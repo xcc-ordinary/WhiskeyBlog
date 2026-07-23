@@ -1,0 +1,23 @@
+import "server-only";
+import { readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string };
+export type PostSummary = ContentMeta & { kind: "post"; href: string };
+export type ProjectSummary = ContentMeta & { kind: "project"; href: string };
+export type PostDocument = PostSummary & { source: string };
+export type ProjectDocument = ProjectSummary & { source: string };
+const contentRoot = path.join(process.cwd(), "content");
+function readCollection<T extends PostSummary | ProjectSummary>(collection: "posts" | "projects", kind: T["kind"]): T[] {
+  const directory = path.join(contentRoot, collection);
+  return readdirSync(directory).filter((file) => file.endsWith(".mdx")).map((file) => {
+    const parsed = matter(readFileSync(path.join(directory, file), "utf8"));
+    const data = parsed.data as Partial<ContentMeta>;
+    if (!data.title || !data.description || !data.slug || !/^\d{4}-\d{2}-\d{2}$/.test(data.date ?? "") || !Array.isArray(data.tags) || !data.tags.every((tag) => typeof tag === "string")) throw new Error("无效内容元数据：" + file);
+    return { title: data.title, description: data.description, date: data.date, tags: data.tags, slug: data.slug, kind, href: "/" + collection + "/" + data.slug } as T;
+  }).sort((a, b) => b.date.localeCompare(a.date));
+}
+export function getPosts(): PostSummary[] { return readCollection<PostSummary>("posts", "post"); }
+export function getProjects(): ProjectSummary[] { return readCollection<ProjectSummary>("projects", "project"); }
+export function getPost(slug: string): PostDocument | null { const post = getPosts().find((item) => item.slug === slug); if (!post) return null; return { ...post, source: matter(readFileSync(path.join(contentRoot, "posts", slug + ".mdx"), "utf8")).content }; }
+export function getProject(slug: string): ProjectDocument | null { const project = getProjects().find((item) => item.slug === slug); if (!project) return null; return { ...project, source: matter(readFileSync(path.join(contentRoot, "projects", slug + ".mdx"), "utf8")).content }; }
