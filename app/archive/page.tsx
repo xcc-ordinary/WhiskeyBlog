@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 
 import { getPublicArchivePhotographs } from "@/lib/public-photographs";
-import type { PublicArchivePhotograph } from "@/lib/public-photographs";
+import type { PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
 export const metadata: Metadata = {
   title: "Life Archive | WhiskeyBlog",
@@ -15,10 +15,12 @@ function editorialDate(value: string | null) {
   return year && month && day ? `${year}.${month}.${day}` : value;
 }
 
-const playwrightArchiveFixture: PublicArchivePhotograph[] = [
+const playwrightArchiveFixture: PublicArchiveSourcePhotograph[] = [
   {
     id: "published-e2e-fixture",
-    imageUrl: "/archive-e2e-frame.svg",
+    thumbnailPath: "published/thumbnail.jpg",
+    galleryPath: "published/gallery.jpg",
+    detailPath: "published/detail.jpg",
     title: "雾中的山谷",
     alt: "薄雾覆盖的绿色山谷",
     caption: "清晨，莫干山",
@@ -27,6 +29,22 @@ const playwrightArchiveFixture: PublicArchivePhotograph[] = [
     category: "自然",
     displayOrder: 1,
     publishedAt: "2026-06-04T00:00:00.000Z",
+    status: "published",
+  },
+  {
+    id: "draft-e2e-fixture",
+    thumbnailPath: "draft/thumbnail.jpg",
+    galleryPath: "draft/gallery.jpg",
+    detailPath: "draft/detail.jpg",
+    title: "草稿：不应公开",
+    alt: "绝不应该显示的私密草稿",
+    caption: null,
+    capturedAt: null,
+    location: null,
+    category: null,
+    displayOrder: 2,
+    publishedAt: "2026-06-04T00:00:00.000Z",
+    status: "draft",
   },
 ];
 
@@ -34,7 +52,10 @@ export default async function ArchivePage() {
   // The fixture is available exclusively to the local Playwright web server; it
   // lets browser tests verify published rendering without reaching a real account.
   const photographs = process.env.PLAYWRIGHT_ARCHIVE_FIXTURE === "1"
-    ? playwrightArchiveFixture
+    ? await getPublicArchivePhotographs({
+      getPublished: async () => playwrightArchiveFixture,
+      signDerivativeUrl: async () => "/archive-e2e-frame.svg",
+    })
     : await getPublicArchivePhotographs();
 
   return (

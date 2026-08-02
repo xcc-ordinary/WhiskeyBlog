@@ -3,7 +3,7 @@ import "server-only";
 import { createClient } from "@supabase/supabase-js";
 
 import { getPublishedPhotographs } from "@/lib/supabase/photographs";
-import type { Database, PublishedPhotograph } from "@/lib/supabase/types";
+import type { Database, PhotographStatus, PublishedPhotograph } from "@/lib/supabase/types";
 
 const SIGNED_DERIVATIVE_URL_SECONDS = 5 * 60;
 
@@ -20,8 +20,10 @@ export type PublicArchivePhotograph = {
   publishedAt: string;
 };
 
+export type PublicArchiveSourcePhotograph = PublishedPhotograph & { status?: PhotographStatus };
+
 type PublicPhotographOptions = {
-  getPublished?: () => Promise<PublishedPhotograph[]>;
+  getPublished?: () => Promise<PublicArchiveSourcePhotograph[]>;
   signDerivativeUrl?: (path: string, expiresInSeconds: number) => Promise<string | null>;
 };
 
@@ -71,12 +73,13 @@ function toPublicRecord(photo: PublishedPhotograph, imageUrl: string): PublicArc
  * It deliberately has no API for originals, thumbnails, or draft records.
  */
 export async function getPublicArchivePhotographs(options: PublicPhotographOptions = {}): Promise<PublicArchivePhotograph[]> {
-  const getPublished = options.getPublished ?? getPublishedPhotographs;
+  const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished ?? getPublishedPhotographs;
   const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner();
   const photographs = await getPublished();
 
-  const safePublished = photographs.filter(
-    (photo) => Boolean(photo.galleryPath && isSafeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
+  const safePublished = photographs.filter((photo) =>
+    photo.status !== "draft"
+    && Boolean(photo.galleryPath && isSafeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
   );
 
   const signed = await Promise.all(

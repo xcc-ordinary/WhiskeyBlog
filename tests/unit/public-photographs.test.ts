@@ -47,4 +47,20 @@ describe("public photograph archive", () => {
 
     expect(signDerivativeUrl).not.toHaveBeenCalled();
   });
+
+  it("filters a draft before it can be signed or rendered", async () => {
+    const signDerivativeUrl = vi.fn().mockResolvedValue("https://images.example/signed-gallery");
+
+    const result = await getPublicArchivePhotographs({
+      getPublished: async () => [
+        { ...published, status: "published" },
+        { ...published, id: "private-draft", title: "草稿：不应公开", status: "draft" },
+      ],
+      signDerivativeUrl,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: "published-id", title: "雨后的上海" });
+    expect(signDerivativeUrl).toHaveBeenCalledTimes(1);
+  });
 });
