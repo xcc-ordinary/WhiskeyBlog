@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createDraftPhotograph, publishPhotograph, unpublishPhotograph, updatePhotograph } from "@/lib/supabase/photographs";
 import type { PhotographCrop } from "@/lib/supabase/types";
-import { extensionForUploadType, getUploadValidationError, type UploadFileDetails } from "@/lib/supabase/upload";
+import { extensionForUploadType, getUploadValidationError, isManagedOriginalPath, type UploadFileDetails } from "@/lib/supabase/upload";
 import { requireOwner } from "@/lib/supabase/auth";
 
 type ActionResult = { ok: true; message?: string; photographId?: string } | { ok: false; message: string };
@@ -57,8 +57,23 @@ export async function createOriginalUploadIntent(file: UploadFileDetails): Promi
 
 /** Creates a draft only after the browser finished its private-storage upload. */
 export async function createUploadedDraft(originalPath: string): Promise<ActionResult> {
-  if (!originalPath.startsWith("owner/")) return { ok: false, message: "无效的原图路径。" };
+  if (!isManagedOriginalPath(originalPath)) return { ok: false, message: "无效的原图路径。" };
   try {
+    const supabase = await createSupabaseServerClient();
+    await requireOwner(supabase);
+    const { data: existing, error: existingError } = await supabase
+      .from("photographs")
+      .select("id")
+      .eq("original_path", originalPath)
+      .maybeSingle();
+    if (existingError) return { ok: false, message: "无法确认草稿状态，请稍后重试。" };
+    if (existing) return { ok: true, photographId: existing.id };
+
+    const fileName = originalPath.slice("owner/".length);
+    const { data: objects, error: objectError } = await supabase.storage.from("originals").list("owner", { search: fileName });
+    if (objectError || !objects?.some((object) => object.name === fileName)) {
+      return { ok: false, message: "未找到刚才上传的原图；请重新上传。" };
+    }
     const photograph = await createDraftPhotograph({ originalPath });
     return { ok: true, photographId: photograph.id };
   } catch (error) {

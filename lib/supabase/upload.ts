@@ -19,3 +19,8 @@ export function getUploadValidationError(file: UploadFileDetails): string | null
 export function extensionForUploadType(type: string): string | null {
   return extensionByType[type] ?? null;
 }
+
+/** Upload intents always use a random UUID path inside the owner-only originals prefix. */
+export function isManagedOriginalPath(path: string): boolean {
+  return /^owner\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?:jpg|png|webp|avif)$/i.test(path);
+}
