@@ -47,6 +47,37 @@ export interface PhotographRow {
   published_at: string | null;
 }
 
+/** The only photograph shape exposed to anonymous public-page queries. */
+export interface PublishedPhotographRow {
+  id: string;
+  thumbnail_path: string | null;
+  gallery_path: string | null;
+  detail_path: string | null;
+  title: string | null;
+  alt: string | null;
+  caption: string | null;
+  captured_at: string | null;
+  location: string | null;
+  category: string | null;
+  display_order: number;
+  published_at: string;
+}
+
+export interface PublishedPhotograph {
+  id: string;
+  thumbnailPath: string | null;
+  galleryPath: string | null;
+  detailPath: string | null;
+  title: string | null;
+  alt: string | null;
+  caption: string | null;
+  capturedAt: string | null;
+  location: string | null;
+  category: string | null;
+  displayOrder: number;
+  publishedAt: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -60,7 +91,12 @@ export interface Database {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      published_photographs: {
+        Row: PublishedPhotographRow;
+        Relationships: [];
+      };
+    };
     Functions: Record<string, never>;
     Enums: {
       photograph_status: PhotographStatus;

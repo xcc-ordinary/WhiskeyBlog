@@ -72,12 +72,6 @@ grant execute on function private.is_media_owner() to anon, authenticated;
 
 alter table public.photographs enable row level security;
 
-create policy "Published photographs are publicly readable"
-  on public.photographs
-  for select
-  to anon, authenticated
-  using (status = 'published');
-
 create policy "Owner can read every photograph"
   on public.photographs
   for select
@@ -102,6 +96,33 @@ create policy "Owner can delete photographs"
   for delete
   to authenticated
   using (private.is_media_owner());
+
+-- Anonymous clients must never read public.photographs directly: that row
+-- includes original_path and internal curatorial fields. This view is the sole
+-- public data boundary and intentionally exposes only published derivatives and
+-- display metadata. It runs with the view owner's access, so it remains usable
+-- while the base table stays owner-only under RLS.
+create view public.published_photographs
+with (security_barrier = true)
+as
+select
+  id,
+  thumbnail_path,
+  gallery_path,
+  detail_path,
+  title,
+  alt,
+  caption,
+  captured_at,
+  location,
+  category,
+  display_order,
+  published_at
+from public.photographs
+where status = 'published';
+
+revoke all on public.published_photographs from public;
+grant select on public.published_photographs to anon, authenticated;
 
 -- Both buckets are private. Public pages receive derivative URLs from server code;
 -- originals never receive browser-readable URLs.

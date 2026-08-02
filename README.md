@@ -37,7 +37,7 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
    在这一步前，RLS 会拒绝所有 Studio 访问；不要把该邮箱放入公开环境变量。
 4. 在 Authentication 中启用 Email magic link，并把生产环境中的三个 Supabase 环境变量设置到部署平台。service-role 密钥只应出现在服务器环境中。
 
-原图和衍生图 bucket 都是私有的。公开页面只能由服务器为已发布照片提供衍生图，绝不能暴露 `originals` 中的对象。
+原图和衍生图 bucket 都是私有的。公开页面只能查询 `published_photographs` 视图：它只返回已发布的衍生图路径和展示元数据，绝不返回 `originals` 中的对象路径或私有草稿数据。
 
 ## 发布
 
