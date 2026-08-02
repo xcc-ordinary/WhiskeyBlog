@@ -36,6 +36,21 @@ export interface UpdatePhotographInput {
   detailPath?: string | null;
 }
 
+type PublishablePhotograph = Pick<Photograph, "title" | "alt" | "thumbnailPath" | "galleryPath" | "detailPath">;
+
+/** Returns the owner-facing reason a draft cannot be published, or null when it is ready. */
+export function getPublishValidationError(photograph: PublishablePhotograph): string | null {
+  if (!photograph.title?.trim() || !photograph.alt?.trim()) {
+    return "请先补充照片标题和替代文本。";
+  }
+
+  if (!photograph.thumbnailPath || !photograph.galleryPath || !photograph.detailPath) {
+    return "请先填写三种公开衍生图路径。";
+  }
+
+  return null;
+}
+
 function mapPhotograph(row: PhotographRow): Photograph {
   return {
     id: row.id,
@@ -157,9 +172,31 @@ export async function updatePhotograph(
 export async function publishPhotograph(id: string, client?: PhotographClient): Promise<Photograph> {
   const supabase = client ?? (await createSupabaseServerClient());
   await requireOwner(supabase);
+  const { data: existing, error: existingError } = await supabase.from("photographs").select("*").eq("id", id).single();
+
+  throwIfError(existingError);
+  const validationError = getPublishValidationError(mapPhotograph(requireData(existing)));
+  if (validationError) {
+    throw new Error(validationError);
+  }
+
   const { data, error } = await supabase
     .from("photographs")
     .update({ status: "published", published_at: new Date().toISOString() })
+    .eq("id", id)
+    .select()
+    .single();
+
+  throwIfError(error);
+  return mapPhotograph(requireData(data));
+}
+
+export async function unpublishPhotograph(id: string, client?: PhotographClient): Promise<Photograph> {
+  const supabase = client ?? (await createSupabaseServerClient());
+  await requireOwner(supabase);
+  const { data, error } = await supabase
+    .from("photographs")
+    .update({ status: "draft", published_at: null })
     .eq("id", id)
     .select()
     .single();
