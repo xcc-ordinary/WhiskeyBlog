@@ -40,6 +40,23 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 
 原图和衍生图 bucket 都是私有的。公开页面只能查询 `published_photographs` 视图：它只返回已发布的衍生图路径和展示元数据，绝不返回 `originals` 中的对象路径或私有草稿数据。
 
+## 摄影档案发布清单
+
+公开档案位于 `/archive`。它只为 `published` 照片的 `gallery_path` 创建五分钟有效的签名链接；`original_path`、草稿和缺少替代文本的记录不会出现在页面中。
+
+在 Studio 中每次发布一张照片前，请替换或填写以下个人内容：
+
+- 原图：通过 Studio 上传，只会进入私有 `originals` bucket。
+- 三个衍生图路径：将自己处理好的缩略图、画廊图和详情图上传到私有 `derivatives` bucket，并在 Studio 的 `thumbnailPath`、`galleryPath`、`detailPath` 中填写对象路径。当前阶段不会自动处理图片。
+- `title`：照片的简短标题；`alt`：能让无法看到图片的人理解画面的具体描述。这两项是发布必填项。
+- `caption`、`capturedAt`、`location`、`category`、`displayOrder` 和 `crop`：分别替换为照片说明、拍摄日期、地点、分类、排序和可选裁切信息。
+
+## 部署到 Vercel
+
+1. 将 GitHub 仓库导入 Vercel，在 Project Settings → Environment Variables 为 Production（以及需要的 Preview）分别添加 `.env.example` 的三个 Supabase 变量；不要上传 `.env.local`。
+2. 将 Supabase Auth 的 Site URL 设为你的生产域名，并把 `https://你的域名/auth/callback` 加入 Redirect URLs；本地开发保留 `http://localhost:3000/auth/callback`。
+3. 部署后，以所有者邮箱登录 `/studio`，发布一张带有衍生图路径和完整替代文本的照片，再访问 `/archive` 验收。签名图链接会定期刷新，因此页面不能被当作静态导出。
+
 ## 发布
 
 将 GitHub 仓库导入 Vercel；可复制 .env.example 为 .env.local 并填写生产地址。部署后检查桌面和窄屏布局、亮暗主题、键盘焦点、页面标题与访问分析。
