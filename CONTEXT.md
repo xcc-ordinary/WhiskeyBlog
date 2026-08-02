@@ -24,6 +24,18 @@ _Avoid_: Unlicensed stock imagery, generic photo library
 A light or dark presentation selected from the visitor's system preference and optionally overridden by the visitor.
 _Avoid_: Light-only interface, forced dark interface
 
+**Media Studio**:
+A protected owner-only workspace for uploading, publishing, and managing the photographs used by the Personal Website.
+_Avoid_: Visitor uploads, public media library
+
+**Published Photograph**:
+A photograph from the Media Studio that has been explicitly marked for public display and supplied with its presentation metadata.
+_Avoid_: Uploaded file, draft media
+
+**Photograph Draft**:
+An uploaded photograph visible only in the Media Studio until its owner supplies metadata and publishes it.
+_Avoid_: Automatically public upload
+
 **Project Showcase**:
 A curated set of completed or in-progress projects, each with a short detail page covering its context, problem, technology choices, evidence, and learning.
 _Avoid_: Product catalog, gallery
