@@ -72,4 +72,4 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 
 ## 发布
 
-将 GitHub 仓库导入 Vercel；可复制 .env.example 为 .env.local 并填写生产地址。部署后检查桌面和窄屏布局、亮暗主题、键盘焦点、页面标题与访问分析。
+将 GitHub 仓库导入 Vercel；可复制 .env.example 为 .env.local 并填写生产地址。部署后检查暖白色数字展厅在桌面和窄屏中的布局、键盘焦点、页面标题、减少动态效果与降低透明度偏好，以及访问分析。
