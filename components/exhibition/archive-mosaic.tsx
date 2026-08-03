@@ -9,7 +9,7 @@ function archiveDateline(photo: PublicArchivePhotograph) {
 
 export function ArchiveMosaic({ photographs }: { photographs: PublicArchivePhotograph[] }): JSX.Element {
   return (
-    <section aria-label="Life archive" className="archive-mosaic">
+    <section aria-label="生活影像档案" className="archive-mosaic">
       {photographs.map((photo, index) => (
         <figure className={`archive-item archive-item-${index % 5}`} key={photo.id}>
           <div className="archive-item-frame">
