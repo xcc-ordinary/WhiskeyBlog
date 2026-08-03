@@ -24,3 +24,19 @@ test("mobile navigation remains usable and exhibition motion respects reduction"
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
 });
+
+test("reduced motion homepage hydrates without a recoverable error", async ({ page }) => {
+  const hydrationErrors: string[] = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error" && /hydration|server rendered text/i.test(message.text())) {
+      hydrationErrors.push(message.text());
+    }
+  });
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /growing/i })).toBeVisible();
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+  expect(hydrationErrors).toEqual([]);
+});
