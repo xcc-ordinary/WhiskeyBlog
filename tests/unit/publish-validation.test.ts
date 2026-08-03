@@ -26,4 +26,24 @@ describe("photograph publishing validation", () => {
       }),
     ).toBe("请先填写三种公开衍生图路径。");
   });
+
+  it("accepts both current and legacy derivative object paths", () => {
+    expect(getPublishValidationError({
+      title: "晨光",
+      alt: "窗边的植物",
+      thumbnailPath: "owner/photo-thumbnail.jpg",
+      galleryPath: "derivatives/owner/photo-gallery.jpg",
+      detailPath: "owner/photo-detail.jpg",
+    })).toBeNull();
+  });
+
+  it("rejects paths outside the derivatives bucket", () => {
+    expect(getPublishValidationError({
+      title: "晨光",
+      alt: "窗边的植物",
+      thumbnailPath: "owner/photo-thumbnail.jpg",
+      galleryPath: "originals/private-source.jpg",
+      detailPath: "https://example.com/photo.jpg",
+    })).toBe("公开衍生图路径必须是 derivatives bucket 内的对象路径。");
+  });
 });

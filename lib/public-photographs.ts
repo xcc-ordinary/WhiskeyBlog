@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { normalizeDerivativePath } from "@/lib/derivative-paths";
 import { getPublishedPhotographs } from "@/lib/supabase/photographs";
 import type { Database, PhotographStatus, PublishedPhotograph } from "@/lib/supabase/types";
 
@@ -32,11 +33,6 @@ function requiredServerEnvironment(name: "NEXT_PUBLIC_SUPABASE_URL" | "SUPABASE_
   return value;
 }
 
-function isGalleryDerivativePath(path: string) {
-  const objectPath = path.slice("derivatives/".length);
-  return path.startsWith("derivatives/") && objectPath.length > 0 && !path.includes("..") && !path.includes("\\");
-}
-
 function createDerivativeSigner() {
   const client = createClient<Database>(
     requiredServerEnvironment("NEXT_PUBLIC_SUPABASE_URL"),
@@ -45,8 +41,9 @@ function createDerivativeSigner() {
   );
 
   return async (path: string, expiresInSeconds: number) => {
-    if (!isGalleryDerivativePath(path)) return null;
-    const objectPath = path.slice("derivatives/".length);
+    const canonicalPath = normalizeDerivativePath(path);
+    if (!canonicalPath) return null;
+    const objectPath = canonicalPath.slice("derivatives/".length);
     const { data, error } = await client.storage.from("derivatives").createSignedUrl(objectPath, expiresInSeconds);
     if (error || !data?.signedUrl) return null;
     return data.signedUrl;
@@ -77,12 +74,14 @@ export async function getPublicArchivePhotographs(options: PublicPhotographOptio
 
   const safePublished = photographs.filter((photo) =>
     (photo.status === undefined || photo.status === "published")
-    && Boolean(photo.galleryPath && isGalleryDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
+    && Boolean(photo.galleryPath && normalizeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
   );
 
   const signed = await Promise.all(
     safePublished.map(async (photo) => {
-      const galleryUrl = await signDerivativeUrl(photo.galleryPath!, SIGNED_DERIVATIVE_URL_SECONDS);
+      const canonicalPath = normalizeDerivativePath(photo.galleryPath!);
+      if (!canonicalPath) return null;
+      const galleryUrl = await signDerivativeUrl(canonicalPath, SIGNED_DERIVATIVE_URL_SECONDS);
       return galleryUrl ? toPublicRecord(photo, galleryUrl) : null;
     }),
   );

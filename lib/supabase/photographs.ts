@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { isDerivativePath } from "@/lib/derivative-paths";
 import { requireOwner } from "@/lib/supabase/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type {
@@ -46,6 +47,10 @@ export function getPublishValidationError(photograph: PublishablePhotograph): st
 
   if (!photograph.thumbnailPath || !photograph.galleryPath || !photograph.detailPath) {
     return "请先填写三种公开衍生图路径。";
+  }
+
+  if (![photograph.thumbnailPath, photograph.galleryPath, photograph.detailPath].every(isDerivativePath)) {
+    return "公开衍生图路径必须是 derivatives bucket 内的对象路径。";
   }
 
   return null;
