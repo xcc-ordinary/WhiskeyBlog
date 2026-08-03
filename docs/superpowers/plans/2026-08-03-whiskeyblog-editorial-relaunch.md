@@ -28,6 +28,7 @@
 | `components/exhibition/editorial-button.tsx` | Primary/secondary action semantics and press feedback. |
 | `components/exhibition/exhibition-hero.tsx` | Home hero composition and image caption. |
 | `components/exhibition/selected-works.tsx` | Asymmetric project gallery driven by `Project[]`. |
+| `components/exhibition/project-media.tsx` | Safe local project-cover fallback and responsive project-image rendering. |
 | `components/exhibition/life-archive-teaser.tsx` | Published-photo teaser driven by safe public image records. |
 | `components/exhibition/about-field-notes.tsx` | About narrative and current-facts composition. |
 | `components/exhibition/notes-directory.tsx` | Numbered blog list and Xiaohongshu handoff. |
@@ -49,6 +50,7 @@
 - Create: `components/exhibition/reveal.tsx`
 - Create: `components/exhibition/editorial-button.tsx`
 - Create: `tests/unit/exhibition.test.ts`
+- Create: `public/images/placeholders/hero-editorial.svg`
 - Modify: `package.json`
 - Modify: `app/globals.css`
 
@@ -103,6 +105,8 @@ export const xiaohongshuLink: XiaohongshuLink = {
 };
 ```
 
+Create `public/images/placeholders/hero-editorial.svg` as a neutral warm-paper placeholder with the visible replacement label `REPLACE WITH YOUR PHOTO`; it must contain no third-party image or logo.
+
 - [ ] **Step 4: Create the motion and action primitives**
 
 ```tsx
@@ -152,9 +156,11 @@ git commit -m "feat: add editorial exhibition foundation"
 - Create: `components/exhibition/editorial-footer.tsx`
 - Create: `components/exhibition/exhibition-hero.tsx`
 - Create: `components/exhibition/selected-works.tsx`
+- Create: `components/exhibition/project-media.tsx`
 - Create: `components/exhibition/life-archive-teaser.tsx`
 - Modify: `app/layout.tsx`
 - Modify: `app/page.tsx`
+- Modify: `lib/content.ts`
 - Modify: `components/site-header.tsx`
 - Modify: `components/site-footer.tsx`
 - Modify: `app/globals.css`
@@ -163,6 +169,7 @@ git commit -m "feat: add editorial exhibition foundation"
 **Interfaces:**
 - Consumes `homeIdentity`, `EditorialButton`, `Reveal`, existing `getProjects()`, and `getPublishedPhotographs()`.
 - Produces a home page with landmark labels `Personal field notes`, `Selected work`, and `Life archive`.
+- Produces `ProjectMedia({ project, sizes })`, which renders a project cover from project metadata when present and the local neutral placeholder otherwise.
 
 - [ ] **Step 1: Write a failing desktop home test**
 
@@ -193,9 +200,21 @@ Replace public `SiteHeader`/`SiteFooter` usage in `app/layout.tsx` with `Editori
 
 - [ ] **Step 4: Implement hero, gallery, and archive teaser**
 
+Extend `ProjectSummary` in `lib/content.ts` with optional `coverImage`, `coverAlt`, and `role` string fields. Read each only when its MDX frontmatter value is a string; invalid optional values must throw the same `无效内容元数据` error as required fields.
+
 ```tsx
 export function SelectedWorks({ projects }: { projects: Project[] }) {
   return <section aria-label="Selected work" className="selected-works"><p className="section-label">02 / SELECTED WORK</p>{projects.slice(0, 3).map((project, index) => <Link className={`work-piece work-piece-${index + 1}`} href={`/projects/${project.slug}`} key={project.slug}><ProjectMedia project={project} /><span>{project.title}</span><small>{project.date.slice(0, 4)} · {project.tags.join(" / ")}</small></Link>)}</section>;
+}
+```
+
+```tsx
+import Image from "next/image";
+import type { ProjectSummary } from "@/lib/content";
+
+export function ProjectMedia({ project, sizes }: { project: ProjectSummary; sizes: string }) {
+  const src = project.coverImage ?? "/images/placeholders/hero-editorial.svg";
+  return <Image alt={project.coverAlt ?? `${project.title} 项目封面`} fill sizes={sizes} src={src} />;
 }
 ```
 
@@ -360,9 +379,11 @@ test("mobile navigation remains usable and exhibition motion respects reduction"
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("button", { name: /index/i }).click();
-  await expect(page.getByRole("navigation", { name: "主导航" })).toBeVisible();
-  await expect(page.locator(".editorial-header")).toBeFocused({ timeout: 0 }).catch(() => undefined);
+  const trigger = page.getByRole("button", { name: /index/i });
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "导航菜单" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
 });
 ```
 
