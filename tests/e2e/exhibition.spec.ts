@@ -6,3 +6,10 @@ test("home presents the exhibition chapters", async ({ page }) => {
   await expect(page.getByRole("region", { name: "Selected work" })).toBeVisible();
   await expect(page.getByRole("link", { name: /explore selected work/i })).toHaveAttribute("href", "/projects");
 });
+
+test("about and blog keep field-notes landmarks and external handoff honest", async ({ page }) => {
+  await page.goto("/about");
+  await expect(page.getByRole("heading", { name: /still learning/i })).toBeVisible();
+  await page.goto("/blog");
+  await expect(page.getByRole("link", { name: /follow on 小红书/i })).toHaveAttribute("href", /^https:\/\//);
+});
