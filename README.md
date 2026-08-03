@@ -8,13 +8,25 @@
 
 ## 质量检查
 
-依次运行 npm run lint、npm run typecheck、npm run test:unit 与 npm run build。
+提交前依次运行 `npm run lint`、`npm run typecheck`、`npm run test:unit`、`npm run test:e2e` 与 `npm run build`。浏览器测试覆盖桌面首页、字段笔记页面和移动端导航；生产环境仍需按下方清单手动验收。
 
 ## 内容
 
 文章放在 content/posts/，项目放在 content/projects/。每个 MDX 文件需要 title、description、date（YYYY-MM-DD）、tags 和 slug 五个 frontmatter 字段。
 
 发布前请把示例项目与个人介绍替换为真实内容。不要提交 .env、密钥或私人凭据。
+
+## 数字展厅内容替换清单
+
+首页、关于页和小红书入口的公开文案集中在 `lib/exhibition.ts`：
+
+- `homeIdentity`：首屏编号、标题、简介、主图路径与替代文本。
+- `currentFacts`：About 页的三条当前状态；可按需改为真实的在做项目、关注方向和所在地。
+- `xiaohongshuLink`：真实小红书主页 URL、链接文案与说明。当前 URL 只是占位入口，发布前必须替换。
+
+项目和文章继续由本地 MDX 管理：`content/projects/*.mdx` 与 `content/posts/*.mdx`。每份文件都必须包含 `title`、`description`、`date`（`YYYY-MM-DD`）、`tags` 和 `slug`。项目可额外填写字符串类型的 `coverImage`、`coverAlt`、`role`；图片地址请替换为自己拥有使用权的素材，并写准确的替代文本。
+
+`public/images/placeholders/hero-editorial.svg` 是明确标注的个人照片占位图。替换首屏或 About 图片时，把自己的已授权图片放在 `public/images/`，再在 `lib/exhibition.ts` 或相应组件数据中使用该路径。设计探索过程中生成的草图或 mockup 图片不是生产资产，不能直接作为对外站点素材。
 
 ## Media Studio（Supabase）
 
@@ -42,7 +54,7 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 
 ## 摄影档案发布清单
 
-公开档案位于 `/archive`。它只为 `published` 照片的 `gallery_path` 创建五分钟有效的签名链接；`original_path`、草稿和缺少替代文本的记录不会出现在页面中。
+公开档案位于 `/archive`。它只为 `published` 照片的 `gallery_path` 创建五分钟有效的签名链接；`original_path`、草稿和缺少替代文本的记录不会出现在页面中。`galleryPath` 接受当前的 bucket-relative 衍生图对象路径（例如 `2026/example-gallery.webp`）以及兼容旧数据的 `derivatives/2026/example-gallery.webp` 前缀；两种格式最终都只会访问私有 `derivatives` bucket，原图永不公开。
 
 在 Studio 中每次发布一张照片前，请替换或填写以下个人内容：
 
@@ -54,8 +66,9 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 ## 部署到 Vercel
 
 1. 将 GitHub 仓库导入 Vercel，在 Project Settings → Environment Variables 为 Production（以及需要的 Preview）分别添加 `.env.example` 的三个 Supabase 变量；不要上传 `.env.local`。
-2. 将 Supabase Auth 的 Site URL 设为你的生产域名，并把 `https://你的域名/auth/callback` 加入 Redirect URLs；本地开发保留 `http://localhost:3000/auth/callback`。
+2. 将 Supabase Auth 的 Site URL 设为你的生产域名，并把 `https://你的域名/auth/callback` 加入 Redirect URLs；本地开发保留 `http://localhost:3000/auth/callback`。生产端必须配置公开的 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY`，以及仅服务器可见的 `SUPABASE_SERVICE_ROLE_KEY`。
 3. 部署后，以所有者邮箱登录 `/studio`，发布一张带有衍生图路径和完整替代文本的照片，再访问 `/archive` 验收。签名图链接会定期刷新，因此页面不能被当作静态导出。
+4. 在真实生产域名检查首页、项目、关于、博客、Archive 与 `/studio`；分别用桌面和窄屏尺寸测试键盘 Tab 焦点、移动端 `Index +` 菜单与 Escape 返回焦点，并在系统“减少动态效果”开启时确认阅读和导航不依赖动画。这些是部署后的待执行检查，不是本仓库的生产测试声明。
 
 ## 发布
 

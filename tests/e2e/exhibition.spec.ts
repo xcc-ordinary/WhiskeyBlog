@@ -13,3 +13,14 @@ test("about and blog keep field-notes landmarks and external handoff honest", as
   await page.goto("/blog");
   await expect(page.getByRole("link", { name: /follow on 小红书/i })).toHaveAttribute("href", /^https:\/\//);
 });
+
+test("mobile navigation remains usable and exhibition motion respects reduction", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const trigger = page.getByRole("button", { name: /index/i });
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "导航菜单" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+});
