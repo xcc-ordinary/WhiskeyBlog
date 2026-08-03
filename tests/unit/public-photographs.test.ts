@@ -6,7 +6,7 @@ import type { PublishedPhotograph } from "@/lib/supabase/types";
 const published: PublishedPhotograph = {
   id: "published-id",
   thumbnailPath: "published/thumb.jpg",
-  galleryPath: "published/gallery.jpg",
+  galleryPath: "derivatives/published/gallery.jpg",
   detailPath: "published/detail.jpg",
   title: "雨后的上海",
   alt: "雨后街道上的橙色出租车",
@@ -18,7 +18,25 @@ const published: PublishedPhotograph = {
   publishedAt: "2026-08-02T00:00:00.000Z",
 };
 
+const fakePublishedClient = {
+  getPublished: async () => [
+    {
+      ...published,
+      title: "Published image",
+      alt: "Published image",
+      galleryPath: "derivatives/published/gallery.jpg",
+    },
+  ],
+  signDerivativeUrl: async (path: string) => `https://images.example/${path}`,
+};
+
 describe("public photograph archive", () => {
+  it("maps only published gallery derivatives into the archive mosaic", async () => {
+    const photographs = await getPublicArchivePhotographs(fakePublishedClient);
+    expect(photographs[0]).toEqual(expect.objectContaining({ alt: "Published image", galleryUrl: expect.stringContaining("derivatives") }));
+    expect("originalPath" in photographs[0]).toBe(false);
+  });
+
   it("creates a short-lived URL only for a published gallery derivative", async () => {
     const signDerivativeUrl = vi.fn().mockResolvedValue("https://images.example/signed-gallery");
 
@@ -28,10 +46,10 @@ describe("public photograph archive", () => {
         signDerivativeUrl,
       }),
     ).resolves.toEqual([
-      expect.objectContaining({ id: "published-id", imageUrl: "https://images.example/signed-gallery", alt: published.alt }),
+      expect.objectContaining({ id: "published-id", galleryUrl: "https://images.example/signed-gallery", alt: published.alt }),
     ]);
 
-    expect(signDerivativeUrl).toHaveBeenCalledWith("published/gallery.jpg", 300);
+    expect(signDerivativeUrl).toHaveBeenCalledWith("derivatives/published/gallery.jpg", 300);
     expect(signDerivativeUrl).not.toHaveBeenCalledWith("originals/private-source.jpg", expect.anything());
   });
 
@@ -41,6 +59,24 @@ describe("public photograph archive", () => {
     await expect(
       getPublicArchivePhotographs({
         getPublished: async () => [{ ...published, galleryPath: null }, { ...published, id: "missing-alt", alt: null }],
+        signDerivativeUrl,
+      }),
+    ).resolves.toEqual([]);
+
+    expect(signDerivativeUrl).not.toHaveBeenCalled();
+  });
+
+  it("rejects metadata and paths that cannot belong to a published gallery derivative", async () => {
+    const signDerivativeUrl = vi.fn().mockResolvedValue("https://images.example/signed-gallery");
+
+    await expect(
+      getPublicArchivePhotographs({
+        getPublished: async () => [
+          { ...published, id: "empty-title", title: "  " },
+          { ...published, id: "empty-alt", alt: "  " },
+          { ...published, id: "wrong-bucket", galleryPath: "originals/private-source.jpg" },
+          { ...published, id: "traversal", galleryPath: "derivatives/../originals/private-source.jpg" },
+        ],
         signDerivativeUrl,
       }),
     ).resolves.toEqual([]);

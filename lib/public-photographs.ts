@@ -9,15 +9,13 @@ const SIGNED_DERIVATIVE_URL_SECONDS = 5 * 60;
 
 export type PublicArchivePhotograph = {
   id: string;
-  imageUrl: string;
   title: string;
   alt: string;
   caption: string | null;
   capturedAt: string | null;
   location: string | null;
-  category: string | null;
+  galleryUrl: string;
   displayOrder: number;
-  publishedAt: string;
 };
 
 export type PublicArchiveSourcePhotograph = PublishedPhotograph & { status?: PhotographStatus };
@@ -34,8 +32,9 @@ function requiredServerEnvironment(name: "NEXT_PUBLIC_SUPABASE_URL" | "SUPABASE_
   return value;
 }
 
-function isSafeDerivativePath(path: string) {
-  return path.length > 0 && !path.startsWith("/") && !path.includes("..") && !path.includes("\\");
+function isGalleryDerivativePath(path: string) {
+  const objectPath = path.slice("derivatives/".length);
+  return path.startsWith("derivatives/") && objectPath.length > 0 && !path.includes("..") && !path.includes("\\");
 }
 
 function createDerivativeSigner() {
@@ -46,25 +45,24 @@ function createDerivativeSigner() {
   );
 
   return async (path: string, expiresInSeconds: number) => {
-    if (!isSafeDerivativePath(path)) return null;
-    const { data, error } = await client.storage.from("derivatives").createSignedUrl(path, expiresInSeconds);
+    if (!isGalleryDerivativePath(path)) return null;
+    const objectPath = path.slice("derivatives/".length);
+    const { data, error } = await client.storage.from("derivatives").createSignedUrl(objectPath, expiresInSeconds);
     if (error || !data?.signedUrl) return null;
     return data.signedUrl;
   };
 }
 
-function toPublicRecord(photo: PublishedPhotograph, imageUrl: string): PublicArchivePhotograph {
+function toPublicRecord(photo: PublishedPhotograph, galleryUrl: string): PublicArchivePhotograph {
   return {
     id: photo.id,
-    imageUrl,
     title: photo.title!.trim(),
     alt: photo.alt!.trim(),
     caption: photo.caption,
     capturedAt: photo.capturedAt,
     location: photo.location,
-    category: photo.category,
+    galleryUrl,
     displayOrder: photo.displayOrder,
-    publishedAt: photo.publishedAt,
   };
 }
 
@@ -78,14 +76,14 @@ export async function getPublicArchivePhotographs(options: PublicPhotographOptio
   const photographs = await getPublished();
 
   const safePublished = photographs.filter((photo) =>
-    photo.status !== "draft"
-    && Boolean(photo.galleryPath && isSafeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
+    (photo.status === undefined || photo.status === "published")
+    && Boolean(photo.galleryPath && isGalleryDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
   );
 
   const signed = await Promise.all(
     safePublished.map(async (photo) => {
-      const imageUrl = await signDerivativeUrl(photo.galleryPath!, SIGNED_DERIVATIVE_URL_SECONDS);
-      return imageUrl ? toPublicRecord(photo, imageUrl) : null;
+      const galleryUrl = await signDerivativeUrl(photo.galleryPath!, SIGNED_DERIVATIVE_URL_SECONDS);
+      return galleryUrl ? toPublicRecord(photo, galleryUrl) : null;
     }),
   );
 

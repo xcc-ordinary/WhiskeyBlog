@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 
+import { ArchiveMosaic } from "@/components/exhibition/archive-mosaic";
 import { getPublicArchivePhotographs } from "@/lib/public-photographs";
 import type { PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
@@ -9,18 +9,12 @@ export const metadata: Metadata = {
   description: "WhiskeyBlog 的公开摄影档案。",
 };
 
-function editorialDate(value: string | null) {
-  if (!value) return null;
-  const [year, month, day] = value.split("-");
-  return year && month && day ? `${year}.${month}.${day}` : value;
-}
-
 const playwrightArchiveFixture: PublicArchiveSourcePhotograph[] = [
   {
     id: "published-e2e-fixture",
-    thumbnailPath: "published/thumbnail.jpg",
-    galleryPath: "published/gallery.jpg",
-    detailPath: "published/detail.jpg",
+    thumbnailPath: "derivatives/published/thumbnail.jpg",
+    galleryPath: "derivatives/published/gallery.jpg",
+    detailPath: "derivatives/published/detail.jpg",
     title: "雾中的山谷",
     alt: "薄雾覆盖的绿色山谷",
     caption: "清晨，莫干山",
@@ -33,9 +27,9 @@ const playwrightArchiveFixture: PublicArchiveSourcePhotograph[] = [
   },
   {
     id: "draft-e2e-fixture",
-    thumbnailPath: "draft/thumbnail.jpg",
-    galleryPath: "draft/gallery.jpg",
-    detailPath: "draft/detail.jpg",
+    thumbnailPath: "derivatives/draft/thumbnail.jpg",
+    galleryPath: "derivatives/draft/gallery.jpg",
+    detailPath: "derivatives/draft/detail.jpg",
     title: "草稿：不应公开",
     alt: "绝不应该显示的私密草稿",
     caption: null,
@@ -59,44 +53,22 @@ export default async function ArchivePage() {
     : await getPublicArchivePhotographs();
 
   return (
-    <section className="archive-page site-container">
+    <div className="archive-page site-container">
       <header className="archive-heading">
-        <p className="studio-kicker">FIELD NOTES / SELECTED FRAMES</p>
+        <p className="section-label">摄影札记 / 精选画面</p>
         <h1>Life Archive</h1>
         <p>一些不急于被解释的时刻：光线、城市、路途与正在发生的生活。</p>
       </header>
 
       {photographs.length ? (
-        <div className="archive-grid" aria-label="已发布摄影作品">
-          {photographs.map((photograph, index) => (
-            <article className={`archive-entry archive-entry-${(index % 5) + 1}`} key={photograph.id}>
-              <div className="archive-image-frame">
-                <Image
-                  src={photograph.imageUrl}
-                  alt={photograph.alt}
-                  fill
-                  sizes="(max-width: 700px) calc(100vw - 32px), (max-width: 980px) calc(50vw - 36px), 52vw"
-                  className="archive-image"
-                />
-              </div>
-              <div className="archive-entry-meta">
-                <p className="archive-entry-index">{String(index + 1).padStart(2, "0")}</p>
-                <div>
-                  <h2>{photograph.title}</h2>
-                  <p>{[editorialDate(photograph.capturedAt), photograph.location, photograph.category].filter(Boolean).join(" · ")}</p>
-                  {photograph.caption ? <p className="archive-entry-caption">{photograph.caption}</p> : null}
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+        <ArchiveMosaic photographs={photographs} />
       ) : (
         <section className="archive-empty" aria-label="摄影档案暂未发布">
-          <p className="studio-kicker">IN THE MAKING</p>
+          <p className="section-label">整理中</p>
           <h2>档案正在整理。</h2>
           <p>新的照片会在被认真命名、描述和发布之后，出现在这里。</p>
         </section>
       )}
-    </section>
+    </div>
   );
 }

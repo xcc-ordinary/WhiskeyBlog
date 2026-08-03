@@ -16,7 +16,7 @@ export function LifeArchiveTeaser({ photographs }: { photographs: PublicArchiveP
         <div className="life-archive-preview">
           {photographs.slice(0, 2).map((photograph) => (
             <figure key={photograph.id}>
-              <div className="life-archive-frame"><Image src={photograph.imageUrl} alt={photograph.alt} fill sizes="(max-width: 760px) 100vw, 45vw" /></div>
+              <div className="life-archive-frame"><Image src={photograph.galleryUrl} alt={photograph.alt} fill sizes="(max-width: 760px) 100vw, 45vw" /></div>
               <figcaption>{photograph.title}</figcaption>
             </figure>
           ))}

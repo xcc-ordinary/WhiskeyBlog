@@ -1,3 +1,41 @@
-import { ProjectCard } from "@/components/project-card";
+import Image from "next/image";
+import Link from "next/link";
+
 import { getProjects } from "@/lib/content";
-export default function ProjectsPage() { return <section className="site-container page-section"><p className="eyebrow">PROJECTS</p><h1>项目</h1><div className="card-grid">{getProjects().map((project) => <ProjectCard key={project.slug} project={project} />)}</div></section>; }
+
+export default function ProjectsPage() {
+  const projects = getProjects();
+
+  return (
+    <section className="projects-index site-container">
+      <header className="projects-index-heading">
+        <p className="section-label">精选项目 / 案例研究</p>
+        <h1>项目不是陈列品，<br />而是做出选择的过程。</h1>
+        <p>从背景、过程到结果，记录每个项目如何被理解、被构建，也如何让我继续成长。</p>
+      </header>
+      <div className="projects-editorial-list">
+        {projects.map((project, index) => (
+          <article className={`projects-editorial-item projects-editorial-item-${(index % 3) + 1}`} key={project.slug}>
+            <Link href={project.href}>
+              <figure>
+                <div className="projects-editorial-frame">
+                  <Image
+                    alt={project.coverAlt ?? (project.coverImage ? `${project.title} 项目封面` : `${project.title} 项目封面占位图`)}
+                    className="projects-editorial-image"
+                    fill
+                    sizes="(max-width: 760px) calc(100vw - 32px), 62vw"
+                    src={project.coverImage ?? "/images/placeholders/hero-editorial.svg"}
+                  />
+                </div>
+                <figcaption>{project.date.slice(0, 4)} · {project.tags.join(" / ")}</figcaption>
+              </figure>
+              <h2>{project.title}</h2>
+              <p>{project.description}</p>
+              <span className="projects-editorial-link">查看案例研究 →</span>
+            </Link>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
