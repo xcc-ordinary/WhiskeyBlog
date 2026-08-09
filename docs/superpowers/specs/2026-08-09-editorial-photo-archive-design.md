@@ -1,7 +1,7 @@
 # WhiskeyBlog editorial photo archive design
 
-**Date:** 2026-08-09  
-**Status:** Design approved in conversation; awaiting written-spec review  
+**Date:** 2026-08-09
+**Status:** Design approved in conversation; awaiting written-spec review
 **Scope:** Public Life Archive and the already protected owner-only Studio photograph editing flow.
 
 ## Intent

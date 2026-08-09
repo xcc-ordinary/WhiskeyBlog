@@ -13,3 +13,11 @@ export function shouldEnhanceScroll(environment: ScrollEnvironment): boolean {
     environment.viewportWidth > 760
   );
 }
+
+export function isPublicScrollPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+
+  return !["/studio", "/auth"].some(
+    (privatePrefix) => pathname === privatePrefix || pathname.startsWith(`${privatePrefix}/`),
+  );
+}

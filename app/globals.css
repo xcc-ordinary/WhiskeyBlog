@@ -116,7 +116,7 @@
 }
 @media (min-width:761px) and (prefers-reduced-motion:no-preference){
   .parallax-layer-motion{will-change:transform}
-  .visual-camera-layer{position:absolute;inset:-16px;pointer-events:none}
+  .visual-camera-layer{position:absolute;inset:-25px;pointer-events:none}
 }
 @media (max-width:760px),(prefers-reduced-motion:reduce){
   .parallax-layer{transform:none!important;will-change:auto!important}

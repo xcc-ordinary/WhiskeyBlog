@@ -1,19 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
-import { useSyncExternalStore } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
 import type { JSX, ReactNode } from "react";
+
+import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
 
 const MAX_SPEED = 0.2;
 const MAX_TRAVEL_PX = 120;
-
-function subscribeToHydration(): () => void {
-  return () => {};
-}
-
-function useHasHydrated(): boolean {
-  return useSyncExternalStore(subscribeToHydration, () => true, () => false);
-}
 
 function clampSpeed(speed: number): number {
   return Math.max(-MAX_SPEED, Math.min(MAX_SPEED, speed));
@@ -42,10 +35,9 @@ function MotionParallax({ children, speed, className }: { children: ReactNode; s
 
 export function Parallax({ children, speed, className }: { children: ReactNode; speed: number; className?: string }): JSX.Element {
   const clampedSpeed = clampSpeed(speed);
-  const reducedMotion = useReducedMotion();
-  const hasHydrated = useHasHydrated();
+  const motionEnabled = useScrollEnhancement();
 
-  if (!hasHydrated || reducedMotion) {
+  if (!motionEnabled) {
     return (
       <div className={classNames(className)} data-speed={clampedSpeed} data-testid="parallax-layer">
         {children}

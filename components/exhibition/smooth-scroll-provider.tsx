@@ -1,37 +1,15 @@
 "use client";
 
 import Lenis from "lenis";
-import { useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
-import { shouldEnhanceScroll } from "@/lib/scroll-eligibility";
+import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
 
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const reducedMotion = useReducedMotion();
-  const [environment, setEnvironment] = useState({
-    hasHydrated: false,
-    coarsePointer: true,
-    viewportWidth: 0,
-  });
-  const enabled = shouldEnhanceScroll({
-    ...environment,
-    reducedMotion: Boolean(reducedMotion),
-  });
-
-  useEffect(() => {
-    const refresh = () =>
-      setEnvironment({
-        hasHydrated: true,
-        coarsePointer: window.matchMedia("(pointer: coarse)").matches,
-        viewportWidth: window.innerWidth,
-      });
-
-    refresh();
-    window.addEventListener("resize", refresh);
-    return () => window.removeEventListener("resize", refresh);
-  }, []);
+  const enabled = useScrollEnhancement();
+  const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -40,21 +18,49 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
       autoRaf: true,
       lerp: 0.1,
       smoothWheel: true,
-      anchors: true,
     });
+    lenisRef.current = lenis;
     document.documentElement.dataset.smoothScroll = "enabled";
 
     return () => {
+      lenisRef.current = null;
       lenis.destroy();
       delete document.documentElement.dataset.smoothScroll;
     };
   }, [enabled]);
 
-  useEffect(() => {
-    if (enabled && window.location.hash) {
-      document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+  const synchronizeHashTarget = useCallback(() => {
+    const encodedId = window.location.hash.slice(1);
+    if (!encodedId) return;
+
+    const target = document.getElementById(decodeURIComponent(encodedId));
+    if (!target) return;
+
+    if (enabled && lenisRef.current) {
+      lenisRef.current.resize();
+      lenisRef.current.scrollTo(target, { force: true });
+      return;
     }
-  }, [enabled, pathname]);
+
+    target.scrollIntoView?.({ behavior: "auto", block: "start" });
+  }, [enabled]);
+
+  useEffect(() => {
+    let frame = window.requestAnimationFrame(synchronizeHashTarget);
+    const scheduleSynchronization = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(synchronizeHashTarget);
+    };
+
+    window.addEventListener("hashchange", scheduleSynchronization);
+    window.addEventListener("popstate", scheduleSynchronization);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", scheduleSynchronization);
+      window.removeEventListener("popstate", scheduleSynchronization);
+    };
+  }, [pathname, synchronizeHashTarget]);
 
   return <>{children}</>;
 }

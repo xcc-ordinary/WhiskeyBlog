@@ -60,9 +60,43 @@ test("desktop enables camera glide while reduced motion stays native", async ({ 
 
 test("a public hash target remains reachable with cinematic scroll enabled", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/#selected-work");
-  await expect(page.locator("#selected-work")).toBeInViewport();
+  await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-smooth-scroll", "enabled");
+  await page.evaluate(() => {
+    window.location.hash = "selected-work";
+  });
+  await expect(page.locator("#selected-work")).toBeInViewport();
+  await page.goBack();
+  await page.goForward();
+  await expect(page.locator("#selected-work")).toBeInViewport();
+});
+
+test("a wide coarse-pointer device keeps Lenis and continuous parallax disabled", async ({ page }) => {
+  await page.addInitScript(() => {
+    const nativeMatchMedia = window.matchMedia.bind(window);
+    window.matchMedia = (query: string) => {
+      if (query !== "(pointer: coarse)") return nativeMatchMedia(query);
+      return {
+        addEventListener: () => undefined,
+        addListener: () => undefined,
+        dispatchEvent: () => false,
+        matches: true,
+        media: query,
+        onchange: null,
+        removeEventListener: () => undefined,
+        removeListener: () => undefined,
+      };
+    };
+  });
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.goto("/");
+
+  const firstLayer = page.getByTestId("parallax-layer").first();
+  await expect(firstLayer).toBeVisible();
+  await expect(firstLayer).not.toHaveClass(/parallax-layer-motion/);
+  await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect.poll(() => firstLayer.evaluate((element) => getComputedStyle(element).transform)).toBe("none");
 });
 
 test("parallax layers stay static on mobile and with reduced motion", async ({ page }) => {
