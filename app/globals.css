@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 /* Public editorial exhibition shell */
 .editorial-shell{background:var(--paper);color:var(--ink)}

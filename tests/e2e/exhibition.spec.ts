@@ -40,3 +40,12 @@ test("reduced motion homepage hydrates without a recoverable error", async ({ pa
   await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   expect(hydrationErrors).toEqual([]);
 });
+
+test("desktop enables camera glide while reduced motion stays native", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  await expect.poll(() => page.locator("html").getAttribute("data-smooth-scroll")).toBe("enabled");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll", "enabled");
+});
