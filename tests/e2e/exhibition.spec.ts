@@ -57,3 +57,33 @@ test("desktop enables camera glide while reduced motion stays native", async ({ 
   await page.reload();
   await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll", "enabled");
 });
+
+test("a public hash target remains reachable with cinematic scroll enabled", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/#selected-work");
+  await expect(page.locator("#selected-work")).toBeInViewport();
+  await expect(page.locator("html")).toHaveAttribute("data-smooth-scroll", "enabled");
+});
+
+test("parallax layers stay static on mobile and with reduced motion", async ({ page }) => {
+  const firstLayer = page.getByTestId("parallax-layer").first();
+  const computedTransform = () => firstLayer.evaluate((element) => getComputedStyle(element).transform);
+  const advanceFrames = () => page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await expect(firstLayer).toBeVisible();
+  await expect.poll(computedTransform).toBe("none");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await advanceFrames();
+  await expect.poll(computedTransform).toBe("none");
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(firstLayer).toBeVisible();
+  await expect.poll(computedTransform).toBe("none");
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await advanceFrames();
+  await expect.poll(computedTransform).toBe("none");
+});
