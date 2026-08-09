@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { JSX } from "react";
 
 import { EditorialButton } from "@/components/exhibition/editorial-button";
+import { Parallax } from "@/components/exhibition/parallax";
 import { Reveal } from "@/components/exhibition/reveal";
 import { currentFacts, homeIdentity } from "@/lib/exhibition";
 
@@ -17,7 +18,9 @@ export function ExhibitionHero(): JSX.Element {
       <Reveal className="exhibition-hero-visual" delay={0.08}>
         <figure>
           <div className="exhibition-hero-frame">
-            <Image src={homeIdentity.heroImage} alt={homeIdentity.heroAlt} fill priority sizes="(max-width: 760px) calc(100vw - 32px), 46vw" />
+            <Parallax className="visual-camera-layer" speed={-0.14}>
+              <Image src={homeIdentity.heroImage} alt={homeIdentity.heroAlt} fill priority sizes="(max-width: 760px) calc(100vw - 32px), 46vw" />
+            </Parallax>
           </div>
           <figcaption>IMAGE PLACEHOLDER / PERSONAL WORK SCENE</figcaption>
         </figure>

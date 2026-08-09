@@ -7,6 +7,14 @@ test("home presents the exhibition chapters", async ({ page }) => {
   await expect(page.getByRole("link", { name: /explore selected work/i })).toHaveAttribute("href", "/projects");
 });
 
+test("public exhibition marks visual camera layers without changing reading landmarks", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("parallax-layer").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /growing/i })).toBeVisible();
+  await page.goto("/archive");
+  await expect(page.getByRole("region", { name: "生活影像档案" })).toBeVisible();
+});
+
 test("about and blog keep field-notes landmarks and external handoff honest", async ({ page }) => {
   await page.goto("/about");
   await expect(page.getByRole("heading", { name: /still learning/i })).toBeVisible();
