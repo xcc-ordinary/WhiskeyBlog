@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { JSX } from "react";
 
 import { EditorialButton } from "@/components/exhibition/editorial-button";
+import { Parallax } from "@/components/exhibition/parallax";
 import { Reveal } from "@/components/exhibition/reveal";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
@@ -14,9 +15,13 @@ export function LifeArchiveTeaser({ photographs }: { photographs: PublicArchiveP
       </Reveal>
       {photographs.length ? (
         <div className="life-archive-preview">
-          {photographs.slice(0, 2).map((photograph) => (
+          {photographs.slice(0, 2).map((photograph, index) => (
             <figure key={photograph.id}>
-              <div className="life-archive-frame"><Image src={photograph.galleryUrl} alt={photograph.alt} fill sizes="(max-width: 760px) 100vw, 45vw" /></div>
+              <div className="life-archive-frame">
+                <Parallax className="visual-camera-layer" speed={index === 0 ? -0.1 : 0.08}>
+                  <Image src={photograph.galleryUrl} alt={photograph.alt} fill sizes="(max-width: 760px) 100vw, 45vw" />
+                </Parallax>
+              </div>
               <figcaption>{photograph.title}</figcaption>
             </figure>
           ))}

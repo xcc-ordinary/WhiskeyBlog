@@ -10,6 +10,14 @@
 
 提交前依次运行 `npm run lint`、`npm run typecheck`、`npm run test:unit`、`npm run test:e2e` 与 `npm run build`。浏览器测试覆盖桌面首页、字段笔记页面和移动端导航；生产环境仍需按下方清单手动验收。
 
+## Cinematic scroll
+
+桌面端在视口宽度大于 760px、精细指针且未开启“减少动态效果”时启用 Lenis：滚轮输入带有明显但可中断的镜头滑行，页面仍保留原生滚动位置、键盘操作与公开锚点。粗指针设备、390px 等移动端尺寸和 `prefers-reduced-motion: reduce` 会回退为原生滚动，所有视差层保持静止。
+
+视差速度由 `components/exhibition/parallax.tsx` 统一限制；具体节奏可在 `exhibition-hero.tsx`、`life-archive-teaser.tsx`、`archive-mosaic.tsx` 与 `project-media.tsx` 的 `speed` 参数中调整。数值应保持小幅、只应用于图片层，标题、正文和图注不参与持续位移。
+
+发布前请分别手动验收鼠标滚轮和触控板的阻尼感；用 Tab、方向键、Page Up/Down 与 `/#selected-work` 检查键盘和锚点定位；在 390px 手机视口确认原生滚动与静态图片；最后开启系统“减少动态效果”，确认 Lenis 未启用且图片不随滚动位移。
+
 ## 内容
 
 文章放在 content/posts/，项目放在 content/projects/。每个 MDX 文件需要 title、description、date（YYYY-MM-DD）、tags 和 slug 五个 frontmatter 字段。
