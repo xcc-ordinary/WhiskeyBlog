@@ -11,6 +11,11 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:unit
+      # The production Archive signs private derivative URLs with Supabase.
+      # CI deliberately uses the existing non-secret fixture so the build proves
+      # prerendering without requiring service-role credentials in GitHub Actions.
       - run: npm run build
+        env:
+          PLAYWRIGHT_ARCHIVE_FIXTURE: "1"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
