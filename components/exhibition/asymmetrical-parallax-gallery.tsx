@@ -8,6 +8,8 @@ import { useLayoutEffect, useRef } from "react";
 import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
+import styles from "./asymmetrical-parallax-gallery.module.css";
+
 const galleryLayouts = [
   { className: "horizontal-gallery-piece-primary", aspect: "landscape" },
   { className: "horizontal-gallery-piece-portrait", aspect: "portrait" },
@@ -70,8 +72,8 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   }, [motionEnabled, photographs.length]);
 
   return (
-    <section aria-label="横向滚动摄影画廊" className="gallery-wrapper" ref={wrapperRef}>
-      <div className="gallery-pinned" ref={pinnedRef}>
+    <section aria-label="横向滚动摄影画廊" className={`gallery-wrapper ${styles.harborGallery}`} ref={wrapperRef}>
+      <div className={`gallery-pinned ${styles.pinned}`} ref={pinnedRef}>
         <div className="gallery-track" ref={trackRef}>
           <div className="horizontal-gallery-intro">
             <span>FIELD NOTES / 2026</span>
