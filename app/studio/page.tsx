@@ -27,5 +27,5 @@ export default async function StudioPage() {
     return <section className="studio-auth site-container"><p className="studio-kicker">PRIVATE / WHISKEYBLOG</p><h1>此账户未获授权。</h1><p>Media Studio 仅向已配置的站点所有者开放。</p><form action={signOutOfStudio}><button className="studio-button" type="submit">退出并返回登录</button></form></section>;
   }
 
-  return <section className="studio-page site-container"><header className="studio-heading"><div><p className="studio-kicker">PRIVATE ARCHIVE / 2026</p><h1>Media Studio</h1><p>把私人的观察，慢慢整理成能够被看见的作品。</p></div><form action={signOutOfStudio}><button className="studio-sign-out" type="submit">退出登录</button></form></header><PhotographLibrary photographs={studio.photographs} /></section>;
+  return <section className="studio-page"><div className="site-container studio-page-content"><header className="studio-heading"><div><p className="studio-kicker">PRIVATE WORKBENCH / 2026</p><h1>Media Studio</h1><p>把私人的观察，慢慢整理成能够被看见的作品。</p></div><form action={signOutOfStudio}><button className="studio-sign-out" type="submit">离开工作台</button></form></header><PhotographLibrary photographs={studio.photographs} /></div></section>;
 }
