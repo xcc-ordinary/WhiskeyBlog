@@ -24,12 +24,10 @@ export function ExplorerHero({ eyebrow, title, description, image, cta }: Explor
 
     gsap.registerPlugin(ScrollTrigger);
     const context = gsap.context(() => {
-      const background = gsap.utils.selector(rootRef)(".explorer-hero-background");
       const panel = gsap.utils.selector(rootRef)(".explorer-hero-panel");
 
       gsap.fromTo(panel, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.2, ease: "power2.out" });
-      gsap.to(background, { yPercent: 12, ease: "none", scrollTrigger: { trigger: rootRef.current, start: "top bottom", end: "bottom top", scrub: 1 } });
-      gsap.to(panel, { yPercent: -7, ease: "none", scrollTrigger: { trigger: rootRef.current, start: "top bottom", end: "bottom top", scrub: 1 } });
+      gsap.to(panel, { yPercent: -5, ease: "none", scrollTrigger: { trigger: rootRef.current, start: "top bottom", end: "bottom top", scrub: 1 } });
     }, rootRef);
 
     return () => context.revert();
