@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { publishStudioPhotograph, savePhotographDraft, unpublishStudioPhotograph } from "@/app/studio/actions";
+import { quickPublishStudioPhotograph, savePhotographDraft, unpublishStudioPhotograph } from "@/app/studio/actions";
 import type { Photograph } from "@/lib/supabase/types";
 
 function dateInputValue(value: string | null) { return value ? value.slice(0, 10) : ""; }
@@ -22,13 +22,13 @@ export function PhotographEditor({ photograph }: { photograph: Photograph }) {
 
   async function changePublication() {
     setIsWorking(true); setMessage(null);
-    const result = photograph.status === "published" ? await unpublishStudioPhotograph(photograph.id) : await publishStudioPhotograph(photograph.id);
+    const result = photograph.status === "published" ? await unpublishStudioPhotograph(photograph.id) : await quickPublishStudioPhotograph(photograph.id);
     setIsWorking(false); setMessage(result.message ?? "操作已完成。");
     if (result.ok) router.refresh();
   }
 
   return <form action={save} className="studio-editor">
-    <header className="studio-editor-heading"><div><p className="studio-kicker">{photograph.status === "draft" ? "DRAFT / METADATA" : "PUBLISHED / METADATA"}</p><h1>{photograph.title ?? "未命名照片"}</h1><p>原图保持私密。填写清楚的替代文本后，才能将衍生图作为公开作品发布。</p></div><button className="studio-secondary-button" disabled={isWorking} onClick={changePublication} type="button">{photograph.status === "published" ? "撤回发布" : "发布照片"}</button></header>
+    <header className="studio-editor-heading"><div><p className="studio-kicker">{photograph.status === "draft" ? "DRAFT / METADATA" : "PUBLISHED / METADATA"}</p><h1>{photograph.title ?? "未命名照片"}</h1><p>原图保持私密。你可以直接从资料库发布；这里仅用于补充标题、替代文本和说明。</p></div><button className="studio-secondary-button" disabled={isWorking} onClick={changePublication} type="button">{photograph.status === "published" ? "撤回发布" : "发布照片"}</button></header>
     <div className="studio-original-note"><span>PRIVATE ORIGINAL</span><code>{photograph.originalPath}</code></div>
     <div className="studio-editor-grid">
       <label>标题<input defaultValue={photograph.title ?? ""} name="title" placeholder="例如：雨后的河岸" /></label>
@@ -40,7 +40,6 @@ export function PhotographEditor({ photograph }: { photograph: Photograph }) {
       <label className="studio-wide-field">说明<textarea defaultValue={photograph.caption ?? ""} name="caption" placeholder="可选：记录这个瞬间。" rows={4} /></label>
       <label className="studio-wide-field">裁切参数 <input defaultValue={JSON.stringify(photograph.crop)} name="crop" placeholder='例如 {"x":0.5,"y":0.5}' /><span className="studio-field-hint">可选，使用标准化坐标的 JSON 对象。</span></label>
     </div>
-    <section className="studio-derivatives"><p className="studio-kicker">PUBLIC DERIVATIVES / STEP 02</p><h2>公开衍生图路径</h2><p>自动生成衍生图将在下一阶段接入。当前请在 Supabase 的私密 <code>derivatives</code> bucket 手动上传优化版本，并填写 bucket 内相对对象路径（例如 <code>owner/photo-gallery.jpg</code>）；旧的 <code>derivatives/owner/photo-gallery.jpg</code> 写法也会兼容。这三项均为发布前置条件，不能填原图 bucket 或外部链接。</p><div className="studio-editor-grid"><label>缩略图路径<input defaultValue={photograph.thumbnailPath ?? ""} name="thumbnailPath" placeholder="owner/photo-thumbnail.jpg" /></label><label>画廊图路径<input defaultValue={photograph.galleryPath ?? ""} name="galleryPath" placeholder="owner/photo-gallery.jpg" /></label><label>详情图路径<input defaultValue={photograph.detailPath ?? ""} name="detailPath" placeholder="owner/photo-detail.jpg" /></label></div></section>
     <div className="studio-editor-actions"><button className="studio-button" disabled={isWorking} type="submit">{isWorking ? "正在保存…" : "保存草稿"}</button>{message ? <p aria-live="polite" className="studio-form-message">{message}</p> : null}</div>
   </form>;
 }

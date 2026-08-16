@@ -10,7 +10,7 @@ export function SignInForm() {
   async function requestMagicLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setIsSubmitting(true); setMessage(null);
     const { error } = await createSupabaseBrowserClient().auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/studio` } });
-    setIsSubmitting(false); setMessage(error ? "暂时无法发送登录链接，请稍后重试。" : "登录链接已发送，请在邮箱中打开它。");
+    setIsSubmitting(false); setMessage(error ? `无法发送登录链接：${error.message}` : "登录链接已发送，请在邮箱中打开它。");
   }
   return <form className="studio-sign-in-form" onSubmit={requestMagicLink}>
     <label htmlFor="studio-email">邮箱</label>

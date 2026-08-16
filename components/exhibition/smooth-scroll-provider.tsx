@@ -1,6 +1,8 @@
 "use client";
 
 import Lenis from "lenis";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 
@@ -15,15 +17,22 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     if (!enabled) return;
 
     const lenis = new Lenis({
-      autoRaf: true,
-      lerp: 0.1,
+      autoRaf: false,
+      lerp: 0.08,
       smoothWheel: true,
     });
+    gsap.registerPlugin(ScrollTrigger);
+    lenis.on("scroll", ScrollTrigger.update);
+    const synchronizeWithGsap = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(synchronizeWithGsap);
+    gsap.ticker.lagSmoothing(0);
     lenisRef.current = lenis;
     document.documentElement.dataset.smoothScroll = "enabled";
 
     return () => {
       lenisRef.current = null;
+      lenis.off("scroll", ScrollTrigger.update);
+      gsap.ticker.remove(synchronizeWithGsap);
       lenis.destroy();
       delete document.documentElement.dataset.smoothScroll;
     };

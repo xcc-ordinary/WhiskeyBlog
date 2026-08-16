@@ -16,6 +16,7 @@ export function UploadDrawer() {
   const [message, setMessage] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -57,8 +58,12 @@ export function UploadDrawer() {
         <p className="studio-kicker">PRIVATE ORIGINAL / STEP 01</p>
         <h2 id="upload-drawer-title">上传一张新照片</h2>
         <p>原图会存入私密存储，上传不会自动公开。接下来你可以编辑资料，再决定是否发布。</p>
-        <label className="studio-file-input" htmlFor="studio-image">选择图片 <input accept="image/jpeg,image/png,image/webp,image/avif" disabled={isUploading} id="studio-image" onChange={() => setMessage(null)} ref={inputRef} type="file" /></label>
-        <p className="studio-field-hint">支持 JPG、PNG、WebP、AVIF，单张不超过 20 MB。</p>
+        <div className="studio-file-input">
+          <input accept="image/jpeg,image/png,image/webp,image/avif" aria-describedby="studio-image-hint studio-selected-file" aria-label="选择图片" className="studio-hidden-file-input" disabled={isUploading} id="studio-image" onChange={(event) => { setMessage(null); setSelectedFileName(event.currentTarget.files?.[0]?.name ?? null); }} ref={inputRef} type="file" />
+          <button className="studio-secondary-button" disabled={isUploading} onClick={() => inputRef.current?.click()} type="button">选择图片</button>
+          <p aria-live="polite" className="studio-selected-file" id="studio-selected-file">{selectedFileName ?? "尚未选择图片"}</p>
+        </div>
+        <p className="studio-field-hint" id="studio-image-hint">支持 JPG、PNG、WebP、AVIF，单张不超过 20 MB。</p>
         <div className="studio-drawer-actions"><button className="studio-button" disabled={isUploading} onClick={upload} type="button">{isUploading ? "正在上传…" : "创建草稿"}</button><button className="studio-secondary-button" disabled={isUploading} onClick={() => setIsOpen(false)} type="button">取消</button></div>
         {progress !== null ? <progress aria-label="上传进度" className="studio-upload-progress" max="100" value={progress}>{progress}%</progress> : null}
         {message ? <p aria-live="polite" className="studio-form-message">{message}</p> : null}

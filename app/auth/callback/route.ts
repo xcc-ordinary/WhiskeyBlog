@@ -15,10 +15,21 @@ function safeCallbackPath(next: string | null, origin: string) {
   }
 }
 
+function loginRedirect(origin: string, reason: "missing-code" | "exchange-failed") {
+  const login = new URL("/studio/login", origin);
+  login.searchParams.set("error", reason);
+  return NextResponse.redirect(login);
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const safeNext = safeCallbackPath(url.searchParams.get("next"), url.origin);
-  if (code) { const supabase = await createSupabaseServerClient(); await supabase.auth.exchangeCodeForSession(code); }
+  if (!code) return loginRedirect(url.origin, "missing-code");
+
+  const supabase = await createSupabaseServerClient();
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  if (error) return loginRedirect(url.origin, "exchange-failed");
+
   return NextResponse.redirect(new URL(safeNext, url.origin));
 }

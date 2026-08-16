@@ -9,6 +9,9 @@ const pathname = vi.hoisted(() => ({ value: "/" }));
 const lenis = vi.hoisted(() => ({
   constructed: vi.fn(),
   destroy: vi.fn(),
+  raf: vi.fn(),
+  on: vi.fn(),
+  off: vi.fn(),
   resize: vi.fn(),
   scrollTo: vi.fn(),
 }));
@@ -17,8 +20,8 @@ vi.mock("next/navigation", () => ({ usePathname: () => pathname.value }));
 vi.mock("motion/react", () => ({ useReducedMotion: () => false }));
 vi.mock("lenis", () => ({
   default: class MockLenis {
-    constructor() {
-      lenis.constructed();
+    constructor(options?: { autoRaf?: boolean; lerp?: number; smoothWheel?: boolean }) {
+      lenis.constructed(options);
     }
 
     destroy() {
@@ -27,6 +30,18 @@ vi.mock("lenis", () => ({
 
     resize() {
       lenis.resize();
+    }
+
+    raf(time: number) {
+      lenis.raf(time);
+    }
+
+    on(event: string, listener: () => void) {
+      lenis.on(event, listener);
+    }
+
+    off(event: string, listener: () => void) {
+      lenis.off(event, listener);
     }
 
     scrollTo(target: HTMLElement, options?: { force?: boolean }) {
@@ -65,6 +80,8 @@ describe("SmoothScrollProvider", () => {
     );
 
     await waitFor(() => expect(document.documentElement).toHaveAttribute("data-smooth-scroll", "enabled"));
+    expect(lenis.constructed).toHaveBeenCalledWith({ autoRaf: false, lerp: 0.08, smoothWheel: true });
+    expect(lenis.on).toHaveBeenCalledWith("scroll", expect.any(Function));
     window.history.pushState(null, "", "#selected-work");
     window.dispatchEvent(new HashChangeEvent("hashchange"));
 

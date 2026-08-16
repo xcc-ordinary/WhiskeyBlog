@@ -2,7 +2,7 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { isDerivativePath } from "@/lib/derivative-paths";
+import { isDerivativePath, normalizeDerivativePath } from "@/lib/derivative-paths";
 import { requireOwner } from "@/lib/supabase/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type {
@@ -208,4 +208,26 @@ export async function unpublishPhotograph(id: string, client?: PhotographClient)
 
   throwIfError(error);
   return mapPhotograph(requireData(data));
+}
+
+/** Permanently removes an owner photograph record and its private source/display files. */
+export async function deletePhotograph(id: string, client?: PhotographClient): Promise<void> {
+  const supabase = client ?? (await createSupabaseServerClient());
+  await requireOwner(supabase);
+  const { data: existing, error: existingError } = await supabase.from("photographs").select("*").eq("id", id).single();
+  throwIfError(existingError);
+  const photograph = mapPhotograph(requireData(existing));
+  const { error } = await supabase.from("photographs").delete().eq("id", id);
+  throwIfError(error);
+
+  // Only remove display objects created for this photo. Older manually-managed
+  // derivative paths may be shared by several records and must not be removed here.
+  const managedPrefix = `owner/${id}/`;
+  const derivativePaths = [photograph.thumbnailPath, photograph.galleryPath, photograph.detailPath]
+    .map(normalizeDerivativePath)
+    .filter((path): path is string => path !== null)
+    .map((path) => path.slice("derivatives/".length));
+  await supabase.storage.from("originals").remove([photograph.originalPath]);
+  const managedDerivativePaths = derivativePaths.filter((path) => path.startsWith(managedPrefix));
+  if (managedDerivativePaths.length) await supabase.storage.from("derivatives").remove([...new Set(managedDerivativePaths)]);
 }

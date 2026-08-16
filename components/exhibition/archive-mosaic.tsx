@@ -17,7 +17,7 @@ export function ArchiveMosaic({ photographs }: { photographs: PublicArchivePhoto
         <figure className={`archive-item archive-item-${index % 5}`} key={photo.id}>
           <div className="archive-item-frame">
             <Parallax className="visual-camera-layer" speed={archiveSpeeds[index % archiveSpeeds.length]}>
-              <Image alt={photo.alt} fill sizes="(max-width: 760px) 50vw, 33vw" src={photo.galleryUrl} />
+              <Image alt={photo.alt} fill sizes="(max-width: 760px) 50vw, 33vw" src={photo.galleryUrl} unoptimized />
             </Parallax>
           </div>
           <figcaption>

@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   // Playwright uses a loopback hostname while Next's dev server serves the
   // browser bundle locally. Keep this explicit so development HMR and client
   // event handlers work in the reproducible local E2E environment.

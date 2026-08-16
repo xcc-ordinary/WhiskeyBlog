@@ -100,10 +100,10 @@ create policy "Owner can delete photographs"
 -- Anonymous clients must never read public.photographs directly: that row
 -- includes original_path and internal curatorial fields. This view is the sole
 -- public data boundary and intentionally exposes only published derivatives and
--- display metadata. It runs with the view owner's access, so it remains usable
--- while the base table stays owner-only under RLS.
+-- display metadata. SECURITY INVOKER ensures callers never inherit the view
+-- owner's privileges or bypass the base table's RLS policies.
 create view public.published_photographs
-with (security_barrier = true)
+with (security_barrier = true, security_invoker = true)
 as
 select
   id,

@@ -1,10 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
-  <title id="title">Warm paper image placeholder</title>
-  <desc id="description">A neutral placeholder for a personal work-scene photograph.</desc>
-  <rect width="1600" height="1000" fill="#FAF9F6"/>
-  <rect x="48" y="48" width="1504" height="904" fill="none" stroke="#E2DFD7" stroke-width="2"/>
-  <path d="M48 760H1552M320 48V952" fill="none" stroke="#E2DFD7" stroke-width="2"/>
-  <circle cx="1216" cy="284" r="168" fill="#F0EEE8"/>
-  <text x="96" y="174" fill="#5B5C58" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="24" letter-spacing="4">PERSONAL WORK SCENE</text>
-  <text x="96" y="830" fill="#1B1C1E" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="64" font-weight="700" letter-spacing="-2">REPLACE WITH YOUR PHOTO</text>
+  <title id="title">Cool gray personal work-scene placeholder</title>
+  <desc id="description">A minimal centered placeholder for a personal work-scene photograph.</desc>
+  <rect width="1600" height="1000" fill="#F5F5F7"/>
+  <circle cx="800" cy="400" r="190" fill="#E8E8ED"/>
+  <text x="800" y="760" fill="#1D1D1F" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="700" letter-spacing="-1" text-anchor="middle">REPLACE WITH YOUR PHOTO</text>
 </svg>

@@ -1,35 +1,19 @@
-import Image from "next/image";
 import type { JSX } from "react";
 
+import { AsymmetricalParallaxGallery } from "@/components/exhibition/asymmetrical-parallax-gallery";
 import { EditorialButton } from "@/components/exhibition/editorial-button";
-import { Parallax } from "@/components/exhibition/parallax";
 import { Reveal } from "@/components/exhibition/reveal";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
 export function LifeArchiveTeaser({ photographs }: { photographs: PublicArchivePhotograph[] }): JSX.Element {
   return (
-    <section aria-label="Life archive" className="life-archive site-container">
-      <Reveal>
+    <section aria-label="Life archive" className="life-archive">
+      <Reveal className="life-archive-heading-wrap site-container">
         <p className="section-label">03 / LIFE ARCHIVE</p>
         <div className="life-archive-heading"><h2>生活不是边角料。</h2><p>把光线、路途和那些未被解释的瞬间，留在工作的另一面。</p></div>
       </Reveal>
-      {photographs.length ? (
-        <div className="life-archive-preview">
-          {photographs.slice(0, 2).map((photograph, index) => (
-            <figure key={photograph.id}>
-              <div className="life-archive-frame">
-                <Parallax className="visual-camera-layer" speed={index === 0 ? -0.1 : 0.08}>
-                  <Image src={photograph.galleryUrl} alt={photograph.alt} fill sizes="(max-width: 760px) 100vw, 45vw" />
-                </Parallax>
-              </div>
-              <figcaption>{photograph.title}</figcaption>
-            </figure>
-          ))}
-        </div>
-      ) : (
-        <div className="life-archive-empty" aria-label="摄影档案正在整理中。">摄影档案正在整理中。</div>
-      )}
-      <EditorialButton href="/archive" variant="secondary">Open life archive</EditorialButton>
+      <AsymmetricalParallaxGallery photographs={photographs} />
+      <div className="life-archive-action site-container"><EditorialButton href="/archive" variant="secondary">Open life archive</EditorialButton></div>
     </section>
   );
 }

@@ -3,12 +3,15 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type JSX } from "react";
 
+import { LanguageToggle } from "@/components/language-toggle";
+import { useLanguage } from "@/components/language-provider";
 import { navigation, site } from "@/lib/site";
 
 export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const { content } = useLanguage();
   const links = showStudio ? [...navigation, { href: "/studio", label: "Studio" }] : navigation;
 
   useEffect(() => () => {
@@ -36,9 +39,12 @@ export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }
     <header className="editorial-header">
       <div className="site-container editorial-header-inner">
         <Link className="site-mark" href="/" aria-label={`${site.name} 首页`}>{site.name}</Link>
-        <nav className="editorial-desktop-nav" aria-label="主导航">
-          <ul>{links.map((item) => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}</ul>
-        </nav>
+        <div className="editorial-header-actions">
+          <nav className="editorial-desktop-nav" aria-label="主导航">
+            <ul>{links.map((item, index) => <li key={item.href}><Link href={item.href}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
+          </nav>
+          <LanguageToggle />
+        </div>
         <button
           aria-controls="mobile-navigation"
           aria-expanded={isOpen}
@@ -71,7 +77,7 @@ export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }
               <button aria-label="关闭导航菜单" onClick={closeNavigation} type="button">Close ×</button>
             </div>
             <nav aria-label="移动导航">
-              <ul>{links.map((item) => <li key={item.href}><Link href={item.href} onClick={closeNavigation}>{item.label}</Link></li>)}</ul>
+              <ul>{links.map((item, index) => <li key={item.href}><Link href={item.href} onClick={closeNavigation}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
             </nav>
           </div>
         </dialog>

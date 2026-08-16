@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("home presents the exhibition chapters", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /growing/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
   await expect(page.getByRole("region", { name: "Selected work" })).toBeVisible();
   await expect(page.getByRole("link", { name: /explore selected work/i })).toHaveAttribute("href", "/projects");
 });
@@ -10,7 +10,7 @@ test("home presents the exhibition chapters", async ({ page }) => {
 test("public exhibition marks visual camera layers without changing reading landmarks", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByTestId("parallax-layer").first()).toBeVisible();
-  await expect(page.getByRole("heading", { name: /growing/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
   await page.goto("/archive");
   await expect(page.getByRole("region", { name: "生活影像档案" })).toBeVisible();
 });
@@ -44,7 +44,7 @@ test("reduced motion homepage hydrates without a recoverable error", async ({ pa
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /growing/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
   await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   expect(hydrationErrors).toEqual([]);
 });
@@ -56,6 +56,17 @@ test("desktop enables camera glide while reduced motion stays native", async ({ 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
   await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll", "enabled");
+});
+
+test("published Studio images enter the asymmetric homepage gallery", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  const gallery = page.locator(".asymmetrical-gallery");
+  await expect(gallery).toBeVisible();
+  await expect(gallery.locator("[data-speed]")).toHaveCount(4);
+  await expect(gallery.locator("[data-speed='1.2']")).toHaveCount(1);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+  await expect(gallery.locator("[data-gallery-topography]")).toBeVisible();
 });
 
 test("a public hash target remains reachable with cinematic scroll enabled", async ({ page }) => {

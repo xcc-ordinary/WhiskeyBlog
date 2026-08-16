@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createDraftPhotograph, publishPhotograph, unpublishPhotograph, updatePhotograph } from "@/lib/supabase/photographs";
+import { createDraftPhotograph, deletePhotograph, publishPhotograph, unpublishPhotograph, updatePhotograph } from "@/lib/supabase/photographs";
 import type { PhotographCrop } from "@/lib/supabase/types";
 import { extensionForUploadType, getUploadValidationError, isManagedOriginalPath, type UploadFileDetails } from "@/lib/supabase/upload";
 import { requireOwner } from "@/lib/supabase/auth";
@@ -110,6 +110,47 @@ export async function unpublishStudioPhotograph(id: string): Promise<ActionResul
   try {
     await unpublishPhotograph(id);
     return { ok: true, message: "照片已撤回为草稿。" };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+/** Prepares a private display copy, fills missing basic metadata, then publishes. */
+export async function quickPublishStudioPhotograph(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    await requireOwner(supabase);
+    const { data, error } = await supabase.from("photographs").select("*").eq("id", id).single();
+    if (error || !data) return { ok: false, message: "未找到这张照片。" };
+
+    const extension = data.original_path.match(/\.([a-z0-9]+)$/i)?.[1];
+    if (!extension) return { ok: false, message: "无法识别原图格式。" };
+    const displayPath = `owner/${id}/display.${extension}`;
+    if (!data.thumbnail_path || !data.gallery_path || !data.detail_path) {
+      const { data: original, error: downloadError } = await supabase.storage.from("originals").download(data.original_path);
+      if (downloadError || !original) return { ok: false, message: "无法读取私密原图，请稍后重试。" };
+      const { error: uploadError } = await supabase.storage.from("derivatives").upload(displayPath, original, { contentType: original.type || undefined, upsert: true });
+      if (uploadError) return { ok: false, message: "无法准备展示图片，请稍后重试。" };
+    }
+
+    await updatePhotograph(id, {
+      title: data.title?.trim() || "未命名照片",
+      alt: data.alt?.trim() || data.title?.trim() || "上传的摄影作品",
+      thumbnailPath: data.thumbnail_path || displayPath,
+      galleryPath: data.gallery_path || displayPath,
+      detailPath: data.detail_path || displayPath,
+    }, supabase);
+    await publishPhotograph(id, supabase);
+    return { ok: true, message: "照片已发布到公开档案。" };
+  } catch (error) {
+    return actionError(error);
+  }
+}
+
+export async function deleteStudioPhotograph(id: string): Promise<ActionResult> {
+  try {
+    await deletePhotograph(id);
+    return { ok: true, message: "照片已删除。" };
   } catch (error) {
     return actionError(error);
   }

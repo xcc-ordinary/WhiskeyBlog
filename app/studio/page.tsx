@@ -23,7 +23,7 @@ export default async function StudioPage() {
   const studio = await loadStudio();
 
   if ("error" in studio) {
-    if (studio.error.status === 401) redirect("/studio/login");
+    if (studio.error.status === 401) redirect("/studio/login?error=session-missing");
     return <section className="studio-auth site-container"><p className="studio-kicker">PRIVATE / WHISKEYBLOG</p><h1>此账户未获授权。</h1><p>Media Studio 仅向已配置的站点所有者开放。</p><form action={signOutOfStudio}><button className="studio-button" type="submit">退出并返回登录</button></form></section>;
   }
 
