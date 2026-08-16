@@ -12,10 +12,11 @@ type ExplorerHeroProps = {
   title: string;
   description: string;
   image: string;
+  variant?: "default" | "home";
   cta?: { href: string; label: string };
 };
 
-export function ExplorerHero({ eyebrow, title, description, image, cta }: ExplorerHeroProps): JSX.Element {
+export function ExplorerHero({ eyebrow, title, description, image, variant = "default", cta }: ExplorerHeroProps): JSX.Element {
   const rootRef = useRef<HTMLElement>(null);
   const motionEnabled = useScrollEnhancement();
 
@@ -34,7 +35,7 @@ export function ExplorerHero({ eyebrow, title, description, image, cta }: Explor
   }, [motionEnabled]);
 
   return (
-    <section className="explorer-hero" ref={rootRef} aria-label={title}>
+    <section className={`explorer-hero explorer-hero--${variant}`} ref={rootRef} aria-label={title}>
       <div aria-hidden="true" className="explorer-hero-background parallax-layer" data-testid="parallax-layer" style={{ backgroundImage: `url(${image})` }} />
       <div className="explorer-hero-vignette" aria-hidden="true" />
       <div className="explorer-hero-panel explorer-glass">
