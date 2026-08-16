@@ -5,8 +5,8 @@
   position: relative;
   isolation: isolate;
   background:
-    linear-gradient(90deg, rgba(250, 246, 235, 0.9), rgba(250, 246, 235, 0.68)),
-    url("/images/site-backgrounds/gallery-harbor-exhibition-deck-v1.png") center / cover no-repeat !important;
+    linear-gradient(90deg, rgba(250, 246, 235, 0.4), rgba(250, 246, 235, 0.16)),
+    url("/images/site-backgrounds/gallery-harbor-exhibition-deck-v2.png") center bottom / cover no-repeat !important;
   color: var(--harbor-ink) !important;
 }
 
