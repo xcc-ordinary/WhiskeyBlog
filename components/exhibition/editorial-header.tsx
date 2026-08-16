@@ -38,7 +38,9 @@ export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }
   return (
     <header className="editorial-header liquid-glass">
       <div className="site-container editorial-header-inner">
-        <Link className="site-mark" href="/" aria-label={`${site.name} 首页`}>{site.name}</Link>
+        <Link className="site-mark site-logo-link" href="/" aria-label={`${site.name} 首页`}>
+          <span aria-hidden="true" className="site-logo-mark" />
+        </Link>
         <div className="editorial-header-actions">
           <nav className="editorial-desktop-nav" aria-label="主导航">
             <ul>{links.map((item, index) => <li key={item.href}><Link href={item.href}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
