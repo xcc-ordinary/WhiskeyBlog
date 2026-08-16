@@ -54,7 +54,7 @@ export default async function ArchivePage() {
     : await getPublicArchivePhotographs();
 
   return (
-    <><ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-v2.png" /><div className="archive-page site-container">
+    <><ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-vault-v2.png" /><div className="archive-page site-container">
       <header className="archive-heading">
         <p className="section-label">摄影札记 / 精选画面</p>
         <h1>Life Archive</h1>
