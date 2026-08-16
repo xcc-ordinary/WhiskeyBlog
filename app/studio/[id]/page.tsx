@@ -18,5 +18,11 @@ export default async function StudioPhotographPage({ params }: { params: Promise
   const photograph = (await getOwnerPhotographs()).find((entry) => entry.id === id);
   if (!photograph) notFound();
 
-  return <section className="studio-page site-container"><PhotographEditor photograph={photograph} /></section>;
+  return (
+    <section className="studio-page">
+      <div className="site-container studio-page-content">
+        <PhotographEditor photograph={photograph} />
+      </div>
+    </section>
+  );
 }
