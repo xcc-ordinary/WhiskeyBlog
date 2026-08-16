@@ -36,7 +36,7 @@ export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }
   }
 
   return (
-    <header className="editorial-header">
+    <header className="editorial-header liquid-glass">
       <div className="site-container editorial-header-inner">
         <Link className="site-mark" href="/" aria-label={`${site.name} 首页`}>{site.name}</Link>
         <div className="editorial-header-actions">

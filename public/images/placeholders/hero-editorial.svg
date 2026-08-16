@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title description">
-  <title id="title">Cool gray personal work-scene placeholder</title>
-  <desc id="description">A minimal centered placeholder for a personal work-scene photograph.</desc>
-  <rect width="1600" height="1000" fill="#F5F5F7"/>
-  <circle cx="800" cy="400" r="190" fill="#E8E8ED"/>
-  <text x="800" y="760" fill="#1D1D1F" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif" font-size="52" font-weight="700" letter-spacing="-1" text-anchor="middle">REPLACE WITH YOUR PHOTO</text>
+  <title id="title">Editorial personal work-scene placeholder</title>
+  <desc id="description">A sharp rectangular placeholder for a personal work-scene photograph.</desc>
+  <rect width="1600" height="1000" fill="#f0f0ee"/>
 </svg>
