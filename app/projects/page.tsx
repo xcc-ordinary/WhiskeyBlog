@@ -1,13 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 import { getProjects } from "@/lib/content";
 
 export default function ProjectsPage() {
   const projects = getProjects();
 
   return (
-    <section className="projects-index site-container">
+    <><ExplorerHero eyebrow="03 / AIRSHIP YARD" title="项目，是驶向未知的装置。" description="从背景、过程到结果，记录每一次建造如何让想法获得自己的航向。" image="/images/site-backgrounds/projects-airshipyard-v2.png" /><section className="projects-index site-container">
       <header className="projects-index-heading">
         <p className="section-label">精选项目 / 案例研究</p>
         <h1>项目不是陈列品，<br />而是做出选择的过程。</h1>
@@ -36,6 +37,6 @@ export default function ProjectsPage() {
           </article>
         ))}
       </div>
-    </section>
+    </section></>
   );
 }

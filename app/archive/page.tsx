@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ArchiveMosaic } from "@/components/exhibition/archive-mosaic";
+import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 import { getPublicArchivePhotographs } from "@/lib/public-photographs";
 import type { PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
@@ -53,7 +54,7 @@ export default async function ArchivePage() {
     : await getPublicArchivePhotographs();
 
   return (
-    <div className="archive-page site-container">
+    <><ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-v2.png" /><div className="archive-page site-container">
       <header className="archive-heading">
         <p className="section-label">摄影札记 / 精选画面</p>
         <h1>Life Archive</h1>
@@ -69,6 +70,6 @@ export default async function ArchivePage() {
           <p>新的照片会在被认真命名、描述和发布之后，出现在这里。</p>
         </section>
       )}
-    </div>
+    </div></>
   );
 }
