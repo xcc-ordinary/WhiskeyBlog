@@ -1,21 +1,56 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { JSX } from "react";
 
-import { navigation, site } from "@/lib/site";
+import { site } from "@/lib/site";
+
+const signalNavigation = [
+  { href: "/", label: "HOME" },
+  { href: "/about", label: "ABOUT" },
+  { href: "/projects", label: "WORK" },
+  { href: "/archive", label: "ARCHIVE" },
+  { href: "/blog", label: "NOTES" },
+] as const;
+
+function isCurrentPath(pathname: string, href: string): boolean {
+  return href === "/" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function EditorialFooter(): JSX.Element {
+  const pathname = usePathname();
+
   return (
-    <footer className="editorial-footer">
-      <div className="site-container editorial-footer-inner">
-        <div>
-          <p className="section-label">LET&apos;S MAKE SOMETHING USEFUL</p>
-          <h2>有想法，欢迎来信。</h2>
-          <a className="editorial-contact" href={`mailto:${site.email}`}>{site.email}</a>
-        </div>
-        <nav aria-label="页脚导航">
-          <ul>{navigation.map((item) => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}</ul>
+    <footer className="editorial-footer signal-station-footer">
+      <div className="signal-station-scrim" aria-hidden="true" />
+      <div className="site-container signal-station-inner">
+        <section className="signal-station-message" aria-labelledby="signal-station-title">
+          <p className="signal-station-kicker">SIGNAL STATION / OPEN CHANNEL</p>
+          <h2 id="signal-station-title">继续航行。</h2>
+          <a className="signal-frequency" href={`mailto:${site.email}`}>
+            <span>发报频率</span>
+            <small>{site.email}</small>
+          </a>
+        </section>
+
+        <nav className="signal-station-nav" aria-label="航标导航">
+          <p>航标清单</p>
+          <ul>
+            {signalNavigation.map((item, index) => {
+              const current = isCurrentPath(pathname, item.href);
+              return (
+                <li key={item.href}>
+                  <Link aria-current={current ? "page" : undefined} className={current ? "is-current" : undefined} href={item.href}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>{item.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
-        <p className="editorial-copyright">© {new Date().getFullYear()} {site.name}</p>
+
+        <p className="signal-station-id">BUOY / {new Date().getFullYear()} / {site.name.toUpperCase()}</p>
       </div>
     </footer>
   );
