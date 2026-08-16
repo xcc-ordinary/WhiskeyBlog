@@ -457,7 +457,7 @@ body{font-family:var(--font-inter),var(--font-noto-sans-sc),ui-sans-serif,system
 
 /* Full-screen concept-art prologue: painted city, vignette, and fine film grain. */
 /* The XCC mark replaces the former text wordmark in the navigation bar. */
-.site-logo-link{display:grid!important;width:2.6rem;height:2.6rem;place-items:center}.site-logo-mark{display:block;width:2.6rem;height:2.6rem;background:#fff url("/images/xcc-logo-white-v1.png") center / 100% 100% no-repeat}
+.site-logo-link{display:grid!important;width:2.6rem;height:2.6rem;place-items:center}.site-logo-mark{display:block;width:2.6rem;height:2.6rem;background:transparent url("/images/xcc-logo-transparent-v1.png") center / 100% 100% no-repeat}
 
 /* Explorer's Log: shared full-screen template for Home, About, Projects, and Archives. */
 .explorer-hero.explorer-hero--default,.explorer-hero.explorer-hero--home{align-items:flex-start;padding-top:clamp(8rem,13vh,11.5rem)}.explorer-hero.explorer-hero--default .explorer-hero-panel,.explorer-hero.explorer-hero--home .explorer-hero-panel{max-width:min(58rem,calc(100% - 2rem));border:0;background:transparent;box-shadow:none!important;backdrop-filter:none;-webkit-backdrop-filter:none;padding:0}.explorer-hero.explorer-hero--default h1,.explorer-hero.explorer-hero--home h1{max-width:min(88vw,58rem);font-size:clamp(3rem,5vw,6rem);line-height:1;letter-spacing:-.05em;text-wrap:balance}.explorer-hero.explorer-hero--default .explorer-description,.explorer-hero.explorer-hero--home .explorer-description{max-width:34rem;font-size:clamp(.95rem,1.15vw,1.12rem)}
