@@ -2,6 +2,7 @@ import "server-only";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import { cache } from "react";
 export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; coverImage?: string; coverAlt?: string };
 export type PostSummary = ContentMeta & { kind: "post"; href: string };
 export type ProjectSummary = ContentMeta & { kind: "project"; href: string; coverImage?: string; coverAlt?: string; role?: string };
@@ -31,7 +32,7 @@ function readCollection<T extends PostSummary | ProjectSummary>(collection: "pos
     } as T;
   }).sort((a, b) => b.date.localeCompare(a.date));
 }
-export function getPosts(): PostSummary[] { return readCollection<PostSummary>("posts", "post"); }
-export function getProjects(): ProjectSummary[] { return readCollection<ProjectSummary>("projects", "project"); }
-export function getPost(slug: string): PostDocument | null { const post = getPosts().find((item) => item.slug === slug); if (!post) return null; return { ...post, source: matter(readFileSync(path.join(contentRoot, "posts", slug + ".mdx"), "utf8")).content }; }
-export function getProject(slug: string): ProjectDocument | null { const project = getProjects().find((item) => item.slug === slug); if (!project) return null; return { ...project, source: matter(readFileSync(path.join(contentRoot, "projects", slug + ".mdx"), "utf8")).content }; }
+export const getPosts = cache((): PostSummary[] => readCollection<PostSummary>("posts", "post"));
+export const getProjects = cache((): ProjectSummary[] => readCollection<ProjectSummary>("projects", "project"));
+export const getPost = cache((slug: string): PostDocument | null => { const post = getPosts().find((item) => item.slug === slug); if (!post) return null; return { ...post, source: matter(readFileSync(path.join(contentRoot, "posts", slug + ".mdx"), "utf8")).content }; });
+export const getProject = cache((slug: string): ProjectDocument | null => { const project = getProjects().find((item) => item.slug === slug); if (!project) return null; return { ...project, source: matter(readFileSync(path.join(contentRoot, "projects", slug + ".mdx"), "utf8")).content }; });

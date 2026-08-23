@@ -11,6 +11,7 @@ type Result = { ok: true; message: string } | { ok: false; message: string };
 const root = process.cwd();
 const postDirectory = path.join(root, "content", "posts");
 const coverDirectory = path.join(root, "public", "images", "blog-covers");
+const maxCoverBytes = 3.75 * 1024 * 1024;
 const clean = (value: FormDataEntryValue | null) => typeof value === "string" ? value.trim() : "";
 const validSlug = (slug: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
 
@@ -50,7 +51,7 @@ export async function uploadStudioPostCover(form: FormData): Promise<{ ok: boole
     requireRepositoryContentWrites();
     const file = form.get("cover");
     if (!(file instanceof File) || file.size === 0) return { ok: false, message: "请选择封面图片。" };
-    if (!file.type.startsWith("image/") || file.size > 4 * 1024 * 1024) return { ok: false, message: "封面须为 4MB 以内的图片。" };
+    if (!file.type.startsWith("image/") || file.size > maxCoverBytes) return { ok: false, message: "封面须为 3.75MB 以内的图片。" };
     const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
     const fileName = `${crypto.randomUUID()}.${extension}`;
     await mkdir(coverDirectory, { recursive: true });

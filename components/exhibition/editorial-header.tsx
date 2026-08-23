@@ -7,12 +7,12 @@ import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/components/language-provider";
 import { navigation, site } from "@/lib/site";
 
-export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }): JSX.Element {
+export function EditorialHeader(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const { content } = useLanguage();
-  const links = showStudio ? [...navigation, { href: "/studio", label: "Studio" }] : navigation;
+  const links = navigation;
 
   useEffect(() => () => {
     document.body.style.overflow = "";

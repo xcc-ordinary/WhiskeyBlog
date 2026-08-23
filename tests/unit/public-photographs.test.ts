@@ -126,4 +126,16 @@ describe("public photograph archive", () => {
     expect(report).toHaveBeenCalledWith("Public photograph archive is unavailable.", expect.any(Error));
     report.mockRestore();
   });
+
+  it("keeps public pages available when deployment credentials are missing", async () => {
+    const report = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
+
+    await expect(getPublicArchivePhotographs()).resolves.toEqual([]);
+
+    expect(report).toHaveBeenCalledWith("Public photograph archive is unavailable.", expect.any(Error));
+    report.mockRestore();
+    vi.unstubAllEnvs();
+  });
 });

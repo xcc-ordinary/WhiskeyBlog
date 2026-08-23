@@ -5,6 +5,7 @@ test("publishes crawl metadata and baseline security headers", async ({ page }) 
   expect(response?.headers()["x-content-type-options"]).toBe("nosniff");
   expect(response?.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(response?.headers()["content-security-policy"]).toContain("frame-ancestors 'none'");
+  expect(response?.headers()["strict-transport-security"]).toBe("max-age=31536000");
 
   await page.goto("/sitemap.xml");
   const sitemap = await page.locator("body").innerText();

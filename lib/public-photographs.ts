@@ -66,16 +66,15 @@ function toPublicRecord(photo: PublishedPhotograph, galleryUrl: string): PublicA
 }
 
 /**
- * Returns only published metadata plus five-minute links to the gallery derivative.
+ * Returns only published metadata plus fifteen-minute links to the gallery derivative.
  * It deliberately has no API for originals, thumbnails, or draft records.
  */
 export async function getPublicArchivePhotographs(options: PublicPhotographOptions = {}): Promise<PublicArchivePhotograph[]> {
-  const archiveClient = options.getPublished && options.signDerivativeUrl ? null : createPublicArchiveClient();
-  const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished
-    ?? (() => getPublishedPhotographs(archiveClient!));
-  const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner(archiveClient!);
-
   try {
+    const archiveClient = options.getPublished && options.signDerivativeUrl ? null : createPublicArchiveClient();
+    const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished
+      ?? (() => getPublishedPhotographs(archiveClient!));
+    const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner(archiveClient!);
     const photographs = await getPublished();
     const safePublished = photographs.filter((photo) =>
       (photo.status === undefined || photo.status === "published")
