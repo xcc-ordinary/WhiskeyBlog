@@ -4,9 +4,7 @@
   --harbor-accent: #c77c36;
   position: relative;
   isolation: isolate;
-  background:
-    linear-gradient(90deg, rgba(250, 246, 235, 0.4), rgba(250, 246, 235, 0.16)),
-    url("/images/site-backgrounds/gallery-harbor-exhibition-deck-v2.png") center bottom / cover no-repeat !important;
+  background: transparent !important;
   color: var(--harbor-ink) !important;
 }
 
@@ -23,7 +21,31 @@
 }
 
 .pinned {
-  background: transparent !important;
+  position: relative;
+  isolation: isolate;
+  contain: paint;
+  background: #9ccbd8 !important;
+}
+
+.panorama {
+  position: absolute;
+  z-index: -2;
+  inset: 0 auto 0 0;
+  width: max(100vw, calc(100svh * 16 / 3));
+  pointer-events: none;
+  background: #9ccbd8 url("/images/site-backgrounds/gallery-harbor-panorama-v2.png") center / 100% 100% no-repeat;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.panoramaWash {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(253, 250, 241, 0.34), rgba(253, 250, 241, 0.08) 62%, rgba(38, 58, 66, 0.12)),
+    linear-gradient(0deg, rgba(38, 58, 66, 0.14), transparent 45%);
 }
 
 .harborGallery :global(.gallery-track) {
@@ -39,24 +61,37 @@
 }
 
 .harborGallery :global(.horizontal-gallery-piece) {
-  padding: clamp(0.65rem, 1.2vw, 1.15rem);
-  background: rgba(253, 250, 241, 0.78);
-  border: 1px solid rgba(38, 58, 66, 0.18);
-  box-shadow: 0 20px 48px rgba(38, 58, 66, 0.12) !important;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none !important;
+  will-change: auto;
+}
+
+.harborGallery :global(.gallery-track) {
+  backface-visibility: hidden;
 }
 
 .harborGallery :global(.horizontal-gallery-frame) {
+  overflow: hidden;
   background: #e9e6dc;
-  border: 0.4rem solid #f9f4e8;
-  outline: 1px solid rgba(38, 58, 66, 0.22);
+  border: 0;
+  border-radius: clamp(1.15rem, 2.2vw, 1.85rem);
+  box-shadow: 0 2px 5px rgba(27, 46, 58, 0.08), 0 18px 38px rgba(27, 46, 58, 0.18);
+  transition:transform 280ms cubic-bezier(.2,.8,.2,1),box-shadow 280ms cubic-bezier(.2,.8,.2,1);
 }
 
 .harborGallery :global(.horizontal-gallery-frame::after) {
-  border-color: rgba(199, 124, 54, 0.36);
+  border-color: rgba(255, 255, 255, 0.16);
+  border-radius: inherit;
 }
 
 .harborGallery :global(.horizontal-gallery-frame img) {
-  filter: saturate(0.92) contrast(1.03) sepia(0.035);
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+  object-position: center;
+  filter: none;
 }
 
 .harborGallery :global(.horizontal-gallery-caption) {
@@ -90,27 +125,28 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .harborGallery :global(.horizontal-gallery-piece:hover) {
-    border-color: rgba(199, 124, 54, 0.68);
-    box-shadow: 0 26px 60px rgba(38, 58, 66, 0.18) !important;
+  .harborGallery :global(.horizontal-gallery-piece:hover .horizontal-gallery-frame) {
+    box-shadow: 0 3px 7px rgba(27, 46, 58, 0.08), 0 25px 48px rgba(27, 46, 58, 0.22);
+    transform:translateY(-2px);
   }
 
   .harborGallery :global(.horizontal-gallery-piece:hover .horizontal-gallery-frame img) {
-    filter: saturate(1.02) contrast(1.04) sepia(0);
+    filter: none;
   }
 }
 
 @media (max-width: 768px) {
-  .harborGallery {
+  .pinned {
     background-position: 53% center;
+  }
+
+  .panorama {
+    width: 100%;
+    background-position: 54% center;
   }
 
   .harborGallery :global(.gallery-track) {
     padding-top: 3.25rem;
-  }
-
-  .harborGallery :global(.horizontal-gallery-piece) {
-    padding: 0.7rem;
   }
 
   .harborGallery :global(.horizontal-gallery-quote) {
@@ -119,7 +155,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .panorama {
+    transform: none !important;
+  }
+
   .harborGallery :global(.horizontal-gallery-piece),
+  .harborGallery :global(.horizontal-gallery-frame),
   .harborGallery :global(.horizontal-gallery-frame img) {
     transition: none !important;
   }

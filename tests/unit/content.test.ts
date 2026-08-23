@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest";
 import { getPost, getPosts, getProjects } from "@/lib/content";
 
 describe("post content", () => {
-  it("sorts posts by date descending", () => {
-    expect(getPosts().map((post) => post.slug)).toEqual(["building-this-site"]);
+  it("sorts posts by date descending and maps them to the public blog route", () => {
+    const posts = getPosts();
+    expect(posts.map((post) => post.date)).toEqual([...posts].map((post) => post.date).sort().reverse());
+    expect(posts.every((post) => post.href === `/blog/${post.slug}`)).toBe(true);
   });
 
   it("returns null for an unknown post", () => {

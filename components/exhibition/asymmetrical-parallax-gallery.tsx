@@ -21,6 +21,7 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   const wrapperRef = useRef<HTMLElement>(null);
   const pinnedRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const panoramaRef = useRef<HTMLDivElement>(null);
   const motionEnabled = useScrollEnhancement();
   const items = galleryLayouts.map((layout, index) => ({ layout, photograph: photographs[index] ?? null }));
 
@@ -28,43 +29,31 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
     const wrapper = wrapperRef.current;
     const pinned = pinnedRef.current;
     const track = trackRef.current;
-    if (!motionEnabled || !wrapper || !pinned || !track) return;
+    const panorama = panoramaRef.current;
+    if (!motionEnabled || !wrapper || !pinned || !track || !panorama) return;
 
     gsap.registerPlugin(ScrollTrigger);
     const context = gsap.context(() => {
       const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
-      const tween = gsap.to(track, {
-        x: () => -distance(),
-        ease: "none",
+      const panoramaDistance = () => Math.max(0, panorama.scrollWidth - window.innerWidth);
+      const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: wrapper,
           pin: pinned,
-          scrub: 1.5,
+          scrub: 0.6,
           start: "top top",
           end: () => `+=${distance()}`,
           invalidateOnRefresh: true,
           anticipatePin: 1,
+          fastScrollEnd: true,
         },
       });
 
-      const galleryItems = gsap.utils.toArray<HTMLElement>(".gallery-item");
-      galleryItems.forEach((item, index) => {
-        const drift = index % 2 === 0 ? 22 : -22;
-        gsap.fromTo(item, { y: drift, scale: 1.05 }, {
-          y: -drift,
-          scale: 1,
-          ease: "none",
-          scrollTrigger: {
-            trigger: item,
-            containerAnimation: tween,
-            start: "left 85%",
-            end: "right 15%",
-            scrub: 1.5,
-          },
-        });
-      });
+      timeline
+        .to(track, { x: () => -distance(), ease: "none", force3D: true }, 0)
+        .to(panorama, { x: () => -panoramaDistance(), ease: "none", force3D: true }, 0);
 
-      if (distance() === 0) tween.scrollTrigger?.kill();
+      if (distance() === 0) timeline.scrollTrigger?.kill();
       ScrollTrigger.refresh();
     }, wrapper);
 
@@ -74,10 +63,11 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   return (
     <section aria-label="横向滚动摄影画廊" className={`gallery-wrapper ${styles.harborGallery}`} ref={wrapperRef}>
       <div className={`gallery-pinned ${styles.pinned}`} ref={pinnedRef}>
+        <div aria-hidden="true" className={styles.panorama} ref={panoramaRef} />
+        <div aria-hidden="true" className={styles.panoramaWash} />
         <div className="gallery-track" ref={trackRef}>
           <div className="horizontal-gallery-intro">
-            <span>FIELD NOTES / 2026</span>
-            <span>SCROLL TO MOVE →</span>
+            <span>03 / LIFE ARCHIVE</span>
           </div>
           {items.slice(0, 2).map(({ layout, photograph }, index) => <GalleryPiece index={index} key={photograph?.id ?? `gallery-placeholder-${index}`} layout={layout} photograph={photograph} />)}
           <article className="horizontal-gallery-quote">

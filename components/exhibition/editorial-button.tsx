@@ -20,7 +20,7 @@ export function EditorialButton({ href, children, variant = "primary" }: { href:
   const hasHydrated = useHasHydrated();
   const interaction = reducedMotion || variant === "secondary" ? undefined : { scale: 1.018 };
   const press = reducedMotion || variant === "secondary" ? undefined : { scale: 0.972 };
-  const className = `editorial-button editorial-button-${variant}`;
+  const className = `editorial-button liquid-glass-button editorial-button-${variant}`;
   const content = <><span className="editorial-button-label">{children}</span><span className="editorial-button-arrow" aria-hidden="true">↗</span></>;
 
   if (!hasHydrated || reducedMotion) {

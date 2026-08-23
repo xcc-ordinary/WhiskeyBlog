@@ -29,7 +29,7 @@ export const currentFacts: CurrentFact[] = [
 ];
 
 export const xiaohongshuLink: XiaohongshuLink = {
-  href: "https://www.xiaohongshu.com/",
+  href: "https://www.xiaohongshu.com/user/profile/63d36fd60000000027029781?tab=note&subTab=note",
   label: "Follow on 小红书 ↗",
-  description: "待替换：你的真实小红书主页链接。",
+  description: "Wesley 的小红书主页。",
 };

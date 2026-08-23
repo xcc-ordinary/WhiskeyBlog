@@ -36,21 +36,21 @@ export function EditorialHeader({ showStudio = false }: { showStudio?: boolean }
   }
 
   return (
-    <header className="editorial-header liquid-glass">
+    <header className="editorial-header" id="header">
       <div className="site-container editorial-header-inner">
         <Link className="site-mark site-logo-link" href="/" aria-label={`${site.name} 首页`}>
           <span aria-hidden="true" className="site-logo-mark" />
         </Link>
         <div className="editorial-header-actions">
           <nav className="editorial-desktop-nav" aria-label="主导航">
-            <ul>{links.map((item, index) => <li key={item.href}><Link href={item.href}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
+            <ul>{links.map((item, index) => <li key={item.href}><Link className="liquid-glass-nav-link" href={item.href}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
           </nav>
           <LanguageToggle />
         </div>
         <button
           aria-controls="mobile-navigation"
           aria-expanded={isOpen}
-          className="editorial-mobile-index"
+          className="editorial-mobile-index liquid-glass-button"
           onClick={openNavigation}
           ref={triggerRef}
           type="button"

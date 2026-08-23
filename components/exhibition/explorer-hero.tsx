@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useLayoutEffect, useRef, type JSX } from "react";
+import { useLayoutEffect, useRef, type JSX, type ReactNode } from "react";
 
 import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
 
@@ -14,9 +14,10 @@ type ExplorerHeroProps = {
   image: string;
   variant?: "default" | "home";
   cta?: { href: string; label: string };
+  children?: ReactNode;
 };
 
-export function ExplorerHero({ eyebrow, title, description, image, variant = "default", cta }: ExplorerHeroProps): JSX.Element {
+export function ExplorerHero({ eyebrow, title, description, image, variant = "default", cta, children }: ExplorerHeroProps): JSX.Element {
   const rootRef = useRef<HTMLElement>(null);
   const motionEnabled = useScrollEnhancement();
 
@@ -42,6 +43,7 @@ export function ExplorerHero({ eyebrow, title, description, image, variant = "de
         <p className="explorer-kicker">{eyebrow}</p>
         <h1>{title}</h1>
         <p className="explorer-description">{description}</p>
+        {children}
         {cta ? <Link className="explorer-link" href={cta.href}>{cta.label}<span aria-hidden="true">↗</span></Link> : null}
       </div>
       <p className="explorer-scroll-note">LOG ENTRY / 2026</p>

@@ -13,20 +13,29 @@ function archiveDateline(photo: PublicArchivePhotograph) {
 export function ArchiveMosaic({ photographs }: { photographs: PublicArchivePhotograph[] }): JSX.Element {
   return (
     <section aria-label="生活影像档案" className="archive-mosaic">
-      {photographs.map((photo, index) => (
-        <figure className={`archive-item archive-item-${index % 5}`} key={photo.id}>
-          <div className="archive-item-frame">
-            <Parallax className="visual-camera-layer" speed={archiveSpeeds[index % archiveSpeeds.length]}>
-              <Image alt={photo.alt} fill sizes="(max-width: 760px) 50vw, 33vw" src={photo.galleryUrl} unoptimized />
-            </Parallax>
-          </div>
-          <figcaption>
-            <strong>{photo.title}</strong>
-            {archiveDateline(photo) ? <span>{archiveDateline(photo)}</span> : null}
-            {photo.caption ? <span>{photo.caption}</span> : null}
-          </figcaption>
-        </figure>
-      ))}
+      {photographs.map((photo, index) => {
+        const dateline = archiveDateline(photo);
+
+        return (
+          <figure className={`archive-item archive-item-${index % 5}`} key={photo.id}>
+            <div className="archive-item-matte">
+              <div className="archive-item-frame">
+                <Parallax className="visual-camera-layer" speed={archiveSpeeds[index % archiveSpeeds.length]}>
+                  <Image alt={photo.alt} fill sizes="(max-width: 760px) 90vw, 58vw" src={photo.galleryUrl} unoptimized />
+                </Parallax>
+              </div>
+            </div>
+            <figcaption>
+              <span className="archive-item-index">{String(index + 1).padStart(2, "0")}</span>
+              <span className="archive-item-copy">
+                <strong>{photo.title}</strong>
+                {dateline ? <span>{dateline}</span> : null}
+                {photo.caption ? <span>{photo.caption}</span> : null}
+              </span>
+            </figcaption>
+          </figure>
+        );
+      })}
     </section>
   );
 }

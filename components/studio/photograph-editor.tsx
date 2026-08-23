@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -8,7 +10,9 @@ import type { Photograph } from "@/lib/supabase/types";
 
 function dateInputValue(value: string | null) { return value ? value.slice(0, 10) : ""; }
 
-export function PhotographEditor({ photograph }: { photograph: Photograph }) {
+type EditablePhotograph = Photograph & { previewUrl?: string | null };
+
+export function PhotographEditor({ photograph }: { photograph: EditablePhotograph }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -28,7 +32,8 @@ export function PhotographEditor({ photograph }: { photograph: Photograph }) {
   }
 
   return <form action={save} className="studio-editor">
-    <header className="studio-editor-heading"><div><p className="studio-kicker">{photograph.status === "draft" ? "DRAFT / METADATA" : "PUBLISHED / METADATA"}</p><h1>{photograph.title ?? "未命名照片"}</h1><p>原图保持私密。你可以直接从资料库发布；这里仅用于补充标题、替代文本和说明。</p></div><button className="studio-secondary-button" disabled={isWorking} onClick={changePublication} type="button">{photograph.status === "published" ? "撤回发布" : "发布照片"}</button></header>
+    <header className="studio-editor-heading"><div><p className="studio-kicker">{photograph.status === "draft" ? "DRAFT / PHOTO" : "PUBLISHED / PHOTO"}</p><h1>{photograph.title ?? "未命名照片"}</h1><p>编辑照片信息、公开展示顺序与画面裁切；原图始终保留在私密存储中。</p></div><div className="studio-editor-heading-actions"><Link className="studio-sign-out" href="/studio#photographs">返回照片资料库</Link><button className="studio-secondary-button" disabled={isWorking} onClick={changePublication} type="button">{photograph.status === "published" ? "撤回公开展示" : "发布到公开展示"}</button></div></header>
+    {photograph.previewUrl ? <figure className="studio-photo-preview"><Image alt={photograph.alt ?? photograph.title ?? "照片预览"} fill sizes="(max-width: 700px) 100vw, 50vw" src={photograph.previewUrl} unoptimized /></figure> : null}
     <div className="studio-original-note"><span>PRIVATE ORIGINAL</span><code>{photograph.originalPath}</code></div>
     <div className="studio-editor-grid">
       <label>标题<input defaultValue={photograph.title ?? ""} name="title" placeholder="例如：雨后的河岸" /></label>
@@ -40,6 +45,7 @@ export function PhotographEditor({ photograph }: { photograph: Photograph }) {
       <label className="studio-wide-field">说明<textarea defaultValue={photograph.caption ?? ""} name="caption" placeholder="可选：记录这个瞬间。" rows={4} /></label>
       <label className="studio-wide-field">裁切参数 <input defaultValue={JSON.stringify(photograph.crop)} name="crop" placeholder='例如 {"x":0.5,"y":0.5}' /><span className="studio-field-hint">可选，使用标准化坐标的 JSON 对象。</span></label>
     </div>
-    <div className="studio-editor-actions"><button className="studio-button" disabled={isWorking} type="submit">{isWorking ? "正在保存…" : "保存草稿"}</button>{message ? <p aria-live="polite" className="studio-form-message">{message}</p> : null}</div>
+    <section className="studio-display-settings" aria-labelledby="display-settings-title"><div><p className="studio-kicker">PUBLIC DISPLAY</p><h2 id="display-settings-title">照片展示设置</h2><p>排序数字越小越靠前。三种路径用于首页画廊、档案列表与详情展示，保存时会完整保留。</p></div><div className="studio-editor-grid"><label>缩略图路径<input defaultValue={photograph.thumbnailPath ?? ""} name="thumbnailPath" placeholder="owner/photo-id/thumbnail.jpg" /></label><label>画廊图路径<input defaultValue={photograph.galleryPath ?? ""} name="galleryPath" placeholder="owner/photo-id/gallery.jpg" /></label><label className="studio-wide-field">详情图路径<input defaultValue={photograph.detailPath ?? ""} name="detailPath" placeholder="owner/photo-id/detail.jpg" /></label></div></section>
+    <div className="studio-editor-actions"><button className="studio-button" disabled={isWorking} type="submit">{isWorking ? "正在保存…" : "保存照片信息"}</button>{message ? <p aria-live="polite" className="studio-form-message">{message}</p> : null}</div>
   </form>;
 }

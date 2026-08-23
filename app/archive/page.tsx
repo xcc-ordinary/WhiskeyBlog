@@ -54,22 +54,29 @@ export default async function ArchivePage() {
     : await getPublicArchivePhotographs();
 
   return (
-    <><ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-vault-v2.png" /><div className="archive-page site-container">
-      <header className="archive-heading">
-        <p className="section-label">摄影札记 / 精选画面</p>
-        <h1>Life Archive</h1>
-        <p>一些不急于被解释的时刻：光线、城市、路途与正在发生的生活。</p>
-      </header>
+    <div className="archive-page-shell">
+      <ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-vault-v2.png" />
+      <div className="archive-collection painted-index-transition">
+        <div className="archive-collection-canvas site-container">
+          <header className="archive-collection-intro">
+            <div>
+              <p className="section-label">摄影札记 / 精选画面</p>
+              <p>一些不急于被解释的时刻：光线、城市、路途与正在发生的生活。</p>
+            </div>
+            <span>{String(photographs.length).padStart(2, "0")} / PUBLIC FRAMES</span>
+          </header>
 
-      {photographs.length ? (
-        <ArchiveMosaic photographs={photographs} />
-      ) : (
-        <section className="archive-empty" aria-label="摄影档案暂未发布">
-          <p className="section-label">整理中</p>
-          <h2>档案正在整理。</h2>
-          <p>新的照片会在被认真命名、描述和发布之后，出现在这里。</p>
-        </section>
-      )}
-    </div></>
+          {photographs.length ? (
+            <ArchiveMosaic photographs={photographs} />
+          ) : (
+            <section className="archive-empty" aria-label="摄影档案暂未发布">
+              <p className="section-label">整理中</p>
+              <h2>档案正在整理。</h2>
+              <p>新的照片会在被认真命名、描述和发布之后，出现在这里。</p>
+            </section>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

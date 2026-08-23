@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createDraftPhotograph, deletePhotograph, publishPhotograph, unpublishPhotograph, updatePhotograph } from "@/lib/supabase/photographs";
+import { createDraftPhotograph, deletePhotograph, publishPhotograph, unpublishPhotograph, updatePhotograph, type UpdatePhotographInput } from "@/lib/supabase/photographs";
 import type { PhotographCrop } from "@/lib/supabase/types";
 import { extensionForUploadType, getUploadValidationError, isManagedOriginalPath, type UploadFileDetails } from "@/lib/supabase/upload";
 import { requireOwner } from "@/lib/supabase/auth";
@@ -83,14 +83,18 @@ export async function createUploadedDraft(originalPath: string): Promise<ActionR
 
 export async function savePhotographDraft(id: string, form: FormData): Promise<ActionResult> {
   try {
-    await updatePhotograph(id, {
+    const displayOrder = Number(form.get("displayOrder") ?? 0);
+    if (!Number.isFinite(displayOrder) || displayOrder < 0) return { ok: false, message: "展示排序必须是大于或等于 0 的数字。" };
+    const update: UpdatePhotographInput = {
       title: text(form.get("title") as string | null), alt: text(form.get("alt") as string | null),
       capturedAt: text(form.get("capturedAt") as string | null), location: text(form.get("location") as string | null),
       category: text(form.get("category") as string | null), caption: text(form.get("caption") as string | null),
-      thumbnailPath: text(form.get("thumbnailPath") as string | null), galleryPath: text(form.get("galleryPath") as string | null),
-      detailPath: text(form.get("detailPath") as string | null),
-      displayOrder: Number(form.get("displayOrder") ?? 0), crop: cropFrom(form.get("crop") as string | null),
-    });
+      displayOrder, crop: cropFrom(form.get("crop") as string | null),
+      ...(form.has("thumbnailPath") ? { thumbnailPath: text(form.get("thumbnailPath") as string | null) } : {}),
+      ...(form.has("galleryPath") ? { galleryPath: text(form.get("galleryPath") as string | null) } : {}),
+      ...(form.has("detailPath") ? { detailPath: text(form.get("detailPath") as string | null) } : {}),
+    };
+    await updatePhotograph(id, update);
     return { ok: true, message: "草稿已保存。" };
   } catch (error) {
     return actionError(error);

@@ -15,6 +15,7 @@ describe("PhotographLibrary", () => {
   it("offers direct publish, edit, and delete controls for each draft", () => {
     render(<PhotographLibrary photographs={[{
       id: "photo-1", originalPath: "owner/photo-1.jpg", thumbnailPath: null, galleryPath: null, detailPath: null,
+      previewUrl: null,
       title: "晨跑", alt: null, caption: null, capturedAt: null, location: null, category: null, displayOrder: 0,
       crop: {}, status: "draft", createdAt: "2026-08-12T00:00:00.000Z", publishedAt: null,
     }]} />);

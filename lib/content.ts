@@ -2,7 +2,7 @@ import "server-only";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
-export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string };
+export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; coverImage?: string; coverAlt?: string };
 export type PostSummary = ContentMeta & { kind: "post"; href: string };
 export type ProjectSummary = ContentMeta & { kind: "project"; href: string; coverImage?: string; coverAlt?: string; role?: string };
 export type PostDocument = PostSummary & { source: string };
@@ -14,7 +14,7 @@ function readCollection<T extends PostSummary | ProjectSummary>(collection: "pos
     const parsed = matter(readFileSync(path.join(directory, file), "utf8"));
     const data = parsed.data as Partial<ContentMeta>;
     if (!data.title || !data.description || !data.slug || !/^\d{4}-\d{2}-\d{2}$/.test(data.date ?? "") || !Array.isArray(data.tags) || !data.tags.every((tag) => typeof tag === "string")) throw new Error("无效内容元数据：" + file);
-    const optionalProjectData = collection === "projects" ? parsed.data as Record<string, unknown> : {};
+    const optionalProjectData = parsed.data as Record<string, unknown>;
     const optionalProjectKeys = ["coverImage", "coverAlt", "role"] as const;
     if (optionalProjectKeys.some((key) => key in optionalProjectData && typeof optionalProjectData[key] !== "string")) throw new Error("无效内容元数据");
     return {
@@ -24,9 +24,9 @@ function readCollection<T extends PostSummary | ProjectSummary>(collection: "pos
       tags: data.tags,
       slug: data.slug,
       kind,
-      href: "/" + collection + "/" + data.slug,
-      ...(collection === "projects" && typeof optionalProjectData.coverImage === "string" ? { coverImage: optionalProjectData.coverImage } : {}),
-      ...(collection === "projects" && typeof optionalProjectData.coverAlt === "string" ? { coverAlt: optionalProjectData.coverAlt } : {}),
+      href: (collection === "posts" ? "/blog/" : "/projects/") + data.slug,
+      ...(typeof optionalProjectData.coverImage === "string" ? { coverImage: optionalProjectData.coverImage } : {}),
+      ...(typeof optionalProjectData.coverAlt === "string" ? { coverAlt: optionalProjectData.coverAlt } : {}),
       ...(collection === "projects" && typeof optionalProjectData.role === "string" ? { role: optionalProjectData.role } : {}),
     } as T;
   }).sort((a, b) => b.date.localeCompare(a.date));
