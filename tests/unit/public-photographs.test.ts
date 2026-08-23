@@ -49,7 +49,7 @@ describe("public photograph archive", () => {
       expect.objectContaining({ id: "published-id", galleryUrl: "https://images.example/signed-gallery", alt: published.alt }),
     ]);
 
-    expect(signDerivativeUrl).toHaveBeenCalledWith("derivatives/published/gallery.jpg", 300);
+    expect(signDerivativeUrl).toHaveBeenCalledWith("derivatives/published/gallery.jpg", 900);
     expect(signDerivativeUrl).not.toHaveBeenCalledWith("originals/private-source.jpg", expect.anything());
   });
 
@@ -61,7 +61,7 @@ describe("public photograph archive", () => {
       signDerivativeUrl,
     })).resolves.toEqual([expect.objectContaining({ id: "published-id" })]);
 
-    expect(signDerivativeUrl).toHaveBeenCalledWith("derivatives/owner/photo-gallery.jpg", 300);
+    expect(signDerivativeUrl).toHaveBeenCalledWith("derivatives/owner/photo-gallery.jpg", 900);
   });
 
   it("does not surface incomplete records when a view is unexpectedly malformed", async () => {
@@ -111,5 +111,19 @@ describe("public photograph archive", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({ id: "published-id", title: "雨后的上海" });
     expect(signDerivativeUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the public site available when the archive backend is temporarily unavailable", async () => {
+    const report = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    await expect(getPublicArchivePhotographs({
+      getPublished: async () => {
+        throw new Error("temporary Supabase outage");
+      },
+      signDerivativeUrl: vi.fn(),
+    })).resolves.toEqual([]);
+
+    expect(report).toHaveBeenCalledWith("Public photograph archive is unavailable.", expect.any(Error));
+    report.mockRestore();
   });
 });

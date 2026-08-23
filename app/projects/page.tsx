@@ -1,15 +1,22 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 import { getProjects } from "@/lib/content";
 
+export const metadata: Metadata = {
+  title: "项目",
+  description: "WhiskeyBlog 的项目案例、实验与持续学习记录。",
+  alternates: { canonical: "/projects" },
+};
+
 export default function ProjectsPage() {
   const projects = getProjects();
 
   return (
     <div className="projects-page">
-      <ExplorerHero eyebrow="03 / AIRSHIP YARD" title="项目，是驶向未知的装置。" description="从背景、过程到结果，记录每一次建造如何让想法获得自己的航向。" image="/images/site-backgrounds/projects-airshipyard-v2.png" />
+      <ExplorerHero eyebrow="03 / AIRSHIP YARD" title="项目，是驶向未知的装置。" description="从背景、过程到结果，记录每一次建造如何让想法获得自己的航向。" image="/images/site-backgrounds/projects-airshipyard-v2.webp" />
       <div className="projects-index painted-index-transition">
         <div className="projects-index-canvas site-container">
           <div className="projects-editorial-list">

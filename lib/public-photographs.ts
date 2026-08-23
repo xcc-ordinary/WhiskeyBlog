@@ -6,7 +6,7 @@ import { normalizeDerivativePath } from "@/lib/derivative-paths";
 import { getPublishedPhotographs } from "@/lib/supabase/photographs";
 import type { Database, PhotographStatus, PublishedPhotograph } from "@/lib/supabase/types";
 
-const SIGNED_DERIVATIVE_URL_SECONDS = 5 * 60;
+const SIGNED_DERIVATIVE_URL_SECONDS = 15 * 60;
 
 export type PublicArchivePhotograph = {
   id: string;
@@ -33,13 +33,15 @@ function requiredServerEnvironment(name: "NEXT_PUBLIC_SUPABASE_URL" | "SUPABASE_
   return value;
 }
 
-function createDerivativeSigner() {
-  const client = createClient<Database>(
+function createPublicArchiveClient() {
+  return createClient<Database>(
     requiredServerEnvironment("NEXT_PUBLIC_SUPABASE_URL"),
     requiredServerEnvironment("SUPABASE_SERVICE_ROLE_KEY"),
     { auth: { autoRefreshToken: false, persistSession: false } },
   );
+}
 
+function createDerivativeSigner(client = createPublicArchiveClient()) {
   return async (path: string, expiresInSeconds: number) => {
     const canonicalPath = normalizeDerivativePath(path);
     if (!canonicalPath) return null;
@@ -68,23 +70,30 @@ function toPublicRecord(photo: PublishedPhotograph, galleryUrl: string): PublicA
  * It deliberately has no API for originals, thumbnails, or draft records.
  */
 export async function getPublicArchivePhotographs(options: PublicPhotographOptions = {}): Promise<PublicArchivePhotograph[]> {
-  const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished ?? getPublishedPhotographs;
-  const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner();
-  const photographs = await getPublished();
+  const archiveClient = options.getPublished && options.signDerivativeUrl ? null : createPublicArchiveClient();
+  const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished
+    ?? (() => getPublishedPhotographs(archiveClient!));
+  const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner(archiveClient!);
 
-  const safePublished = photographs.filter((photo) =>
-    (photo.status === undefined || photo.status === "published")
-    && Boolean(photo.galleryPath && normalizeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
-  );
+  try {
+    const photographs = await getPublished();
+    const safePublished = photographs.filter((photo) =>
+      (photo.status === undefined || photo.status === "published")
+      && Boolean(photo.galleryPath && normalizeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
+    );
 
-  const signed = await Promise.all(
-    safePublished.map(async (photo) => {
-      const canonicalPath = normalizeDerivativePath(photo.galleryPath!);
-      if (!canonicalPath) return null;
-      const galleryUrl = await signDerivativeUrl(canonicalPath, SIGNED_DERIVATIVE_URL_SECONDS);
-      return galleryUrl ? toPublicRecord(photo, galleryUrl) : null;
-    }),
-  );
+    const signed = await Promise.all(
+      safePublished.map(async (photo) => {
+        const canonicalPath = normalizeDerivativePath(photo.galleryPath!);
+        if (!canonicalPath) return null;
+        const galleryUrl = await signDerivativeUrl(canonicalPath, SIGNED_DERIVATIVE_URL_SECONDS);
+        return galleryUrl ? toPublicRecord(photo, galleryUrl) : null;
+      }),
+    );
 
-  return signed.filter((photo): photo is PublicArchivePhotograph => photo !== null);
+    return signed.filter((photo): photo is PublicArchivePhotograph => photo !== null);
+  } catch (error) {
+    console.error("Public photograph archive is unavailable.", error);
+    return [];
+  }
 }

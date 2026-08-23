@@ -1,2 +1,9 @@
 import type { MetadataRoute } from "next";
-export default function robots(): MetadataRoute.Robots { return { rules: { userAgent: "*", allow: "/" }, sitemap: "/sitemap.xml" }; }
+import { getSiteUrl } from "@/lib/site-url";
+
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: { userAgent: "*", allow: "/", disallow: ["/studio/", "/auth/"] },
+    sitemap: new URL("/sitemap.xml", getSiteUrl()).toString(),
+  };
+}

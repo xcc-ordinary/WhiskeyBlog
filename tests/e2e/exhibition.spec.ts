@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("home presents the exhibition chapters", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
-  await expect(page.getByRole("region", { name: "Selected work" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "精选项目" })).toBeVisible();
   await expect(page.getByRole("link", { name: /explore selected work/i })).toHaveAttribute("href", "/projects");
 });
 
@@ -17,9 +17,10 @@ test("public exhibition marks visual camera layers without changing reading land
 
 test("about and blog keep field-notes landmarks and external handoff honest", async ({ page }) => {
   await page.goto("/about");
-  await expect(page.getByRole("heading", { name: /still learning/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "关于我，仍在远航。" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "小红书" })).toHaveAttribute("href", /^https:\/\//);
   await page.goto("/blog");
-  await expect(page.getByRole("link", { name: /follow on 小红书/i })).toHaveAttribute("href", /^https:\/\//);
+  await expect(page.getByRole("heading", { name: "把过程，写成证据。" })).toBeVisible();
 });
 
 test("mobile navigation remains usable and exhibition motion respects reduction", async ({ page }) => {
@@ -31,6 +32,18 @@ test("mobile navigation remains usable and exhibition motion respects reduction"
   await expect(page.getByRole("dialog", { name: "导航菜单" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
+});
+
+test("mobile archive panorama uses a bounded cover crop instead of stretching", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const gallery = page.getByRole("region", { name: "横向滚动摄影画廊" });
+  const panorama = gallery.locator('[aria-hidden="true"]').first();
+  await expect(gallery).toBeVisible();
+  await expect(panorama).toHaveCSS("background-size", "cover");
+  await expect(panorama).toHaveCSS("width", "390px");
+  await expect.poll(() => panorama.evaluate((element) => getComputedStyle(element).maskImage)).not.toBe("none");
 });
 
 test("reduced motion homepage hydrates without a recoverable error", async ({ page }) => {
@@ -61,12 +74,12 @@ test("desktop enables camera glide while reduced motion stays native", async ({ 
 test("published Studio images enter the asymmetric homepage gallery", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
-  const gallery = page.locator(".asymmetrical-gallery");
+  const gallery = page.getByRole("region", { name: "横向滚动摄影画廊" });
   await expect(gallery).toBeVisible();
-  await expect(gallery.locator("[data-speed]")).toHaveCount(4);
-  await expect(gallery.locator("[data-speed='1.2']")).toHaveCount(1);
+  await expect(gallery.locator(".horizontal-gallery-piece")).toHaveCount(4);
+  await expect(gallery.getByRole("img", { name: "柔和晨光下的山谷" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
-  await expect(gallery.locator("[data-gallery-topography]")).toBeVisible();
+  await expect(gallery.getByText("PRIVATE OBSERVATIONS")).toBeVisible();
 });
 
 test("a public hash target remains reachable with cinematic scroll enabled", async ({ page }) => {

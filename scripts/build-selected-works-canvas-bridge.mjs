@@ -1,26 +1,31 @@
 import sharp from "sharp";
+import path from "node:path";
 
 const root = process.cwd();
-const desktopCanvasPath = "C:/Users/16617/.codex/generated_images/01a0152f-ee8a-7df0-b227-1a8d2f6f19bc/exec-d0b869d5-af00-4050-a03c-146cc983b11c.png";
+const desktopCanvasPath = process.argv[2] ? path.resolve(process.argv[2]) : null;
 const destination = `${root}/public/images/site-backgrounds`;
+
+if (!desktopCanvasPath) {
+  throw new Error("Usage: node scripts/build-selected-works-canvas-bridge.mjs <source-image>");
+}
 
 async function build({ width, height, canvasPath, outputPath }) {
   await sharp(canvasPath)
     .resize({ width, height, fit: "cover", position: "north" })
-    .png({ compressionLevel: 9 })
+    .webp({ quality: 82, alphaQuality: 95, effort: 6 })
     .toFile(outputPath);
 }
 
 await build({
-  width: 2560,
-  height: 1440,
+  width: 1920,
+  height: 1080,
   canvasPath: desktopCanvasPath,
-  outputPath: `${destination}/selected-works-canvas-fade-v1.png`,
+  outputPath: `${destination}/selected-works-canvas-fade-v1.webp`,
 });
 
 await build({
-  width: 1440,
-  height: 2560,
+  width: 1080,
+  height: 1920,
   canvasPath: desktopCanvasPath,
-  outputPath: `${destination}/selected-works-canvas-fade-mobile-v1.png`,
+  outputPath: `${destination}/selected-works-canvas-fade-mobile-v1.webp`,
 });

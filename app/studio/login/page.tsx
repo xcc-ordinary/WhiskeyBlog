@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { SignInForm } from "@/components/studio/sign-in-form";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
-export const metadata = { title: "Studio sign in | WhiskeyBlog" };
+export const metadata = { title: "Studio sign in", robots: { index: false, follow: false } };
 const loginErrors: Record<string, string> = {
   "missing-code": "登录链接不完整。请回到邮箱，打开最新的一封登录邮件。",
   "exchange-failed": "登录链接已失效、已被使用，或 Supabase 未允许当前回调地址。请重新发送一封登录邮件。",

@@ -40,6 +40,7 @@
 
 Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓库中填写项目 URL、密钥或所有者邮箱；将 `.env.example` 复制为 `.env.local`，再填写以下值：
 
+- `NEXT_PUBLIC_SITE_URL`：生产站点的规范来源，例如 `https://example.com`。它用于 canonical、Open Graph、robots 和 sitemap。
 - `NEXT_PUBLIC_SUPABASE_URL`：Supabase 项目 URL，可安全发送到浏览器。
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`：Supabase 匿名（publishable）密钥，可安全发送到浏览器。
 - `SUPABASE_SERVICE_ROLE_KEY`：仅服务器使用的 service-role 密钥。绝不能使用 `NEXT_PUBLIC_` 前缀，也绝不能提交。
@@ -56,13 +57,13 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
    ```
    在这一步前，RLS 会拒绝所有 Studio 访问；不要把该邮箱放入公开环境变量。
 4. 接着应用 `supabase/migrations/0002_owner_authorization.sql`。它创建登录后用于确认所有者资格的安全 RPC；没有这一步，Studio 会正确地拒绝所有访问。
-5. 在 Authentication 中启用 Email magic link，并把生产环境中的三个 Supabase 环境变量设置到部署平台。service-role 密钥只应出现在服务器环境中。
+5. 在 Authentication 中启用 Email magic link，并把 `.env.example` 中的四个环境变量设置到部署平台。service-role 密钥只应出现在服务器环境中。
 
 原图和衍生图 bucket 都是私有的。公开页面只能查询 `published_photographs` 视图：它只返回已发布的衍生图路径和展示元数据，绝不返回 `originals` 中的对象路径或私有草稿数据。
 
 ## 摄影档案发布清单
 
-公开档案位于 `/archive`。它只为 `published` 照片的 `gallery_path` 创建五分钟有效的签名链接；`original_path`、草稿和缺少替代文本的记录不会出现在页面中。`galleryPath` 接受当前的 bucket-relative 衍生图对象路径（例如 `2026/example-gallery.webp`）以及兼容旧数据的 `derivatives/2026/example-gallery.webp` 前缀；两种格式最终都只会访问私有 `derivatives` bucket，原图永不公开。
+公开档案位于 `/archive`。它只为 `published` 照片的 `gallery_path` 创建十五分钟有效的签名链接；`original_path`、草稿和缺少替代文本的记录不会出现在页面中。`galleryPath` 接受当前的 bucket-relative 衍生图对象路径（例如 `2026/example-gallery.webp`）以及兼容旧数据的 `derivatives/2026/example-gallery.webp` 前缀；两种格式最终都只会访问私有 `derivatives` bucket，原图永不公开。
 
 在 Studio 中每次发布一张照片前，请替换或填写以下个人内容：
 
@@ -73,10 +74,12 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 
 ## 部署到 Vercel
 
-1. 将 GitHub 仓库导入 Vercel，在 Project Settings → Environment Variables 为 Production（以及需要的 Preview）分别添加 `.env.example` 的三个 Supabase 变量；不要上传 `.env.local`。
+1. 将 GitHub 仓库导入 Vercel，在 Project Settings → Environment Variables 为 Production（以及需要的 Preview）添加 `.env.example` 的四个变量；`NEXT_PUBLIC_SITE_URL` 必须填写最终自定义域名且不带末尾斜杠。不要上传 `.env.local`。
 2. 将 Supabase Auth 的 Site URL 设为你的生产域名，并把 `https://你的域名/auth/callback` 加入 Redirect URLs；本地开发保留 `http://localhost:3000/auth/callback`。生产端必须配置公开的 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY`，以及仅服务器可见的 `SUPABASE_SERVICE_ROLE_KEY`。
 3. 部署后，以所有者邮箱登录 `/studio`，发布一张带有衍生图路径和完整替代文本的照片，再访问 `/archive` 验收。签名图链接会定期刷新，因此页面不能被当作静态导出。
 4. 在真实生产域名检查首页、项目、关于、博客、Archive 与 `/studio`；分别用桌面和窄屏尺寸测试键盘 Tab 焦点、移动端 `Index +` 菜单与 Escape 返回焦点，并在系统“减少动态效果”开启时确认阅读和导航不依赖动画。这些是部署后的待执行检查，不是本仓库的生产测试声明。
+
+Vercel 的部署文件系统不可作为内容数据库：线上 `/studio/writing` 与 `/studio/projects` 会显示只读提示，并拒绝写入。文章和项目请在本地 Studio 或编辑器中修改，提交到 GitHub 后由 Vercel 重新部署；摄影档案继续通过 Supabase 在线管理。
 
 ## 发布
 

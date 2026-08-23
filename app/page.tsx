@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 import { ExhibitionHero } from "@/components/exhibition/exhibition-hero";
 import { LifeArchiveTeaser } from "@/components/exhibition/life-archive-teaser";
 import { SelectedWorks } from "@/components/exhibition/selected-works";
@@ -10,6 +12,9 @@ const playwrightGalleryFixture: PublicArchiveSourcePhotograph[] = [
   { id: "gallery-fixture-3", thumbnailPath: "derivatives/fixture/thumb-3.jpg", galleryPath: "derivatives/fixture/gallery-3.jpg", detailPath: "derivatives/fixture/detail-3.jpg", title: "Quiet corner", alt: "窗边安静的角落", caption: "Home", capturedAt: "2026-07-28", location: "杭州", category: "日常", displayOrder: 3, publishedAt: "2026-07-28T00:00:00.000Z", status: "published" },
   { id: "gallery-fixture-4", thumbnailPath: "derivatives/fixture/thumb-4.jpg", galleryPath: "derivatives/fixture/gallery-4.jpg", detailPath: "derivatives/fixture/detail-4.jpg", title: "Long way", alt: "延伸至远方的道路", caption: "On the road", capturedAt: "2026-08-01", location: "安吉", category: "旅行", displayOrder: 4, publishedAt: "2026-08-01T00:00:00.000Z", status: "published" },
 ];
+
+export const revalidate = 240;
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default async function Home() {
   const projects = getProjects();

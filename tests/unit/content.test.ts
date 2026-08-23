@@ -20,8 +20,8 @@ describe("project content", () => {
     const project = getProjects().find((item) => item.slug === "whiskey-blog");
 
     expect(project).toMatchObject({
-      coverImage: "/images/placeholders/hero-editorial.svg",
-      coverAlt: "WhiskeyBlog 项目封面占位图",
+      coverImage: "/images/site-backgrounds/home-open-valley-v2.webp",
+      coverAlt: "WhiskeyBlog 的开放港湾视觉",
       role: "Design / Development",
     });
   });

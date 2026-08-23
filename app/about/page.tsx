@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
+
 import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 import { SocialIconLinks } from "@/components/exhibition/social-icon-links";
+
+export const metadata: Metadata = {
+  title: "关于我",
+  description: "认识 Wesley：一名学习人工智能、持续把想法做成作品的年轻开发者。",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
@@ -7,7 +15,7 @@ export default function AboutPage() {
       eyebrow="02 / OBSERVATION DECK"
       title="关于我，仍在远航。"
       description="在望远镜、手稿与海风之间，持续学习如何把想法变成可靠的作品。"
-      image="/images/site-backgrounds/about-observatory-v2.png"
+      image="/images/site-backgrounds/about-observatory-v2.webp"
     >
       <div className="about-introduction" aria-label="关于 Wesley">
         <p>哈喽！我叫 Wesley，也可以叫我 Whiskey 或 Sisyphe。</p>

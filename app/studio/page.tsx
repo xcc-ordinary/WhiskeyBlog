@@ -8,7 +8,7 @@ import { getStudioPhotographs, type StudioPhotograph } from "@/lib/supabase/phot
 
 import { signOutOfStudio } from "./actions";
 
-export const metadata = { title: "Media Studio | WhiskeyBlog" };
+export const metadata = { title: "Media Studio", robots: { index: false, follow: false } };
 
 async function loadStudio(): Promise<{ photographs: StudioPhotograph[] } | { error: MediaStudioAuthorizationError }> {
   try {

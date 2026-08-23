@@ -2,13 +2,16 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { ProjectNotesEditor } from "@/components/studio/project-notes-editor";
+import { ProductionContentNotice } from "@/components/studio/production-content-notice";
+import { repositoryContentWritesAvailable } from "@/lib/content-writes";
 import { getProject, getProjects } from "@/lib/content";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
 
-export const metadata = { title: "项目工作台 | WhiskeyBlog" };
+export const metadata = { title: "项目工作台", robots: { index: false, follow: false } };
 
 export default async function ProjectWritingPage({ searchParams }: { searchParams: Promise<{ project?: string; mode?: string }> }) {
   try { await requireOwner(); } catch (error) { if (error instanceof MediaStudioAuthorizationError) redirect("/studio/login?error=session-missing"); throw error; }
+  if (!repositoryContentWritesAvailable()) return <ProductionContentNotice kind="项目" />;
   const query = await searchParams;
   const projects = getProjects();
   const isNew = query.mode === "new" || projects.length === 0;

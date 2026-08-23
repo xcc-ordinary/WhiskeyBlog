@@ -4,6 +4,7 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 
+import { requireRepositoryContentWrites } from "@/lib/content-writes";
 import { requireOwner } from "@/lib/supabase/auth";
 
 const projectDirectory = path.join(process.cwd(), "content", "projects");
@@ -14,6 +15,7 @@ const validSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: boolean; message: string }> {
   try {
     await requireOwner();
+    requireRepositoryContentWrites();
     const slug = clean(form.get("slug"));
     const originalSlug = clean(form.get("originalSlug"));
     const title = clean(form.get("title"));

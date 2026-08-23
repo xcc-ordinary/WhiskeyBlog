@@ -6,9 +6,12 @@ import { getPublicArchivePhotographs } from "@/lib/public-photographs";
 import type { PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
 export const metadata: Metadata = {
-  title: "Life Archive | WhiskeyBlog",
+  title: "Life Archive",
   description: "WhiskeyBlog 的公开摄影档案。",
+  alternates: { canonical: "/archive" },
 };
+
+export const revalidate = 240;
 
 const playwrightArchiveFixture: PublicArchiveSourcePhotograph[] = [
   {
@@ -55,7 +58,7 @@ export default async function ArchivePage() {
 
   return (
     <div className="archive-page-shell">
-      <ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-vault-v2.png" />
+      <ExplorerHero eyebrow="04 / MAKER'S ARCHIVE" title="Life Archive" description="让光线、城市、路途与尚未命名的生活，慢慢留在档案里。" image="/images/site-backgrounds/archive-harbor-vault-v2.webp" />
       <div className="archive-collection painted-index-transition">
         <div className="archive-collection-canvas site-container">
           <header className="archive-collection-intro">

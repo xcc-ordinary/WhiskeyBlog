@@ -4,6 +4,7 @@ import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { revalidatePath } from "next/cache";
 
+import { requireRepositoryContentWrites } from "@/lib/content-writes";
 import { requireOwner } from "@/lib/supabase/auth";
 
 type Result = { ok: true; message: string } | { ok: false; message: string };
@@ -18,6 +19,7 @@ function yaml(value: string) { return JSON.stringify(value); }
 export async function saveStudioPost(form: FormData): Promise<Result> {
   try {
     await requireOwner();
+    requireRepositoryContentWrites();
     const title = clean(form.get("title"));
     const description = clean(form.get("description"));
     const slug = clean(form.get("slug"));
@@ -45,9 +47,10 @@ export async function saveStudioPost(form: FormData): Promise<Result> {
 export async function uploadStudioPostCover(form: FormData): Promise<{ ok: boolean; message?: string; path?: string }> {
   try {
     await requireOwner();
+    requireRepositoryContentWrites();
     const file = form.get("cover");
     if (!(file instanceof File) || file.size === 0) return { ok: false, message: "请选择封面图片。" };
-    if (!file.type.startsWith("image/") || file.size > 8 * 1024 * 1024) return { ok: false, message: "封面须为 8MB 以内的图片。" };
+    if (!file.type.startsWith("image/") || file.size > 4 * 1024 * 1024) return { ok: false, message: "封面须为 4MB 以内的图片。" };
     const extension = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
     const fileName = `${crypto.randomUUID()}.${extension}`;
     await mkdir(coverDirectory, { recursive: true });

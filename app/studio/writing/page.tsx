@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PostEditor } from "@/components/studio/post-editor";
+import { ProductionContentNotice } from "@/components/studio/production-content-notice";
+import { repositoryContentWritesAvailable } from "@/lib/content-writes";
 import { getPost, getPosts } from "@/lib/content";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
 
-export const metadata = { title: "Notes 工作台 | WhiskeyBlog" };
+export const metadata = { title: "Notes 工作台", robots: { index: false, follow: false } };
 export default async function WritingPage({ searchParams }: { searchParams: Promise<{ post?: string; mode?: string }> }) {
   try { await requireOwner(); } catch (error) { if (error instanceof MediaStudioAuthorizationError) redirect("/studio/login?error=session-missing"); throw error; }
+  if (!repositoryContentWritesAvailable()) return <ProductionContentNotice kind="Notes" />;
   const query = await searchParams;
   const posts = getPosts();
   const isNew = query.mode === "new" || posts.length === 0;

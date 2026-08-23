@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -5,12 +6,25 @@ import { notFound } from "next/navigation";
 import { MdxContent } from "@/components/mdx-content";
 import { getPost, getPosts } from "@/lib/content";
 
-// A newly saved slug must resolve immediately; static params only describe the
-// build-time set and must not make the authoring workflow return a 404.
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export function generateStaticParams() { return getPosts().map(({ slug }) => ({ slug })); }
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const post = getPost((await params).slug);
+  if (!post) return { title: "文章未找到" };
+  return {
+    title: post.title,
+    description: post.description,
+    alternates: { canonical: post.href },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description: post.description,
+      publishedTime: post.date,
+      tags: post.tags,
+      ...(post.coverImage ? { images: [{ url: post.coverImage, alt: post.coverAlt ?? post.title }] } : {}),
+    },
+  };
+}
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const post = getPost((await params).slug);
@@ -26,7 +40,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <p>{post.description}</p>
           {post.coverImage ? <figure className="blog-article-cover"><Image alt={post.coverAlt ?? post.title} fill priority sizes="(max-width: 760px) 100vw, 720px" src={post.coverImage} /></figure> : null}
         </header>
-        <MdxContent source={post.source} />
+        <MdxContent source={post.source.replace(/^\s*#\s+[^\n]+\r?\n+/, "")} />
       </article>
     </div>
   );

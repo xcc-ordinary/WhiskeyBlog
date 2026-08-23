@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -66,4 +67,19 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
       </article>
     </div>
   );
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const project = getProject((await params).slug);
+  if (!project) return { title: "项目未找到" };
+  return {
+    title: project.title,
+    description: project.description,
+    alternates: { canonical: project.href },
+    openGraph: {
+      title: project.title,
+      description: project.description,
+      ...(project.coverImage ? { images: [{ url: project.coverImage, alt: project.coverAlt ?? project.title }] } : {}),
+    },
+  };
 }

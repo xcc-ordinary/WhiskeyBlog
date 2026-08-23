@@ -33,7 +33,7 @@
   inset: 0 auto 0 0;
   width: max(100vw, calc(100svh * 16 / 3));
   pointer-events: none;
-  background: #9ccbd8 url("/images/site-backgrounds/gallery-harbor-panorama-v2.png") center / 100% 100% no-repeat;
+  background: #9ccbd8 url("/images/site-backgrounds/gallery-harbor-panorama-v2.webp") center / 100% 100% no-repeat;
   will-change: transform;
   backface-visibility: hidden;
 }
@@ -142,7 +142,11 @@
 
   .panorama {
     width: 100%;
+    height: 100svh;
     background-position: 54% center;
+    background-size: cover;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
   }
 
   .harborGallery :global(.gallery-track) {

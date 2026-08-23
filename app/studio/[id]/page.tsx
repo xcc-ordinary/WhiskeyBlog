@@ -4,7 +4,7 @@ import { PhotographEditor } from "@/components/studio/photograph-editor";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
 import { getStudioPhotographs } from "@/lib/supabase/photographs";
 
-export const metadata = { title: "Edit photograph | WhiskeyBlog" };
+export const metadata = { title: "Edit photograph", robots: { index: false, follow: false } };
 
 export default async function StudioPhotographPage({ params }: { params: Promise<{ id: string }> }) {
   try {
