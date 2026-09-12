@@ -303,9 +303,20 @@
 .blog-article header{padding-bottom:clamp(48px,7vw,82px);border-bottom:1px solid var(--rule)}
 .blog-article header h1{max-width:740px;margin:18px 0 22px;font-size:clamp(3.2rem,7vw,7rem);font-weight:760;letter-spacing:-.08em;line-height:.86}
 .blog-article header>p:not(.section-label){max-width:570px;margin:0;color:var(--graphite);font-size:1.08rem;line-height:1.8}
+.blog-article header>p.blog-article-byline{margin-top:1.2rem;color:#c06f35;font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .blog-article>.prose{max-width:660px;margin:clamp(50px,7vw,80px) auto 0;color:var(--ink);font-size:clamp(1rem,1.3vw,1.1rem);line-height:1.95}
 .blog-article>.prose h1,.blog-article>.prose h2,.blog-article>.prose h3{margin-top:2.1em;letter-spacing:-.055em;line-height:1.05}
 .blog-article>.prose p{margin:0 0 1.35em;color:var(--graphite)}
+.blog-article>.prose ul,.blog-article>.prose ol{margin:0 0 1.6em;padding-left:1.4em;color:var(--graphite)}
+.blog-article>.prose li{margin:.45em 0;padding-left:.25em}
+.blog-article>.prose blockquote{margin:2rem 0;border-left:3px solid #c88a47;padding:.2rem 0 .2rem 1.25rem;color:var(--graphite)}
+.blog-article>.prose code{border-radius:.25rem;background:rgba(37,57,67,.08);padding:.12em .35em;font-size:.9em}
+.blog-article>.prose pre{margin:1.8rem 0;border:1px solid rgba(37,57,67,.14);border-radius:.5rem;background:#253943;color:#f8f3e8;padding:1.1rem 1.25rem;line-height:1.65}
+.blog-article>.prose pre code{background:transparent;padding:0;color:inherit}
+.blog-article>.prose table{width:100%;margin:1.8rem 0;border-collapse:collapse;font-size:.9em}
+.blog-article>.prose th,.blog-article>.prose td{border-bottom:1px solid var(--rule);padding:.75rem .85rem;text-align:left;white-space:nowrap}
+.blog-article>.prose th{color:var(--ink);font-weight:700}
+.blog-article>.prose hr{margin:3rem 0;border:0;border-top:1px solid var(--rule)}
 .blog-article>.prose pre,.blog-article>.prose table{display:block;max-width:100%;overflow-x:auto}
 .blog-article>.prose a{overflow-wrap:anywhere}
 .blog-article .blog-article-cover{border:1px solid rgba(42,58,66,.14);border-radius:.3rem;box-shadow:0 24px 48px rgba(43,64,73,.14)}
@@ -319,6 +330,10 @@
   .blog-article{width:calc(100% - 24px);padding:7.5rem 1.25rem 6rem;backdrop-filter:none;-webkit-backdrop-filter:none}
   .blog-article-page::before{background:radial-gradient(ellipse 92% 18% at -15% 4%,rgba(221,126,42,.48),transparent 74%),radial-gradient(ellipse 94% 20% at 112% 9%,rgba(63,157,190,.48),transparent 76%),radial-gradient(ellipse 84% 18% at 8% 64%,rgba(51,88,111,.16),transparent 78%),linear-gradient(180deg,#ede3d2 0%,#edf0e9 54%,#e5ddd0 100%)}
   .blog-article::after{background:radial-gradient(ellipse 68% 14% at -18% 4%,rgba(210,121,45,.3),transparent 72%),radial-gradient(ellipse 66% 15% at 118% 9%,rgba(52,137,164,.3),transparent 72%),radial-gradient(ellipse 58% 13% at -15% 46%,rgba(49,91,116,.13),transparent 74%),radial-gradient(ellipse 58% 13% at 115% 68%,rgba(210,121,45,.14),transparent 74%),linear-gradient(90deg,rgba(210,121,45,.09),transparent 18% 82%,rgba(52,137,164,.11))}
+}
+
+@media(max-width:760px){
+  .blog-article header h1{font-size:2.35rem;line-height:.94;letter-spacing:-.055em}
 }
 
 @media(prefers-reduced-transparency:reduce){.blog-article{background:#f8f3e8;backdrop-filter:none;-webkit-backdrop-filter:none}}

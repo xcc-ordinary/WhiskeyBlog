@@ -14,6 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: post.title,
     description: post.description,
+    ...(post.author ? { authors: [{ name: post.author }] } : {}),
     alternates: { canonical: post.href },
     openGraph: {
       type: "article",
@@ -38,6 +39,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <p className="section-label">{post.tags[0] ?? "FIELD NOTE"} / {post.date}</p>
           <h1 id="article-title">{post.title}</h1>
           <p>{post.description}</p>
+          {post.author ? <p className="blog-article-byline">整理 / {post.author}</p> : null}
           {post.coverImage ? <figure className="blog-article-cover"><Image alt={post.coverAlt ?? post.title} fill priority sizes="(max-width: 760px) 100vw, 720px" src={post.coverImage} /></figure> : null}
         </header>
         <MdxContent source={post.source.replace(/^\s*#\s+[^\n]+\r?\n+/, "")} />

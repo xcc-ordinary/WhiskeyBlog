@@ -23,6 +23,7 @@ export async function saveStudioPost(form: FormData): Promise<Result> {
     requireRepositoryContentWrites();
     const title = clean(form.get("title"));
     const description = clean(form.get("description"));
+    const author = clean(form.get("author"));
     const slug = clean(form.get("slug"));
     const originalSlug = clean(form.get("originalSlug"));
     const date = clean(form.get("date"));
@@ -37,7 +38,7 @@ export async function saveStudioPost(form: FormData): Promise<Result> {
       try { await access(targetPath); return { ok: false, message: "这个 slug 已经存在，请换一个名称。" }; }
       catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
     }
-    const frontmatter = ["---", `title: ${yaml(title)}`, `description: ${yaml(description)}`, `date: ${yaml(date)}`, `tags: [${tags.map(yaml).join(", ")}]`, `slug: ${yaml(slug)}`, coverImage ? `coverImage: ${yaml(coverImage)}` : "", coverAlt ? `coverAlt: ${yaml(coverAlt)}` : "", "---", "", source, ""].filter(Boolean).join("\n");
+    const frontmatter = ["---", `title: ${yaml(title)}`, `description: ${yaml(description)}`, author ? `author: ${yaml(author)}` : "", `date: ${yaml(date)}`, `tags: [${tags.map(yaml).join(", ")}]`, `slug: ${yaml(slug)}`, coverImage ? `coverImage: ${yaml(coverImage)}` : "", coverAlt ? `coverAlt: ${yaml(coverAlt)}` : "", "---", "", source, ""].filter(Boolean).join("\n");
     await mkdir(postDirectory, { recursive: true });
     await writeFile(targetPath, frontmatter, "utf8");
     revalidatePath("/blog", "page"); revalidatePath(`/blog/${slug}`, "page");

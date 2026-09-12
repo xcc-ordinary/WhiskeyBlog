@@ -11,6 +11,7 @@ import type { PostDocument, PostSummary } from "@/lib/content";
 type Fields = {
   title: string;
   description: string;
+  author: string;
   slug: string;
   date: string;
   tags: string;
@@ -24,6 +25,7 @@ type WorkspaceView = "split" | "write" | "preview";
 const initial: Fields = {
   title: "",
   description: "",
+  author: "Whiskey",
   slug: "",
   date: new Date().toISOString().slice(0, 10),
   tags: "随笔",
@@ -35,6 +37,7 @@ const initial: Fields = {
 const fieldsFrom = (post?: PostDocument | null): Fields => post ? {
   title: post.title,
   description: post.description,
+  author: post.author ?? "Whiskey",
   slug: post.slug,
   date: post.date,
   tags: post.tags.join(", "),
@@ -163,6 +166,7 @@ export function PostEditor({ post = null, posts = [] }: { post?: PostDocument | 
           <div className="notes-editor-meta">
             <label>标题<input value={fields.title} onChange={(event) => set("title", event.target.value)} placeholder="给 Notes 一个标题" /></label>
             <label>摘要<textarea value={fields.description} onChange={(event) => set("description", event.target.value)} placeholder="公开目录中显示的简短介绍" rows={3} /></label>
+            <label>作者<input value={fields.author} onChange={(event) => set("author", event.target.value)} placeholder="Whiskey" /></label>
             <div className="notes-editor-meta-pair">
               <label>发布日期<input type="date" value={fields.date} onChange={(event) => set("date", event.target.value)} /></label>
               <label>标签<input value={fields.tags} onChange={(event) => set("tags", event.target.value)} placeholder="随笔, 生活" /></label>

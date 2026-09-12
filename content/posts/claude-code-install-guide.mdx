@@ -1,0 +1,208 @@
+---
+title: "Claude Code 最新版安装教程"
+description: "写给普通用户的 Claude Code 安装、登录、模型接入与日常使用指南。"
+author: "Whiskey"
+date: "2026-09-12"
+tags: ["Claude Code", "AI 工具", "教程"]
+slug: "claude-code-install-guide"
+---
+
+# Claude Code 最新版安装教程
+
+Claude Code 是运行在终端里的编程智能体。它不只是回答问题，还能读取项目、修改文件、执行命令和检查结果。下面从安装开始，带你完成第一次可用的会话。
+
+想先看 Codex？可以跳到 [Codex 安装与使用教程](/blog/codex-guide)。
+
+> 本文更新于 2026 年 9 月。安装方式与产品权限可能变化，遇到差异时请以文末官方文档为准。
+
+## 本文要点
+
+**适合谁**
+
+- 第一次接触 Claude Code 的 Windows、macOS 或 Linux 用户
+- 希望让 AI 直接参与真实项目，而不只是复制粘贴代码的人
+- 已有 Claude 订阅、Anthropic Console 或企业云平台访问权限的人
+
+**你会完成**
+
+- 安装并验证 Claude Code
+- 选择合适的登录方式
+- 在一个真实目录里开始会话
+- 掌握继续会话、诊断和更新等常用操作
+
+## 目录
+
+1. Windows 准备工作
+2. 安装 Claude Code
+3. 验证命令与 PATH
+4. 登录并接入模型
+5. 开始第一次项目会话
+6. 常见问题与卸载
+
+## 1. Windows 准备工作
+
+原生 Windows 用户建议先安装 [Git for Windows](https://git-scm.com/download/win)。Claude Code 在 Windows 上会用到 Git Bash；macOS、Linux 或已经使用 WSL 的用户可以直接进入下一节。
+
+安装 Git for Windows 时，保持默认选项通常就够了。完成后重新打开 PowerShell，再运行：
+
+```powershell
+git --version
+```
+
+能看到版本号，就说明 Git 已经进入 PATH。
+
+## 2. 安装 Claude Code
+
+选择与你的系统对应的一种方式即可，不需要全部执行。
+
+### Windows PowerShell
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+也可以使用 WinGet：
+
+```powershell
+winget install Anthropic.ClaudeCode
+```
+
+### macOS / Linux / WSL
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+macOS 也可以使用 Homebrew：
+
+```bash
+brew install --cask claude-code
+```
+
+原生安装器会自行携带所需运行环境。若你明确需要 npm 方式，请先确认 Node.js 版本不低于 18，然后运行：
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+不要给 npm 命令加 `sudo`，否则后续更新容易遇到权限问题。
+
+## 3. 验证命令与 PATH
+
+安装完成后先关闭当前终端，再打开一个新的终端：
+
+```powershell
+claude --version
+```
+
+如果出现“找不到 claude 命令”，先检查 Windows 的用户 PATH 中是否包含：
+
+```text
+%USERPROFILE%\.local\bin
+```
+
+你可以在“开始菜单 → 编辑系统环境变量 → 环境变量 → 用户变量 → Path”中添加它。添加后一定要重新打开终端。
+
+如果仍然无法启动，运行诊断：
+
+```powershell
+claude doctor
+```
+
+## 4. 登录并接入模型
+
+最稳妥的方式是直接运行 `claude`，按照界面提示登录。常见选择如下：
+
+<table>
+  <thead><tr><th>你的情况</th><th>建议方式</th></tr></thead>
+  <tbody>
+    <tr><td>Claude Pro / Max 用户</td><td>使用同一 Claude 账号登录</td></tr>
+    <tr><td>Anthropic Console 用户</td><td>使用 Console 账户或 API Key</td></tr>
+    <tr><td>团队或企业用户</td><td>按管理员提供的组织登录方式操作</td></tr>
+    <tr><td>使用 AWS / Google Cloud</td><td>配置 Bedrock 或 Vertex AI</td></tr>
+  </tbody>
+</table>
+
+在 Claude Code 会话内输入 `/login` 可以重新选择登录方式，输入 `/logout` 可以退出当前账户。
+
+### 关于第三方 API 和切换工具
+
+有些工具可以改写 Claude Code 的环境变量或请求地址，用来连接第三方网关。它们并不等于 Anthropic 官方服务。使用前至少确认三件事：
+
+1. 密钥是否只保存在本机，而不是上传到未知服务器；
+2. 对方是否清楚说明模型来源、计费和日志保留策略；
+3. 是否能随时撤销密钥，并为密钥设置余额或权限上限。
+
+不要把 API Key 发到聊天、截图、公开仓库或群聊里。切换登录方式后，如果仍然走 API 计费，检查系统中是否残留 `ANTHROPIC_API_KEY`。
+
+## 5. 开始第一次项目会话
+
+先进入你希望 Claude Code 工作的目录，再启动：
+
+```powershell
+cd "D:\你的项目目录"
+claude
+```
+
+第一次任务不要只说“帮我看看”。给它明确目标、范围和完成标准，例如：
+
+```text
+先阅读 README 和 package.json，告诉我这个项目怎么本地启动。
+不要修改文件。最后给我一组可直接复制的 PowerShell 命令。
+```
+
+确认它理解项目后，再让它实施改动：
+
+```text
+修复登录按钮在手机端被遮挡的问题。
+保留现有视觉风格，完成后运行相关测试并说明还没有验证的部分。
+```
+
+### 常用命令
+
+<table>
+  <thead><tr><th>命令</th><th>用途</th></tr></thead>
+  <tbody>
+    <tr><td><code>/help</code></td><td>查看可用命令</td></tr>
+    <tr><td><code>/login</code></td><td>登录或切换账户</td></tr>
+    <tr><td><code>/model</code></td><td>查看或切换可用模型</td></tr>
+    <tr><td><code>/context</code></td><td>查看上下文占用</td></tr>
+    <tr><td><code>/compact</code></td><td>手动压缩较长的会话</td></tr>
+    <tr><td><code>/resume</code></td><td>恢复当前目录中的历史会话</td></tr>
+    <tr><td><code>/init</code></td><td>为项目生成 <code>CLAUDE.md</code> 指引</td></tr>
+  </tbody>
+</table>
+
+结束一天的工作前，可以让 Claude Code 汇总改动和验证结果。提交代码前仍要亲自查看 diff，确认没有意外修改配置、密钥或用户数据。
+
+## 6. 常见问题与卸载
+
+### 安装完成但命令不存在
+
+重新打开终端，检查 PATH，再运行 `claude doctor`。在 WSL 中还要确认调用的是 Linux 环境里的命令，而不是 Windows 的 Node.js 或可执行文件。
+
+### 登录后一直等待
+
+远程 SSH、容器或严格防火墙可能阻断本机回调。按照终端给出的手动验证地址完成登录，并把返回的验证码粘贴回终端。
+
+### 如何更新
+
+原生安装一般会自动更新，也可以手动执行：
+
+```powershell
+claude update
+```
+
+通过 Homebrew 或 WinGet 安装的版本，应分别使用对应包管理器更新。
+
+### 如何卸载
+
+优先使用与你安装时相同的包管理器，或在 Windows“设置 → 应用 → 已安装的应用”中卸载。只有确认不再需要历史会话、设置和自定义工具时，才考虑手动删除 `~/.claude` 等配置目录；删除前请先备份。
+
+## 官方资料
+
+- [Claude Code 用户常见问题](https://support.claude.com/en/articles/14554922-claude-code-user-faq)
+- [Claude Code 第一天上手指南](https://support.claude.com/en/articles/14552382-your-first-day-in-claude-code)
+- [安装与登录故障排查](https://support.claude.com/en/articles/14552646-troubleshoot-claude-code-installation-and-authentication)
+
+— Whiskey
