@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef } from "react";
 
 import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
+import { useLanguage } from "@/components/language-provider";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
 import styles from "./asymmetrical-parallax-gallery.module.css";
@@ -23,6 +24,8 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   const trackRef = useRef<HTMLDivElement>(null);
   const panoramaRef = useRef<HTMLDivElement>(null);
   const motionEnabled = useScrollEnhancement();
+  const { content } = useLanguage();
+  const copy = content.home.gallery;
   const items = galleryLayouts.map((layout, index) => ({ layout, photograph: photographs[index] ?? null }));
 
   useLayoutEffect(() => {
@@ -61,34 +64,34 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   }, [motionEnabled, photographs.length]);
 
   return (
-    <section aria-label="横向滚动摄影画廊" className={`gallery-wrapper ${styles.harborGallery}`} ref={wrapperRef}>
+    <section aria-label={copy.ariaLabel} className={`gallery-wrapper ${styles.harborGallery}`} ref={wrapperRef}>
       <div className={`gallery-pinned ${styles.pinned}`} ref={pinnedRef}>
         <div aria-hidden="true" className={styles.panorama} ref={panoramaRef} />
         <div aria-hidden="true" className={styles.panoramaWash} />
         <div className="gallery-track" ref={trackRef}>
           <div className="horizontal-gallery-intro">
-            <span>03 / LIFE ARCHIVE</span>
+            <span>{copy.kicker}</span>
           </div>
-          {items.slice(0, 2).map(({ layout, photograph }, index) => <GalleryPiece index={index} key={photograph?.id ?? `gallery-placeholder-${index}`} layout={layout} photograph={photograph} />)}
+          {items.slice(0, 2).map(({ layout, photograph }, index) => <GalleryPiece copy={copy} index={index} key={photograph?.id ?? `gallery-placeholder-${index}`} layout={layout} photograph={photograph} />)}
           <article className="horizontal-gallery-quote">
-            <p>“The moments between<br />the plans are the ones<br />that stay with us.”</p>
-            <span>PRIVATE OBSERVATIONS</span>
+            <p>“{copy.quote}”</p>
+            <span>{copy.quoteLabel}</span>
           </article>
-          {items.slice(2).map(({ layout, photograph }, index) => <GalleryPiece index={index + 2} key={photograph?.id ?? `gallery-placeholder-${index + 2}`} layout={layout} photograph={photograph} />)}
-          <p className="horizontal-gallery-end">EVERYDAY, HELD LIGHTLY</p>
+          {items.slice(2).map(({ layout, photograph }, index) => <GalleryPiece copy={copy} index={index + 2} key={photograph?.id ?? `gallery-placeholder-${index + 2}`} layout={layout} photograph={photograph} />)}
+          <p className="horizontal-gallery-end">{copy.ending}</p>
         </div>
       </div>
     </section>
   );
 }
 
-function GalleryPiece({ index, layout, photograph }: { index: number; layout: (typeof galleryLayouts)[number]; photograph: PublicArchivePhotograph | null }) {
+function GalleryPiece({ copy, index, layout, photograph }: { copy: { placeholder: string; privateArchive: string; published: string }; index: number; layout: (typeof galleryLayouts)[number]; photograph: PublicArchivePhotograph | null }) {
   return (
     <article className={`horizontal-gallery-piece gallery-item ${layout.className}`}>
       <figure className={`horizontal-gallery-frame horizontal-gallery-frame-${layout.aspect}`}>
         {photograph ? <Image alt={photograph.alt} fill sizes="(max-width: 768px) 92vw, 780px" src={photograph.galleryUrl} unoptimized /> : <div aria-hidden="true" className="horizontal-gallery-placeholder">PHOTO / {String(index + 1).padStart(2, "0")}</div>}
       </figure>
-      <div className="horizontal-gallery-caption"><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{photograph?.title ?? "A moment waiting to surface"}</h3><p>{photograph ? ([photograph.location, photograph.capturedAt?.slice(0, 4)].filter(Boolean).join(" · ") || "Published photograph") : "Private archive"}</p></div></div>
+      <div className="horizontal-gallery-caption"><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{photograph?.title ?? copy.placeholder}</h3><p>{photograph ? ([photograph.location, photograph.capturedAt?.slice(0, 4)].filter(Boolean).join(" · ") || copy.published) : copy.privateArchive}</p></div></div>
     </article>
   );
 }

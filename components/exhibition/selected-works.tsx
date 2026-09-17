@@ -1,12 +1,23 @@
-import Link from "next/link";
+"use client";
+
 import type { JSX } from "react";
 
+import { useLanguage } from "@/components/language-provider";
 import { ProjectMedia } from "@/components/exhibition/project-media";
-import type { ProjectSummary } from "@/lib/content";
 
-export function SelectedWorks({ projects }: { projects: ProjectSummary[] }): JSX.Element {
-  return <section aria-label="精选项目" className="selected-works" id="selected-work">
-    <header className="selected-works-heading"><p className="section-label">02 / SELECTED WORK</p><h2>精选项目</h2></header>
-    <div className="selected-works-grid">{projects.slice(0, 3).map((project, index) => <Link className={`selected-work-card selected-work-card-${index + 1}`} href={project.href} key={project.slug}><ProjectMedia project={project} sizes="(max-width: 760px) 100vw, (max-width: 1100px) 50vw, 42vw" /><span className="selected-work-card-copy"><small className="selected-work-index">{String(index + 1).padStart(2, "0")} / 03</small><strong>{project.title}</strong><span>{project.description}</span><small className="selected-work-stack">{project.tags.join(" / ")} <b aria-hidden="true">↗</b></small></span></Link>)}</div>
+type FeaturedProject = { slug: string; coverImage: string };
+
+export function SelectedWorks({ projects }: { projects: readonly FeaturedProject[] }): JSX.Element {
+  const { content } = useLanguage();
+
+  return <section aria-label={content.home.selectedWorkTitle} className="selected-works" id="selected-work">
+    <header className="selected-works-heading"><p className="section-label">{content.home.selectedWorkKicker}</p><h2>{content.home.selectedWorkTitle}</h2><p>{content.home.selectedWorkSummary}</p></header>
+    <div className="selected-works-grid">{projects.map((project, index) => {
+      const copy = content.home.projects[index];
+      return <article className={`selected-work-card selected-work-card-${index + 1}`} key={project.slug}>
+        <ProjectMedia project={{ ...project, title: copy.title, description: copy.description, date: "2026-09-17", tags: [], kind: "project", href: "/projects", coverAlt: copy.alt }} sizes="(max-width: 760px) calc(100vw - 32px), (max-width: 1200px) 48vw, 700px" />
+        <div className="selected-work-card-copy"><small className="selected-work-index">{String(index + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")}</small><h3>{copy.title}</h3><p>{copy.description}</p><small className="selected-work-stack">{copy.tags}</small></div>
+      </article>;
+    })}</div>
   </section>;
 }

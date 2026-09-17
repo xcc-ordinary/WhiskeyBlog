@@ -879,6 +879,40 @@ body:has(.harborGallery) .horizontal-gallery-frame>img,body:has(.harborGallery) 
   }
 }
 
+/* Home 2026: two authored projects, with the artwork carrying the chapter. */
+.selected-works-heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(16rem,28rem);align-items:end;column-gap:clamp(2rem,6vw,7rem);max-width:none!important}
+.selected-works-heading h2{margin:.65rem 0 0}
+.selected-works-heading>p:last-child{grid-column:2;grid-row:1 / span 2;margin:0 0 .4rem;color:rgba(42,58,66,.68);font-size:clamp(.95rem,1.2vw,1.08rem);line-height:1.75;text-wrap:balance}
+.selected-work-card{position:relative;display:grid;align-content:start;min-width:0}
+.selected-work-card .project-media{box-shadow:0 1.5rem 4rem rgba(79,64,48,.12)!important}
+.selected-work-card-1 .project-media{aspect-ratio:793 / 1983;background:#fff8ed!important}
+.selected-work-card-1 .project-media-image{object-fit:contain}
+.selected-work-card-2 .project-media{aspect-ratio:16 / 9;background:#fff7fb!important}
+.selected-work-card-2 .project-media-image{object-fit:cover}
+.selected-work-card-copy{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"index title" ". description" ". stack";column-gap:clamp(1rem,2vw,1.8rem)!important;row-gap:.5rem!important;padding-top:1.25rem!important;border-top:1px solid rgba(42,58,66,.12)}
+.selected-work-index{grid-area:index;padding-top:.42rem}
+.selected-work-card-copy h3{grid-area:title;margin:0;color:#2a3a42;font-family:"Noto Serif SC",var(--font-lora),Georgia,serif;font-size:clamp(2rem,3.2vw,3.65rem);font-weight:450;letter-spacing:-.055em;line-height:1.02}
+.selected-work-card-copy p{grid-area:description;max-width:31rem;margin:0;color:rgba(42,58,66,.72);font-size:.92rem;line-height:1.72}
+.selected-work-stack{grid-area:stack;justify-content:flex-start;margin-top:.3rem}
+@media(min-width:761px){
+  .selected-works{height:176svh;min-height:176svh;padding-inline:7vw}
+  .selected-works-grid{align-items:center!important}
+  .selected-work-card-1{grid-column:2 / span 3;width:min(100%,20rem);align-self:start}
+  .selected-work-card-2{grid-column:6 / span 7;width:min(100%,48rem);align-self:center;margin-top:clamp(5rem,12vh,10rem)}
+}
+@media(max-width:760px){
+  .selected-works-heading{grid-template-columns:1fr;gap:1.1rem}
+  .selected-works-heading>p:last-child{grid-column:1;grid-row:auto;margin:0}
+  .selected-works-grid{gap:5.5rem}
+  .selected-work-card-1,.selected-work-card-2{width:100%;justify-self:stretch}
+  .selected-work-card-1 .project-media{width:82%;margin-inline:auto}
+  .selected-work-card-copy{column-gap:1rem!important}
+  .selected-work-card-copy h3{font-size:clamp(2.2rem,11vw,3.2rem)}
+  .editorial-mobile-language{margin-top:auto;padding-top:2rem}
+  .editorial-mobile-language .language-toggle{display:inline-flex!important;min-height:44px;padding:.65rem 1rem!important;border:1px solid currentColor!important;color:inherit!important}
+}
+@media(prefers-reduced-transparency:reduce){.selected-work-card .project-media{box-shadow:none!important}}
+
 /* Notes Studio: compact, low-latency editorial workbench */
 .notes-workbench{
   position:relative;

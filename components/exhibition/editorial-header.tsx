@@ -55,7 +55,7 @@ export function EditorialHeader(): JSX.Element {
           ref={triggerRef}
           type="button"
         >
-          Index +
+          {content.mobileNavigation.open}
         </button>
         <dialog
           aria-labelledby="mobile-navigation-title"
@@ -75,12 +75,13 @@ export function EditorialHeader(): JSX.Element {
         >
           <div className="editorial-mobile-dialog-inner">
             <div className="editorial-mobile-dialog-heading">
-              <span id="mobile-navigation-title">导航菜单</span>
-              <button aria-label="关闭导航菜单" onClick={closeNavigation} type="button">Close ×</button>
+              <span id="mobile-navigation-title">{content.mobileNavigation.title}</span>
+              <button aria-label={content.mobileNavigation.close} onClick={closeNavigation} type="button">{content.mobileNavigation.close}</button>
             </div>
-            <nav aria-label="移动导航">
+            <nav aria-label={content.mobileNavigation.ariaLabel}>
               <ul>{links.map((item, index) => <li key={item.href}><Link href={item.href} onClick={closeNavigation}>{content.navigation[index] ?? item.label}</Link></li>)}</ul>
             </nav>
+            <div className="editorial-mobile-language"><LanguageToggle /></div>
           </div>
         </dialog>
       </div>

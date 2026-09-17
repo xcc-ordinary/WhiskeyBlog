@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { JSX } from "react";
 
 import { site } from "@/lib/site";
+import { useLanguage } from "@/components/language-provider";
 
 const signalNavigation = [
   { href: "/", label: "HOME" },
@@ -20,29 +21,30 @@ function isCurrentPath(pathname: string, href: string): boolean {
 
 export function EditorialFooter(): JSX.Element {
   const pathname = usePathname();
+  const { content } = useLanguage();
 
   return (
     <footer className="editorial-footer signal-station-footer">
       <div className="signal-station-scrim" aria-hidden="true" />
       <div className="site-container signal-station-inner">
         <section className="signal-station-message" aria-labelledby="signal-station-title">
-          <p className="signal-station-kicker">SIGNAL STATION / OPEN CHANNEL</p>
-          <h2 id="signal-station-title">继续航行。</h2>
+          <p className="signal-station-kicker">{content.footer.kicker}</p>
+          <h2 id="signal-station-title">{content.footer.title}</h2>
           <a className="signal-frequency" href={`mailto:${site.email}`}>
-            <span>发报频率</span>
+            <span>{content.footer.frequency}</span>
             <small>{site.email}</small>
           </a>
         </section>
 
         <nav className="signal-station-nav" aria-label="航标导航">
-          <p>航标清单</p>
+          <p>{content.footer.navigation}</p>
           <ul>
             {signalNavigation.map((item, index) => {
               const current = isCurrentPath(pathname, item.href);
               return (
                 <li key={item.href}>
                   <Link aria-current={current ? "page" : undefined} className={current ? "is-current" : undefined} href={item.href}>
-                    <span>{String(index + 1).padStart(2, "0")}</span>{item.label}
+                    <span>{String(index + 1).padStart(2, "0")}</span>{content.navigation[index] ?? item.label}
                   </Link>
                 </li>
               );
