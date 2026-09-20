@@ -3,7 +3,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 import { cache } from "react";
-export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; author?: string; coverImage?: string; coverAlt?: string };
+import { estimateReadingMinutes } from "@/lib/article";
+export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; author?: string; coverImage?: string; coverAlt?: string; readingMinutes?: number };
 export type PostSummary = ContentMeta & { kind: "post"; href: string };
 export type ProjectSummary = ContentMeta & { kind: "project"; href: string; coverImage?: string; coverAlt?: string; role?: string };
 export type PostDocument = PostSummary & { source: string };
@@ -26,6 +27,7 @@ function readCollection<T extends PostSummary | ProjectSummary>(collection: "pos
       slug: data.slug,
       kind,
       href: (collection === "posts" ? "/blog/" : "/projects/") + data.slug,
+      ...(collection === "posts" ? { readingMinutes: estimateReadingMinutes(parsed.content) } : {}),
       ...(typeof optionalProjectData.author === "string" ? { author: optionalProjectData.author } : {}),
       ...(typeof optionalProjectData.coverImage === "string" ? { coverImage: optionalProjectData.coverImage } : {}),
       ...(typeof optionalProjectData.coverAlt === "string" ? { coverAlt: optionalProjectData.coverAlt } : {}),

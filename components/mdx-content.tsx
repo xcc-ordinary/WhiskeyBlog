@@ -1,20 +1,13 @@
 import { isValidElement, type AnchorHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { compileMDX } from "next-mdx-remote/rsc";
 
+import { headingId } from "@/lib/article";
+
 function textFromChildren(children: ReactNode): string {
   if (typeof children === "string" || typeof children === "number") return String(children);
   if (Array.isArray(children)) return children.map(textFromChildren).join("");
   if (isValidElement<{ children?: ReactNode }>(children)) return textFromChildren(children.props.children);
   return "";
-}
-
-function headingId(children: ReactNode): string {
-  return textFromChildren(children)
-    .trim()
-    .toLocaleLowerCase("zh-CN")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
 }
 
 function ArticleLink({ className = "", href = "", children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) {
@@ -35,7 +28,7 @@ function ArticleLink({ className = "", href = "", children, ...props }: AnchorHT
 type HeadingProps = HTMLAttributes<HTMLHeadingElement> & { children?: ReactNode };
 
 function ArticleHeading({ level: Level, children, id, ...props }: HeadingProps & { level: "h2" | "h3" }) {
-  const resolvedId = id || headingId(children);
+  const resolvedId = id || headingId(textFromChildren(children));
   return (
     <Level {...props} id={resolvedId}>
       <span>{children}</span>
