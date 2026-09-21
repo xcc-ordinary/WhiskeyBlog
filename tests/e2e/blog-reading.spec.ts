@@ -13,6 +13,16 @@ test("article provides readable metadata, table of contents, progress, and a nex
 
   await expect(page.getByRole("heading", { name: "Codex 安装与使用教程" })).toBeVisible();
   await expect(page.getByText(/分钟阅读/).first()).toBeVisible();
+  const rail = page.getByRole("complementary", { name: "文章导航" });
+  const railTrigger = page.getByRole("button", { name: "展开本文目录" });
+  const toc = page.locator('nav[aria-label="本文目录"]');
+  await expect(railTrigger).toHaveAttribute("aria-expanded", "false");
+  await expect(toc).toHaveAttribute("aria-hidden", "true");
+
+  await railTrigger.hover();
+  await expect(rail).toHaveAttribute("data-open", "true");
+  await expect(railTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(toc).toHaveAttribute("aria-hidden", "false");
   const tocLink = page.getByRole("navigation", { name: "本文目录" }).getByRole("link", { name: "2. 安装 Codex" });
   await tocLink.click();
   await expect.poll(() => page.evaluate(() => decodeURIComponent(window.location.hash))).toBe("#2-安装-codex");

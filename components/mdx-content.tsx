@@ -1,6 +1,7 @@
 import { isValidElement, type AnchorHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
 import { compileMDX } from "next-mdx-remote/rsc";
 
+import { ArticleCodeBlock } from "@/components/article-code-block";
 import { headingId } from "@/lib/article";
 
 function textFromChildren(children: ReactNode): string {
@@ -26,6 +27,7 @@ function ArticleLink({ className = "", href = "", children, ...props }: AnchorHT
 }
 
 type HeadingProps = HTMLAttributes<HTMLHeadingElement> & { children?: ReactNode };
+type PreProps = HTMLAttributes<HTMLPreElement> & { children?: ReactNode };
 
 function ArticleHeading({ level: Level, children, id, ...props }: HeadingProps & { level: "h2" | "h3" }) {
   const resolvedId = id || headingId(textFromChildren(children));
@@ -37,10 +39,17 @@ function ArticleHeading({ level: Level, children, id, ...props }: HeadingProps &
   );
 }
 
+function ArticlePre({ children }: PreProps) {
+  const codeElement = isValidElement<{ children?: ReactNode; className?: string }>(children) ? children : null;
+  const language = codeElement?.props.className?.match(/language-([\w-]+)/)?.[1] ?? "text";
+  return <ArticleCodeBlock code={textFromChildren(codeElement?.props.children ?? children).replace(/\n$/, "")} language={language} />;
+}
+
 const components = {
   a: ArticleLink,
   h2: (props: HeadingProps) => <ArticleHeading {...props} level="h2" />,
   h3: (props: HeadingProps) => <ArticleHeading {...props} level="h3" />,
+  pre: ArticlePre,
 };
 
 export async function MdxContent({ source }: { source: string }) {

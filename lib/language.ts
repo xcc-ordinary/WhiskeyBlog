@@ -36,7 +36,7 @@ export const languageContent = {
         published: "已发布照片",
       },
     },
-    mobileNavigation: { open: "目录 +", title: "导航菜单", close: "关闭 ×", ariaLabel: "移动导航" },
+    mobileNavigation: { open: "导航 +", title: "导航菜单", close: "关闭 ×", ariaLabel: "移动导航" },
     footer: { kicker: "信号站 / 频道开放", title: "继续航行。", frequency: "发报频率", navigation: "航标清单" },
   },
   en: {
