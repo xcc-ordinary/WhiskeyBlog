@@ -1927,3 +1927,15 @@ body:has(.blog-article-page) .editorial-desktop-nav a,body:has(.blog-article-pag
   .article-key-points{grid-template-columns:1fr;gap:.75rem}
   .article-key-points>div>.article-key-point-copy{margin-left:2.65rem!important}
 }
+
+/* Center the publication column; keep navigation in the left margin like Lenny's. */
+@media(min-width:1181px){
+  .blog-article-topline,
+  .blog-article-header,
+  .blog-article-reading-layout{
+    width:740px;
+    margin-right:auto;
+    margin-left:auto;
+  }
+  .article-reading-rail{left:calc(50vw - 420px)}
+}
