@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef, type JSX, type ReactNode } from "react";
 
 import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
+import { LivingScene } from "@/components/exhibition/living-scene";
 
 type ExplorerHeroProps = {
   eyebrow: string;
@@ -20,6 +21,11 @@ type ExplorerHeroProps = {
 export function ExplorerHero({ eyebrow, title, description, image, variant = "default", cta, children }: ExplorerHeroProps): JSX.Element {
   const rootRef = useRef<HTMLElement>(null);
   const motionEnabled = useScrollEnhancement();
+  const scene = image.includes("airshipyard") ? "yard"
+    : image.includes("observatory") ? "observatory"
+    : image.includes("harbor-vault") ? "archive"
+    : image.includes("open-water") ? "water"
+    : "harbor";
 
   useLayoutEffect(() => {
     if (!motionEnabled || !rootRef.current) return;
@@ -37,7 +43,7 @@ export function ExplorerHero({ eyebrow, title, description, image, variant = "de
 
   return (
     <section className={`explorer-hero explorer-hero--${variant}`} ref={rootRef} aria-label={title}>
-      <div aria-hidden="true" className="explorer-hero-background parallax-layer" data-testid="parallax-layer" style={{ backgroundImage: `url(${image})` }} />
+      <LivingScene className="explorer-hero-background parallax-layer" controls fit="fill" image={image} scene={scene} />
       <div className="explorer-hero-vignette" aria-hidden="true" />
       <div className="explorer-hero-panel explorer-glass">
         <p className="explorer-kicker">{eyebrow}</p>

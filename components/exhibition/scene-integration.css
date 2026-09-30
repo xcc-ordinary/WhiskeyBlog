@@ -1,0 +1,19 @@
+/* Keep decorative scenes inside their existing chapter and beneath its content. */
+.selected-works {
+  position: relative;
+  isolation: isolate;
+}
+
+.selected-works > .selected-works-scene,
+.signal-station-footer > .signal-station-scene,
+.studio-page > .studio-workbench-scene,
+.notes-workbench > .studio-workbench-scene {
+  z-index: -2;
+}
+
+.explorer-hero-vignette,
+.signal-station-scrim,
+.studio-page::before,
+.notes-workbench::before {
+  pointer-events: none;
+}

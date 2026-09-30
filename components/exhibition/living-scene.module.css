@@ -1,0 +1,20 @@
+.root{position:absolute;inset:0;pointer-events:none;background-repeat:no-repeat}
+@media(max-width:700px){.root{background-image:var(--scene-mobile-image)!important}}
+.surface{position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+.root[data-state="ready"] .surface{opacity:1}
+.surface canvas{display:block;width:100%;height:100%;pointer-events:none}
+.controls{position:absolute;left:clamp(1.5rem,6vw,7rem);bottom:2.4rem;z-index:3;display:flex;align-items:center;gap:1.5rem;color:#344e53;pointer-events:auto}
+.caption{display:grid;grid-template-columns:6px auto;align-items:center;column-gap:.65rem;row-gap:.35rem;font-size:12px;letter-spacing:.13em;text-shadow:0 1px 12px #fff7d6}
+.hint{grid-column:2;color:#536c6c;font-size:10px;letter-spacing:.08em}
+.indicator{width:5px;height:5px;border-radius:50%;background:#628c7a;box-shadow:0 0 0 3px #66897518}
+.indicator[data-paused="true"]{background:#ac9473}
+.actions{display:flex;align-items:center;padding:3px;border:1px solid #fdfbf76b;border-radius:30px;background:#fdfbf742;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.actions button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:inherit;font:24px/1 Georgia,serif;cursor:pointer;transition:background-color 180ms ease,transform 180ms ease}
+.actions button svg{width:16px;height:16px;stroke:currentColor;stroke-width:1}
+.actions button:focus-visible{outline:2px solid #946536;outline-offset:3px}
+.actions button:active:not(:disabled){transform:scale(.92)}
+.actions button:disabled{opacity:.38;cursor:default}
+.divider{height:14px;width:1px;margin:0 3px;background:#344e532b}
+@media(hover:hover) and (pointer:fine){.actions button:hover:not(:disabled){background:#fff9}}
+@media(max-width:700px){.controls{left:1.25rem;right:1.25rem;bottom:1.5rem;justify-content:space-between;gap:.5rem}.caption{font-size:11px}.hint{font-size:9px}.actions button{width:40px;height:40px}.surface{transition-duration:.7s}}
+@media(prefers-reduced-motion:reduce){.surface,.actions button{transition:none}.controls{display:none}}
