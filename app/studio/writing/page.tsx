@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PostEditor } from "@/components/studio/post-editor";
+import { LivingScene } from "@/components/exhibition/living-scene";
 import { ProductionContentNotice } from "@/components/studio/production-content-notice";
 import { repositoryContentWritesAvailable } from "@/lib/content-writes";
 import { getPost, getPosts } from "@/lib/content";
@@ -18,6 +19,7 @@ export default async function WritingPage({ searchParams }: { searchParams: Prom
   if (!isNew && selectedSlug && !post) redirect("/studio/writing?mode=new");
   return (
     <section className="studio-writing notes-workbench">
+      <LivingScene className="studio-workbench-scene" image="/images/site-backgrounds/studio-workbench-v1.webp" position="center top" scene="studio" />
       <div className="site-container notes-workbench-shell">
         <header className="writing-heading notes-workbench-heading">
           <div>

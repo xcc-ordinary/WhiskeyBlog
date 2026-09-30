@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { PhotographEditor } from "@/components/studio/photograph-editor";
+import { LivingScene } from "@/components/exhibition/living-scene";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
 import { getStudioPhotographs } from "@/lib/supabase/photographs";
 
@@ -20,6 +21,7 @@ export default async function StudioPhotographPage({ params }: { params: Promise
 
   return (
     <section className="studio-page">
+      <LivingScene className="studio-workbench-scene" image="/images/site-backgrounds/studio-workbench-v1.webp" position="center top" scene="studio" />
       <div className="site-container studio-page-content">
         <PhotographEditor photograph={photograph} />
       </div>

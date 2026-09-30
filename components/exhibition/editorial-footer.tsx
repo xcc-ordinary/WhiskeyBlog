@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { JSX } from "react";
 
 import { site } from "@/lib/site";
+import { LivingScene } from "@/components/exhibition/living-scene";
 import { useLanguage } from "@/components/language-provider";
 
 const signalNavigation = [
@@ -25,6 +26,7 @@ export function EditorialFooter(): JSX.Element {
 
   return (
     <footer className="editorial-footer signal-station-footer">
+      <LivingScene className="signal-station-scene" image="/images/site-backgrounds/footer-signal-station-v1.webp" scene="signal" />
       <div className="signal-station-scrim" aria-hidden="true" />
       <div className="site-container signal-station-inner">
         <section className="signal-station-message" aria-labelledby="signal-station-title">

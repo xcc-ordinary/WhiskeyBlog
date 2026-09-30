@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLayoutEffect, useRef } from "react";
 
 import { useScrollEnhancement } from "@/components/exhibition/use-scroll-enhancement";
+import { LivingScene } from "@/components/exhibition/living-scene";
 import { useLanguage } from "@/components/language-provider";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
@@ -66,7 +67,9 @@ export function AsymmetricalParallaxGallery({ photographs }: { photographs: Publ
   return (
     <section aria-label={copy.ariaLabel} className={`gallery-wrapper ${styles.harborGallery}`} ref={wrapperRef}>
       <div className={`gallery-pinned ${styles.pinned}`} ref={pinnedRef}>
-        <div aria-hidden="true" className={styles.panorama} ref={panoramaRef} />
+        <div aria-hidden="true" className={styles.panorama} ref={panoramaRef}>
+          <LivingScene className="gallery-panorama-scene" fit="fill" image="/images/site-backgrounds/gallery-harbor-panorama-v2.webp" scene="gallery" />
+        </div>
         <div aria-hidden="true" className={styles.panoramaWash} />
         <div className="gallery-track" ref={trackRef}>
           <div className="horizontal-gallery-intro">

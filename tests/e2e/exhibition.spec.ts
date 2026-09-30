@@ -3,8 +3,8 @@ import { expect, test } from "@playwright/test";
 test("home presents the exhibition chapters", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
-  await expect(page.getByRole("region", { name: "精选项目" })).toBeVisible();
-  await expect(page.getByRole("link", { name: /explore selected work/i })).toHaveAttribute("href", "/projects");
+  await expect(page.getByRole("region", { name: "正在发生的作品" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "探索精选作品" })).toHaveAttribute("href", "#selected-work");
 });
 
 test("public exhibition marks visual camera layers without changing reading landmarks", async ({ page }) => {
@@ -27,7 +27,7 @@ test("mobile navigation remains usable and exhibition motion respects reduction"
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const trigger = page.getByRole("button", { name: /index/i });
+  const trigger = page.getByRole("button", { name: "导航 +" });
   await trigger.click();
   await expect(page.getByRole("dialog", { name: "导航菜单" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -38,7 +38,7 @@ test("mobile archive panorama uses a bounded cover crop instead of stretching", 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const gallery = page.getByRole("region", { name: "横向滚动摄影画廊" });
+  const gallery = page.getByRole("region", { name: "横向滚动生活档案" });
   const panorama = gallery.locator('[aria-hidden="true"]').first();
   await expect(gallery).toBeVisible();
   await expect(panorama).toHaveCSS("background-size", "cover");
@@ -74,12 +74,12 @@ test("desktop enables camera glide while reduced motion stays native", async ({ 
 test("published Studio images enter the asymmetric homepage gallery", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
-  const gallery = page.getByRole("region", { name: "横向滚动摄影画廊" });
+  const gallery = page.getByRole("region", { name: "横向滚动生活档案" });
   await expect(gallery).toBeVisible();
   await expect(gallery.locator(".horizontal-gallery-piece")).toHaveCount(4);
   await expect(gallery.getByRole("img", { name: "柔和晨光下的山谷" })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
-  await expect(gallery.getByText("PRIVATE OBSERVATIONS")).toBeVisible();
+  await expect(gallery.getByText("私人观察")).toBeVisible();
 });
 
 test("a public hash target remains reachable with cinematic scroll enabled", async ({ page }) => {
@@ -121,6 +121,17 @@ test("a wide coarse-pointer device keeps Lenis and continuous parallax disabled"
   await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll");
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await expect.poll(() => firstLayer.evaluate((element) => getComputedStyle(element).transform)).toBe("none");
+});
+
+test("featured work cards lead to their real project case pages", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /藏梦书境/ })).toHaveAttribute("href", "/projects/dreambook-realm");
+  await expect(page.getByRole("link", { name: /Lumi/ })).toHaveAttribute("href", "/projects/lumi");
+
+  await page.getByRole("link", { name: /藏梦书境/ }).click();
+  await expect(page).toHaveURL(/\/projects\/dreambook-realm$/);
+  await expect(page.getByRole("heading", { level: 1, name: "藏梦书境" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "项目笔记" })).toBeVisible();
 });
 
 test("parallax layers stay static on mobile and with reduced motion", async ({ page }) => {
