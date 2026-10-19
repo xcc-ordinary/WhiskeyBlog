@@ -3,6 +3,15 @@ export const projectImageAccept = "image/jpeg,image/png,image/webp,image/gif";
 
 export type ProjectCoverFit = "cover" | "contain";
 
+/** Image sources supported by the site's CSP and Next image configuration. */
+export function isSupportedDocumentCover(value: string): boolean {
+  if (/^\/(?!\/)/.test(value) && !/[\\\u0000-\u001f]/.test(value)) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && /^[a-z0-9-]+\.supabase\.co$/.test(url.hostname) && !url.port && !url.username && !url.password && /^\/storage\/v1\/object\/(?:public\/content-images|sign\/derivatives)\//.test(url.pathname);
+  } catch { return false; }
+}
+
 export function validProjectCoverPosition(value: string): boolean {
   if (value === "center") return true;
   const coordinates = value.match(/^(\d+(?:\.\d+)?)% (\d+(?:\.\d+)?)%$/);

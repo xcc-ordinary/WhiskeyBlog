@@ -1,6 +1,6 @@
 @import "tailwindcss";
-@config "../tailwind.config.js";
 @import "lenis/dist/lenis.css";
+@config "../tailwind.config.js";
 
 @layer components {
   .liquid-glass {

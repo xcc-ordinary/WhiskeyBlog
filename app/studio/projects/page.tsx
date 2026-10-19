@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { publishedNoteLinks } from "@/lib/note-links";
 import { ProjectNotesEditor } from "@/components/studio/project-notes-editor";
 import { ProductionContentNotice } from "@/components/studio/production-content-notice";
 import { studioContentWritesAvailable } from "@/lib/content-writes";
@@ -18,5 +18,5 @@ export default async function ProjectWritingPage({ searchParams }: { searchParam
   const selectedSlug = query.project ?? projects[0]?.slug;
   const project = isNew || !selectedSlug ? null : await getProject(selectedSlug);
   if (!isNew && selectedSlug && !project) redirect("/studio/projects?mode=new");
-  return <section className="studio-writing"><div className="site-container"><header className="writing-heading"><div><p className="studio-kicker">PRIVATE / PROJECT DESK</p><h1>{project ? "编辑项目。" : "建立一个新项目。"}</h1><p>维护项目名称、封面、标签与 Markdown 项目笔记，保存后同步更新公开项目页。</p></div><Link className="studio-sign-out" href="/studio">返回 Media Studio</Link></header><ProjectNotesEditor key={project?.slug ?? "new"} project={project} projects={projects} /></div></section>;
+  return <section className="studio-writing"><ProjectNotesEditor key={project?.slug ?? "new"} project={project} projects={projects} wikiLinks={await publishedNoteLinks()} /></section>;
 }

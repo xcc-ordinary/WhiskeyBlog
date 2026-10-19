@@ -1,33 +1,24 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { renderStudioMarkdown } from "@/app/studio/markdown-preview-actions";
 import { MarkdownPreview } from "@/components/studio/markdown-preview";
-
-vi.mock("@/app/studio/markdown-preview-actions", () => ({ renderStudioMarkdown: vi.fn() }));
-afterEach(() => { cleanup(); vi.useRealTimers(); vi.clearAllMocks(); });
-
-describe("MarkdownPreview", () => {
-  it("debounces typing and ignores stale rendering responses", async () => {
-    vi.useFakeTimers();
-    let finishOld: (value: React.ReactElement) => void = () => {};
-    vi.mocked(renderStudioMarkdown).mockImplementationOnce(() => new Promise(resolve => { finishOld = resolve; }));
-    const { rerender } = render(<MarkdownPreview source="old" />);
-    await act(() => vi.advanceTimersByTimeAsync(450));
-    vi.mocked(renderStudioMarkdown).mockResolvedValueOnce(<div className="prose"><h2>最新版</h2><pre>代码块</pre></div>);
-    rerender(<MarkdownPreview source="new" />);
-    await act(() => vi.advanceTimersByTimeAsync(450));
-    expect(screen.getByRole("heading", { name: "最新版" })).toBeInTheDocument();
-    await act(async () => finishOld(<p>过时的预览</p>));
-    expect(screen.queryByText("过时的预览")).not.toBeInTheDocument();
-    expect(renderStudioMarkdown).toHaveBeenLastCalledWith("new");
+import { MdxContent } from "@/components/mdx-content";
+import { renderToStaticMarkup } from "react-dom/server";
+vi.mock("@/lib/note-links", () => ({ publishedNoteLinks: async () => ({}) }));
+afterEach(cleanup);
+describe("shared journal preview", () => {
+  it("updates immediately without a server preview request", () => {
+    const { rerender } = render(<MarkdownPreview source="## 旧版" />);
+    rerender(<MarkdownPreview source="## 最新版" />);
+    expect(screen.getByRole("heading", { name: /最新版/ })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /旧版/ })).not.toBeInTheDocument();
   });
-
-  it("reports invalid MDX without clearing the editor source", async () => {
-    vi.useFakeTimers();
-    vi.mocked(renderStudioMarkdown).mockRejectedValueOnce(new Error("invalid syntax"));
-    render(<MarkdownPreview source="<invalid" />);
-    await act(() => vi.advanceTimersByTimeAsync(450));
-    expect(screen.getByRole("status")).toHaveTextContent("检查 Markdown / MDX 语法");
+  it("uses the identical safe Markdown markup as the published blog", async () => {
+    const source = "## 正文\n\n> [!note] 记录\n> 共享样式。\n\n| A | B |\n| --- | --- |\n| 1 | 2 |\n\n- [x] 完成\n\n<script>alert(1)</script>";
+    const server = renderToStaticMarkup(await MdxContent({ source }));
+    const { container } = render(<MarkdownPreview source={source} />);
+    const template = document.createElement("template"); template.innerHTML = server;
+    expect(container.querySelector(".markdown-document")?.isEqualNode(template.content.firstElementChild)).toBe(true);
+    expect(container.querySelector("script")).toBeNull();
   });
 });

@@ -181,25 +181,6 @@ body.editorial-shell:has(.studio-admin),
 body.editorial-shell .studio-admin { background: var(--wl-paper); color: var(--wl-ink); }
 body.editorial-shell:has(.studio-admin)::before,
 body.editorial-shell:has(.studio-admin)::after { display: none; }
-body.editorial-shell .studio-admin { --foreground: var(--wl-ink); --background: var(--wl-panel); --border: var(--wl-rule); --muted: var(--wl-muted); --accent: var(--wl-ink); --panel: var(--wl-panel); font-family: var(--wl-ui); font-size: 14px; }
-body.editorial-shell .studio-admin :is(.studio-sidebar,.studio-topbar,.studio-content-panel,.studio-library-list,.post-editor,.notes-editor,.studio-drawer,.studio-auth,.studio-load-state) { background: var(--wl-panel); border-color: var(--wl-rule); color: var(--wl-ink); box-shadow: none; }
-body.editorial-shell .studio-admin :is(.studio-content-panel,.studio-library-list,.post-editor,.notes-editor,.studio-auth,.studio-load-state) { border-radius: var(--wl-radius) !important; }
-body.editorial-shell .studio-admin .studio-brand>b { background: transparent; border: 1px solid var(--wl-ink); border-radius: var(--wl-control-radius); font-family: var(--wl-display); }
-body.editorial-shell .studio-admin .studio-sidebar nav a { color: var(--wl-muted); border-radius: var(--wl-control-radius); }
-body.editorial-shell .studio-admin .studio-sidebar nav a[aria-current="page"] { background: #e5e2d9; color: var(--wl-ink); }
-body.editorial-shell .studio-admin :is(.studio-dashboard-heading h1,.studio-heading h1,.writing-heading h1,.studio-editor-heading h1,.studio-library-toolbar h2) { font: 600 clamp(24px,2.5vw,32px)/1.35 var(--wl-ui) !important; letter-spacing: -.01em; }
-body.editorial-shell .studio-admin :is(.studio-overview>button,.studio-overview>a) { position: relative; border: 1.5px solid var(--wl-rule-strong); border-radius: var(--wl-radius); background: var(--wl-panel); color: var(--wl-ink); padding: 24px; }
-body.editorial-shell .studio-admin :is(.studio-overview>button,.studio-overview>a)::after { content: ""; position: absolute; inset: 7px; border: 1px dashed var(--wl-rule); border-radius: 6px; pointer-events: none; }
-body.editorial-shell .studio-admin :is(.studio-library-toolbar p,.studio-dashboard-heading p:last-child,.studio-editor-heading p,.studio-photograph-row p,.studio-content-identity small,.studio-content-location,.studio-content-row time,.studio-original-note,label small) { color: var(--wl-muted); font-size: 12px; line-height: 1.65; }
-body.editorial-shell .studio-admin :is(.studio-editor-actions,.post-editor-actions,.notes-editor-toolbar,.studio-content-table-head,.notes-editor-settings) { background: var(--wl-panel); border-color: var(--wl-rule); }
-body.editorial-shell .studio-admin input:not([type="checkbox"]):not([type="file"]),
-body.editorial-shell .studio-admin :is(textarea,select) { background: #faf8f3; color: var(--wl-ink); border: 1px solid var(--wl-rule-strong); border-radius: var(--wl-control-radius); font: 400 14px/1.65 var(--wl-ui); min-height: 44px; }
-body.editorial-shell .studio-admin :is(.post-editor-source,.notes-editor .post-editor-source) { font: 14px/1.85 ui-monospace, SFMono-Regular, Consolas, monospace; }
-body.editorial-shell .studio-admin .post-editor-preview { background: #faf8f3; border-color: var(--wl-rule); }
-body.editorial-shell .studio-admin :is(.studio-content-tabs button,.project-editor-viewbar button,.studio-settings-toggle,.project-settings-toggle) { font-family: var(--wl-ui); min-height: 44px; font-size: 13px; color: var(--wl-ink); }
-body.editorial-shell .studio-admin :is(.studio-content-tabs button[aria-selected="true"],.project-editor-viewbar button[aria-pressed="true"]) { background: #e5e2d9; color: var(--wl-ink); }
-body.editorial-shell .studio-admin :is(.studio-row-actions,.studio-editor-heading-actions,.post-editor-actions,.studio-editor-actions) { flex-wrap: wrap; gap: 10px; }
-body.editorial-shell .studio-admin input[type="file"]::file-selector-button { min-height: 44px; border: 1px solid var(--wl-rule-strong); border-radius: 6px; background: var(--wl-panel); color: var(--wl-ink); font: 500 14px var(--wl-ui); }
 
 body.editorial-shell .coastal-site :is(h1,h2,h3):lang(en) { --wl-h1: clamp(48px,6.7vw,96px); --wl-h2: clamp(36px,4vw,56px); --wl-h3: clamp(28px,2.6vw,36px); }
 body.editorial-shell .coastal-site :is(.coastal-explorer h1,.coastal-about-intro h2,.coastal-about-notes h2,.edition-cover-profile h2,.edition-project-aside h2,.edition-life-heading h2):lang(en) { line-height: 1.05; letter-spacing: -.035em; }
@@ -219,10 +200,6 @@ body.editorial-shell .coastal-site :is(.edition-dropcap,.edition-project-descrip
   body.editorial-shell .coastal-site .edition-teaser-description { font-size: 15px; }
   body.editorial-shell .coastal-site .edition-teaser-title small { font-size: 11px; }
   body.editorial-shell .coastal-site .coastal-edition .edition-note-cards>a { padding: 32px 29px 28px; }
-  body.editorial-shell .studio-admin :is(.studio-overview>button,.studio-overview>a) { padding: 17px 12px; }
-  body.editorial-shell .studio-admin .studio-row-actions { grid-column: 1 / -1; justify-content: flex-end; }
-  body.editorial-shell .studio-admin .studio-content-tabs { gap: 10px; flex-wrap: wrap; }
-  body.editorial-shell .studio-admin .studio-overview strong small { margin: 0; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
   body.editorial-shell :is(.coastal-site,.studio-admin) :is(button,.studio-button,.studio-secondary-button,.studio-row-edit,.primary-link) { transition: none !important; }

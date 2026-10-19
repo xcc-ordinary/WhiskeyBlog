@@ -40,6 +40,8 @@ Whiskey 的个人杂志网站 **The Personal Journal**，使用 Next.js、TypeSc
 
 ## Media Studio（Supabase）
 
+写作工作台与当前博客共用 Markdown 渲染和阅读版式，支持 Markdown 文件导入、正文插图、本机草稿恢复、专注写作与显式发布。操作与验证边界见 [docs/studio-writing.md](docs/studio-writing.md)。
+
 Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓库中填写项目 URL、密钥或所有者邮箱；将 `.env.example` 复制为 `.env.local`，再填写以下值：
 
 - `NEXT_PUBLIC_SITE_URL`：生产站点的规范来源，例如 `https://example.com`。它用于 canonical、Open Graph、robots 和 sitemap。

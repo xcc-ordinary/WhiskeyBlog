@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { ArticleDocumentHeader } from "@/components/article-document-header";
 import { MdxContent } from "@/components/mdx-content";
-import { ArticleReadingTools, ArticleShareButton } from "@/components/article-reading-tools";
+import { ArticleReadingTools } from "@/components/article-reading-tools";
 import { extractArticleHeadings } from "@/lib/article";
 import { getPost, getPosts } from "@/lib/published-content";
 import { getPosts as getRepositoryPosts } from "@/lib/content";
@@ -40,20 +40,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="blog-article-page" lang="zh-CN">
-      <article className="blog-article site-container" aria-labelledby="article-title">
+      <article className="blog-article site-container" aria-label={post.title}>
         <div className="blog-article-topline">
           <Link className="blog-back-link" href="/blog">← 返回文章目录</Link>
         </div>
-        <header className="blog-article-header">
-          <p className="section-label">手记{post.tags.length ? ` / ${post.tags.join(" · ")}` : ""}</p>
-          <h1 id="article-title">{post.title}</h1>
-          <p className="blog-article-deck">{post.description}</p>
-          <div className="blog-article-meta">
-            <p><strong>{post.author ?? "Whiskey"}</strong><span>{post.date.replaceAll("-", ".")} · {post.readingMinutes ?? 1} 分钟阅读</span></p>
-            <ArticleShareButton title={post.title} />
-          </div>
-          {post.coverImage ? <figure className="blog-article-cover"><Image alt={post.coverAlt ?? post.title} fill priority sizes="(max-width: 760px) 100vw, 720px" src={post.coverImage} /></figure> : null}
-        </header>
+        <ArticleDocumentHeader document={post} />
         <ArticleReadingTools headings={headings} />
         <div className="blog-article-reading-layout"><MdxContent source={post.source.replace(/^\s*#\s+[^\n]+\r?\n+/, "")} /></div>
         {nextPost && nextPost.slug !== post.slug ? (

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ProjectCaseStudyNav } from "@/components/exhibition/project-case-study-nav";
+import { ArticleDocumentHeader } from "@/components/article-document-header";
 import { MdxContent } from "@/components/mdx-content";
-import { ArticleReadingTools, ArticleShareButton } from "@/components/article-reading-tools";
+import { ArticleReadingTools } from "@/components/article-reading-tools";
 import { extractArticleHeadings, estimateReadingMinutes } from "@/lib/article";
 import "./project-article.css";
 import { getProject, getProjects } from "@/lib/published-content";
@@ -29,18 +29,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="blog-article-topline">
           <Link className="blog-back-link" href="/projects">← 返回项目目录</Link>
         </div>
-        <header className="blog-article-header">
-          <p className="section-label">PROJECT / {project.date.slice(0, 4)}{project.tags.length ? ` · ${project.tags.join(" / ")}` : ""}</p>
-          <h1 id="article-title">{project.title}</h1>
-          <p className="blog-article-deck">{project.description}</p>
-          <div className="blog-article-meta">
-            <p><strong>{project.role || "Whiskey"}</strong><span>{project.date.replaceAll("-", ".")} · {estimateReadingMinutes(source)} 分钟阅读</span></p>
-            <ArticleShareButton title={project.title} />
-          </div>
-          {project.coverImage ? <figure className="blog-article-cover project-article-cover">
-            <Image alt={project.coverAlt ?? `${project.title} 项目封面`} src={project.coverImage} width={1600} height={1067} priority sizes="(max-width: 760px) calc(100vw - 40px), 900px" />
-          </figure> : null}
-        </header>
+        <ArticleDocumentHeader kind="project" document={{ ...project, author: project.role || "Whiskey", readingMinutes: estimateReadingMinutes(source) }} />
         <ArticleReadingTools headings={headings} />
         <div className="blog-article-reading-layout"><MdxContent source={source} /></div>
         <ProjectCaseStudyNav currentSlug={project.slug} projects={projects} />
