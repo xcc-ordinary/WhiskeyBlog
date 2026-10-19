@@ -13,7 +13,7 @@ import "../../node_modules/katex/dist/katex.min.css";
 import "../../app/studio/studio.css";
 const project = new URLSearchParams(location.search).get("kind") === "project";
 const sample = { kind: project ? "project" : "post", title: project ? "把一段想法，做成作品。" : "在日常里，留下自己的观察。", description: "关于设计、开发与生活的一点记录。慢慢写，把过程和想法留在同一页。", slug: "journal-sample", date: "2026-10-19", tags: ["设计", "日常"], author: "Whiskey", href: project ? "/projects/journal-sample" : "/blog/journal-sample", source: "## 从一个具体的问题开始\n\n一篇文章的价值，往往来自那些真实而细小的观察。记录过程，也记录仍然没有答案的问题。\n\n> [!note] 写作手记\n> 先写清楚发生了什么，再慢慢寻找它的意义。\n\n### 留下可复用的方法\n\n- 保持正文的呼吸感\n- 让复杂的信息各有其位\n- 给作品保留完整的表达空间\n\n| 阶段 | 记录 |\n| --- | --- |\n| 观察 | 从日常问题出发 |\n| 实践 | 在真实场景中验证 |\n\n```ts\nconst journal = { write: true, publish: false };\n```\n\n行内公式 $E = mc^2$，以及 **需要强调的一句话**。" };
-if (new URLSearchParams(location.search).has("duplicate")) { sample.source = "![过程](/images/whiskey-journal-card.png)\n\n" + sample.source; sample.coverImage = "/images/whiskey-journal-card.png"; }
+if (new URLSearchParams(location.search).has("duplicate")) { sample.source = "![过程](/images/whiskey-journal-card.png)\n\n" + sample.source; sample.coverImage = "/images/projects/listenband-editorial-cream-navy-v1.png"; }
 const photo = { id: "sample-photo", originalPath: "owner/photo.jpg", previewUrl: "/images/whiskey-journal-card.png", title: "把日常，收进相册。", alt: "日常影像", location: "青岛", category: "日常", caption: "记录平凡的一天。", capturedAt: "2026-10-19", createdAt: "2026-10-19T00:00:00Z", displayOrder: 0, status: "draft", crop: {}, thumbnailPath: null, galleryPath: null, detailPath: null, publishedAt: null };
 const photos = new URLSearchParams(location.search).has("photos");
 const photoEdit = new URLSearchParams(location.search).has("photoEdit");
