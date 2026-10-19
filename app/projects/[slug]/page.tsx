@@ -8,15 +8,15 @@ import { MdxContent } from "@/components/mdx-content";
 import { ArticleReadingTools, ArticleShareButton } from "@/components/article-reading-tools";
 import { extractArticleHeadings, estimateReadingMinutes } from "@/lib/article";
 import "./project-article.css";
-import { getProject, getProjects } from "@/lib/content";
+import { getProject, getProjects } from "@/lib/published-content";
 
-export function generateStaticParams() {
-  return getProjects().map(({ slug }) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getProjects()).map(({ slug }) => ({ slug }));
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
-  const projects = getProjects();
-  const project = getProject((await params).slug);
+  const projects = await getProjects();
+  const project = await getProject((await params).slug);
   if (!project) notFound();
 
   const source = project.source.replace(/^\s*#\s+[^\n]+\r?\n+/, "");
@@ -49,7 +49,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const project = getProject((await params).slug);
+  const project = await getProject((await params).slug);
   if (!project) return { title: "项目未找到" };
   return {
     title: project.title,

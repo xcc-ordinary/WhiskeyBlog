@@ -7,3 +7,10 @@ test("unauthenticated Studio access reaches the sign-in page without cinematic s
   await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
   await expect(page.locator("html")).not.toHaveAttribute("data-smooth-scroll");
 });
+
+test("expired email callbacks show a recoverable message on the login page", async ({ page }) => {
+  await page.goto("/auth/callback?error=access_denied&error_code=otp_expired");
+  await expect(page).toHaveURL(/\/studio\/login\?error=otp_expired$/);
+  await expect(page.getByRole("alert").filter({ hasText: "这封登录邮件" })).toContainText("已过期");
+  await expect(page.getByRole("button", { name: "发送魔法登录链接" })).toBeEnabled();
+});

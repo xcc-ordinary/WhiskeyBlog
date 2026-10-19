@@ -5,6 +5,7 @@ import path from "node:path";
 import { revalidatePath } from "next/cache";
 
 import { requireRepositoryContentWrites } from "@/lib/content-writes";
+import { cloudContentEnabled, saveCloudDocument, uploadCloudContentImage } from "@/lib/studio-content-store";
 import { requireOwner } from "@/lib/supabase/auth";
 import { maxProjectImageBytes, projectImageExtension, validProjectCoverPosition } from "@/lib/project-images";
 
@@ -16,7 +17,7 @@ const validSlug = (value: string) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: boolean; message: string }> {
   try {
     await requireOwner();
-    requireRepositoryContentWrites();
+    if (!cloudContentEnabled()) requireRepositoryContentWrites();
     const slug = clean(form.get("slug"));
     const originalSlug = clean(form.get("originalSlug"));
     const title = clean(form.get("title"));
@@ -35,11 +36,12 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
     const homeLabel = clean(form.get("homeLabel"));
     const tags = clean(form.get("tags")).split(",").map((tag) => tag.trim()).filter(Boolean);
     if (!validSlug(slug) || !title || !description || !source || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !tags.length) return { ok: false, message: "请填写项目名称、简介、日期、至少一个标签、笔记正文和有效 slug。" };
+    if (source.length > 200_000) return { ok: false, message: "正文请缩短到 200,000 字符以内。" };
     if (originalSlug && originalSlug !== slug) return { ok: false, message: "已有项目的 slug 不能直接修改，请新建一个项目。" };
     if (!Number.isSafeInteger(homeOrder) || homeOrder < 0) return { ok: false, message: "首页排序请填写大于或等于 0 的整数。" };
     if (!["cover", "contain"].includes(coverFit) || !validProjectCoverPosition(coverPosition)) return { ok: false, message: "请选择铺满或完整显示封面；焦点使用 center 或 0% 0% 至 100% 100% 的坐标。" };
 
-    await mkdir(projectDirectory, { recursive: true });
+    if (!cloudContentEnabled()) await mkdir(projectDirectory, { recursive: true });
     const targetPath = path.join(projectDirectory, `${slug}.mdx`);
     if (!originalSlug) {
       try { await access(targetPath); return { ok: false, message: "这个项目 slug 已经存在，请换一个名称。" }; }
@@ -68,7 +70,8 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
       source,
       "",
     ].filter(Boolean).join("\n");
-    await writeFile(targetPath, document, "utf8");
+    if (cloudContentEnabled()) await saveCloudDocument("projects", slug, document, Boolean(originalSlug));
+    else await writeFile(targetPath, document, "utf8");
     revalidatePath("/");
     revalidatePath("/projects");
     revalidatePath(`/projects/${slug}`);
@@ -84,12 +87,13 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
 export async function uploadStudioProjectImage(form: FormData): Promise<{ ok: boolean; message?: string; path?: string }> {
   try {
     await requireOwner();
-    requireRepositoryContentWrites();
+    if (!cloudContentEnabled()) requireRepositoryContentWrites();
     const file = form.get("image");
     if (!(file instanceof File) || !file.size || file.size > maxProjectImageBytes) return { ok: false, message: "请选择 3.75MB 以内的 JPG、PNG、WebP 或 GIF 图片。" };
     const bytes = Buffer.from(await file.arrayBuffer());
     const extension = projectImageExtension(bytes);
     if (!extension) return { ok: false, message: "图片格式无法识别，请使用 JPG、PNG、WebP 或 GIF。" };
+    if (cloudContentEnabled()) return { ok: true, path: await uploadCloudContentImage(bytes, extension) };
     const directory = path.join(process.cwd(), "public", "images", "projects", "uploads");
     const filename = `${crypto.randomUUID()}.${extension}`;
     await mkdir(directory, { recursive: true });

@@ -15,7 +15,7 @@ function safeCallbackPath(next: string | null, origin: string) {
   }
 }
 
-function loginRedirect(origin: string, reason: "missing-code" | "exchange-failed") {
+function loginRedirect(origin: string, reason: "missing-code" | "exchange-failed" | "otp_expired") {
   const login = new URL("/studio/login", origin);
   login.searchParams.set("error", reason);
   return NextResponse.redirect(login);
@@ -24,11 +24,15 @@ function loginRedirect(origin: string, reason: "missing-code" | "exchange-failed
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+  const tokenHash = url.searchParams.get("token_hash");
   const safeNext = safeCallbackPath(url.searchParams.get("next"), url.origin);
-  if (!code) return loginRedirect(url.origin, "missing-code");
+  if (url.searchParams.has("error")) return loginRedirect(url.origin, url.searchParams.get("error_code") === "otp_expired" ? "otp_expired" : "exchange-failed");
+  if (!code && !(tokenHash && url.searchParams.get("type") === "email")) return loginRedirect(url.origin, "missing-code");
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { error } = tokenHash && url.searchParams.get("type") === "email"
+    ? await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "email" })
+    : await supabase.auth.exchangeCodeForSession(code!);
   if (error) return loginRedirect(url.origin, "exchange-failed");
 
   return NextResponse.redirect(new URL(safeNext, url.origin));

@@ -2,19 +2,19 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PostEditor } from "@/components/studio/post-editor";
 import { ProductionContentNotice } from "@/components/studio/production-content-notice";
-import { repositoryContentWritesAvailable } from "@/lib/content-writes";
-import { getPost, getPosts } from "@/lib/content";
+import { studioContentWritesAvailable } from "@/lib/content-writes";
+import { getPost, getPosts } from "@/lib/published-content";
 import { MediaStudioAuthorizationError, requireOwner } from "@/lib/supabase/auth";
 
 export const metadata = { title: "Notes 工作台", robots: { index: false, follow: false } };
 export default async function WritingPage({ searchParams }: { searchParams: Promise<{ post?: string; mode?: string }> }) {
   try { await requireOwner(); } catch (error) { if (error instanceof MediaStudioAuthorizationError) redirect("/studio/login?error=session-missing"); throw error; }
-  if (!repositoryContentWritesAvailable()) return <ProductionContentNotice kind="Notes" />;
+  if (!studioContentWritesAvailable()) return <ProductionContentNotice kind="Notes" />;
   const query = await searchParams;
-  const posts = getPosts();
+  const posts = await getPosts();
   const isNew = query.mode === "new" || posts.length === 0;
   const selectedSlug = query.post ?? posts[0]?.slug;
-  const post = isNew || !selectedSlug ? null : getPost(selectedSlug);
+  const post = isNew || !selectedSlug ? null : await getPost(selectedSlug);
   if (!isNew && selectedSlug && !post) redirect("/studio/writing?mode=new");
   return (
     <section className="studio-writing notes-workbench">

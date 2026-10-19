@@ -9,12 +9,16 @@ export function validProjectCoverPosition(value: string): boolean {
   return !!coordinates && coordinates.slice(1).every(coordinate => Number(coordinate) <= 100);
 }
 
-/** Local Markdown images are already supported by the site's image routes. */
+/** Covers may use site images or the public Studio illustration bucket. */
 export function firstProjectBodyImage(source: string): { src: string; alt: string } | undefined {
   const prose = source.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, "").replace(/`[^`\n]+`/g, "");
   for (const match of prose.matchAll(/!\[([^\]]*)\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+["'][^\n]*?["'])?\s*\)/g)) {
     const src = match[2].replace(/^<|>$/g, "");
     if (/^\/(?:images|project-media)\//.test(src) && !src.includes("..")) return { src, alt: match[1] };
+    try {
+      const url = new URL(src);
+      if (url.protocol === "https:" && /^[a-z0-9-]+\.supabase\.co$/.test(url.hostname) && !url.username && !url.password && url.pathname.startsWith("/storage/v1/object/public/content-images/")) return { src, alt: match[1] };
+    } catch { /* Relative or unsupported paths are not cover candidates. */ }
   }
   return undefined;
 }

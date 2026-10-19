@@ -9,8 +9,14 @@ export function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   async function requestMagicLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setIsSubmitting(true); setMessage(null);
-    const { error } = await createSupabaseBrowserClient().auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/studio` } });
-    setIsSubmitting(false); setMessage(error ? `无法发送登录链接：${error.message}` : "登录链接已发送，请在邮箱中打开它。");
+    try {
+      const { error } = await createSupabaseBrowserClient().auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+      setMessage(error ? `无法发送登录链接：${error.message}` : "登录链接已发送。请在当前浏览器打开最新邮件；链接只能使用一次。若邮件跳转到 localhost，请先修正 Supabase 的站点地址与回调配置。");
+    } catch {
+      setMessage("暂时无法连接登录服务，请检查网络后重试。");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
   return <form className="studio-sign-in-form" onSubmit={requestMagicLink}>
     <label htmlFor="studio-email">邮箱</label>

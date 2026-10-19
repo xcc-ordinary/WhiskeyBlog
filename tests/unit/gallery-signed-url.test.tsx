@@ -1,17 +1,18 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AsymmetricalParallaxGallery } from "@/components/exhibition/asymmetrical-parallax-gallery";
+import { ArchiveMosaic } from "@/components/exhibition/archive-mosaic";
 import { LanguageProvider } from "@/components/language-provider";
 import type { PublicArchivePhotograph } from "@/lib/public-photographs";
 
 vi.mock("@/components/exhibition/use-scroll-enhancement", () => ({ useScrollEnhancement: () => false }));
 
 function renderGallery(photographs: PublicArchivePhotograph[]) {
-  return render(<LanguageProvider><AsymmetricalParallaxGallery photographs={photographs} /></LanguageProvider>);
+  return render(<LanguageProvider><ArchiveMosaic photographs={photographs} /></LanguageProvider>);
 }
 
-describe("AsymmetricalParallaxGallery", () => {
+afterEach(cleanup);
+describe("ArchiveMosaic", () => {
   it("loads a signed private-storage URL directly instead of through Next image optimization", () => {
     const signedUrl = "https://project.supabase.co/storage/v1/object/sign/derivatives/owner/photo.png?token=short-lived";
     renderGallery([{
@@ -21,11 +22,10 @@ describe("AsymmetricalParallaxGallery", () => {
     expect(screen.getByRole("img", { name: "健身照" }).getAttribute("src")).toBe(signedUrl);
   });
 
-  it("uses a pinned horizontal track with editorially offset gallery elements", () => {
+  it("does not substitute private uploads or invented photographs for an empty archive", () => {
     const { container } = renderGallery([]);
 
-    expect(container.querySelector(".gallery-wrapper .gallery-pinned .gallery-track")).toBeTruthy();
-    expect(container.querySelectorAll(".gallery-item")).toHaveLength(4);
-    expect(container.querySelector(".horizontal-gallery-quote")).toBeTruthy();
+    expect(container.querySelector(".archive-mosaic")).toBeTruthy();
+    expect(screen.queryAllByRole("img")).toHaveLength(0);
   });
 });

@@ -6,12 +6,12 @@ import { notFound } from "next/navigation";
 import { MdxContent } from "@/components/mdx-content";
 import { ArticleReadingTools, ArticleShareButton } from "@/components/article-reading-tools";
 import { extractArticleHeadings } from "@/lib/article";
-import { getPost, getPosts } from "@/lib/content";
+import { getPost, getPosts } from "@/lib/published-content";
 
-export function generateStaticParams() { return getPosts().map(({ slug }) => ({ slug })); }
+export async function generateStaticParams() { return (await getPosts()).map(({ slug }) => ({ slug })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const post = getPost((await params).slug);
+  const post = await getPost((await params).slug);
   if (!post) return { title: "文章未找到" };
   return {
     title: post.title,
@@ -30,10 +30,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const post = getPost((await params).slug);
+  const post = await getPost((await params).slug);
   if (!post) notFound();
   const headings = extractArticleHeadings(post.source).filter((heading) => heading.text !== "目录");
-  const posts = getPosts();
+  const posts = await getPosts();
   const currentIndex = posts.findIndex((item) => item.slug === post.slug);
   const nextPost = posts[(currentIndex + 1) % posts.length];
 

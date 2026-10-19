@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { HomeStudio } from "@/components/exhibition/home-studio";
-import { getProjects } from "@/lib/content";
+import { getProjects } from "@/lib/published-content";
 import { getPublicArchivePhotographs, type PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
 const playwrightGalleryFixture: PublicArchiveSourcePhotograph[] = [
@@ -19,5 +19,5 @@ export default async function Home() {
     ? await getPublicArchivePhotographs({ getPublished: async () => playwrightGalleryFixture, signDerivativeUrl: async () => "/archive-e2e-frame.svg" })
     : await getPublicArchivePhotographs();
 
-  return <HomeStudio photographs={photographs} projects={getProjects()} />;
+  return <HomeStudio photographs={photographs} projects={await getProjects()} />;
 }

@@ -34,7 +34,7 @@ Whiskey 的个人杂志网站 **The Personal Journal**，使用 Next.js、TypeSc
 - `currentFacts`：About 页的三条当前状态；可按需改为真实的在做项目、关注方向和所在地。
 - `xiaohongshuLink`：真实小红书主页 URL、链接文案与说明。当前 URL 只是占位入口，发布前必须替换。
 
-项目和文章继续由本地 MDX 管理：`content/projects/*.mdx` 与 `content/posts/*.mdx`。每份文件都必须包含 `title`、`description`、`date`（`YYYY-MM-DD`）、`tags` 和 `slug`。项目可额外填写字符串类型的 `coverImage`、`coverAlt`、`role`；图片地址请替换为自己拥有使用权的素材，并写准确的替代文本。
+项目和文章默认由本地 MDX 管理，也支持 Supabase 线上覆盖：`content/projects/*.mdx` 与 `content/posts/*.mdx`。每份文件都必须包含 `title`、`description`、`date`（`YYYY-MM-DD`）、`tags` 和 `slug`。项目可额外填写字符串类型的 `coverImage`、`coverAlt`、`role`；图片地址请替换为自己拥有使用权的素材，并写准确的替代文本。
 
 本人照片与项目图片放在 `public/images/`，项目封面通过 MDX 或本地 Studio 维护；`public/images/placeholders/hero-editorial.svg` 仅作为缺图回退。设计探索稿不自动成为生产素材，应先确认内容与裁切。保留历史素材不意味着公开页面需要继续展示旧风格背景。
 
@@ -81,7 +81,7 @@ Media Studio 使用 Supabase Auth、私有 Storage 和 Postgres。不要在仓�
 3. 部署后，以所有者邮箱登录 `/studio`，发布一张带有衍生图路径和完整替代文本的照片，再访问 `/archive` 验收。签名图链接会定期刷新，因此页面不能被当作静态导出。
 4. 在真实生产域名检查首页、项目、关于、博客、Archive 与 `/studio`；分别用桌面和窄屏尺寸测试键盘 Tab 焦点、移动端 `Index +` 菜单与 Escape 返回焦点，并在系统“减少动态效果”开启时确认阅读和导航不依赖动画。这些是部署后的待执行检查，不是本仓库的生产测试声明。
 
-Vercel 的部署文件系统不可作为内容数据库：线上 `/studio/writing` 与 `/studio/projects` 会显示只读提示，并拒绝写入。文章和项目请在本地 Studio 或编辑器中修改，提交到 GitHub 后由 Vercel 重新部署；摄影档案继续通过 Supabase 在线管理。
+线上作品与文章发布配置见 [docs/studio-online-setup.md](docs/studio-online-setup.md)。应用 `0004_studio_documents.sql` 后设置 `STUDIO_CONTENT_BACKEND=supabase`，Studio 即可将文章和项目保存到数据库、图片上传到公开对象存储，公开页面读取同一份内容。启用前保持线上只读，本地仍可通过 MDX 和 Git 发布。
 
 ## 发布
 

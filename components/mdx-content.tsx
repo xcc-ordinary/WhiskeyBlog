@@ -69,7 +69,7 @@ export async function MdxContent({ source }: { source: string }) {
   return <div className="prose markdown-document"><Markdown
     components={components}
     remarkRehypeOptions={{ footnoteLabel: "脚注", footnoteBackLabel: "返回正文" }}
-    remarkPlugins={[remarkGfm, remarkMath, [remarkObsidian, { wikiLinks: publishedNoteLinks() }]]}
+    remarkPlugins={[remarkGfm, remarkMath, [remarkObsidian, { wikiLinks: await publishedNoteLinks() }]]}
     rehypePlugins={[rehypeRaw, [rehypeSanitize, schema], [rehypeKatex, { strict: "ignore", trust: false }]]}
     urlTransform={(url) => safeMarkdownUrl(url) ?? ""}
   >{source}</Markdown></div>;

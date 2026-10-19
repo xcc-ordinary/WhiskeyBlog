@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
-import { getPosts, getProjects } from "@/lib/content";
+import { getPosts, getProjects } from "@/lib/published-content";
 import { getSiteUrl } from "@/lib/site-url";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl();
   const staticRoutes = ["/", "/about", "/projects", "/archive", "/blog"];
-  const contentRoutes = [...getProjects(), ...getPosts()];
+  const contentRoutes = [...await getProjects(), ...await getPosts()];
 
   return [
     ...staticRoutes.map((href) => ({

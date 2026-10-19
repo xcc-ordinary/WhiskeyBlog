@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 import { NotesFilter } from "@/components/exhibition/notes-filter";
-import { getPosts } from "@/lib/content";
+import { getPosts } from "@/lib/published-content";
 
 export const metadata: Metadata = {
   title: "博客",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
   return (
     <div className="blog-page" lang="zh-CN">
       <ExplorerHero
@@ -27,7 +27,7 @@ export default function BlogPage() {
             </div>
             <p>从实践出发，记录可复用的方法、工具与仍在形成中的想法。</p>
           </div>
-          <NotesFilter posts={getPosts()} />
+          <NotesFilter posts={await getPosts()} />
         </div>
       </div>
     </div>

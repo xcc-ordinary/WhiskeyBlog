@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CoastalProjectBooks } from "@/components/exhibition/coastal-project-books";
-import { getProjects } from "@/lib/content";
+import { getProjects } from "@/lib/published-content";
 
 export const metadata: Metadata = {
   title: "项目",
@@ -9,6 +9,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/projects" },
 };
 
-export default function ProjectsPage() {
-  return <CoastalProjectBooks projects={getProjects()} />;
+export default async function ProjectsPage() {
+  return <CoastalProjectBooks projects={await getProjects()} />;
 }

@@ -5,7 +5,8 @@ export const metadata = { title: "Studio sign in", robots: { index: false, follo
 const loginErrors: Record<string, string> = {
   "missing-code": "登录链接不完整。请回到邮箱，打开最新的一封登录邮件。",
   "exchange-failed": "登录链接已失效、已被使用，或 Supabase 未允许当前回调地址。请重新发送一封登录邮件。",
-  "session-missing": "登录链接已打开，但浏览器没有保存会话。请使用同一浏览器打开邮件链接，并确认 Supabase 允许当前本地地址。",
+  "session-missing": "浏览器中还没有有效会话。请发送新链接，并在请求登录时使用的同一浏览器中打开。",
+  "otp_expired": "这封登录邮件已过期或链接已被使用。请重新发送，只打开最新邮件中的链接。",
 };
 
 export default async function StudioLoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
