@@ -9,9 +9,10 @@ import { ArticleReadingTools, ArticleShareButton } from "@/components/article-re
 import { extractArticleHeadings, estimateReadingMinutes } from "@/lib/article";
 import "./project-article.css";
 import { getProject, getProjects } from "@/lib/published-content";
+import { getProjects as getRepositoryProjects } from "@/lib/content";
 
-export async function generateStaticParams() {
-  return (await getProjects()).map(({ slug }) => ({ slug }));
+export function generateStaticParams() {
+  return getRepositoryProjects().map(({ slug }) => ({ slug }));
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {

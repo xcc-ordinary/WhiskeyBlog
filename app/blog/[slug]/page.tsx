@@ -7,8 +7,9 @@ import { MdxContent } from "@/components/mdx-content";
 import { ArticleReadingTools, ArticleShareButton } from "@/components/article-reading-tools";
 import { extractArticleHeadings } from "@/lib/article";
 import { getPost, getPosts } from "@/lib/published-content";
+import { getPosts as getRepositoryPosts } from "@/lib/content";
 
-export async function generateStaticParams() { return (await getPosts()).map(({ slug }) => ({ slug })); }
+export function generateStaticParams() { return getRepositoryPosts().map(({ slug }) => ({ slug })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const post = await getPost((await params).slug);

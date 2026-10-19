@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { connection } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireOwner } from "@/lib/supabase/auth";
 import type { Database } from "@/lib/supabase/types";
@@ -10,6 +11,9 @@ export function cloudContentEnabled() { return process.env.STUDIO_CONTENT_BACKEN
 /** Anonymous, uncached reads: saved Studio documents are published immediately. */
 export async function readCloudDocuments(collection: ContentCollection) {
   if (!cloudContentEnabled()) return [];
+  // Online edits are request-time data, including when local MDX supplied the
+  // build's known slugs. Never query Supabase while prerendering an article.
+  await connection();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error("线上内容服务缺少 Supabase 公开配置。");
@@ -18,7 +22,10 @@ export async function readCloudDocuments(collection: ContentCollection) {
     global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
   });
   const { data, error } = await client.from("studio_documents").select("slug, document").eq("collection", collection);
-  if (error) throw new Error("无法读取线上内容，请检查 Supabase 连接及 0004 迁移。");
+  if (error) {
+    const code = /^[a-z0-9]+$/i.test(error.code ?? "") ? error.code : "network";
+    throw new Error(`无法读取线上内容，请检查 Supabase 连接及 0004 迁移。（${code}）`);
+  }
   return data;
 }
 
