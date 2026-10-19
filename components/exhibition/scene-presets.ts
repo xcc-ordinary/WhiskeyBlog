@@ -11,7 +11,7 @@ export type ScenePreset = {
 
 // Coordinates refer to the original painting, with (0, 0) at its top left.
 export const scenePresets: Record<SceneKind, ScenePreset> = {
-  harbor: { horizon: .74, water: 1, depth: 1.15, model: "airship", anchor: [.73, .43], scale: .64 },
+  harbor: { horizon: .74, water: 1, depth: 1.15, model: null, anchor: [.73, .43], scale: 0 },
   yard: { horizon: .69, water: .65, depth: 1.4, model: "airship", anchor: [.47, .36], scale: .38 },
   observatory: { horizon: .64, water: .7, depth: 1.65, model: "airship", anchor: [.54, .4], scale: .23 },
   archive: { horizon: .67, water: .55, depth: 1.75, model: "sailboat", anchor: [.76, .71], scale: .24 },

@@ -18,5 +18,5 @@ export default async function ProjectWritingPage({ searchParams }: { searchParam
   const selectedSlug = query.project ?? projects[0]?.slug;
   const project = isNew || !selectedSlug ? null : getProject(selectedSlug);
   if (!isNew && selectedSlug && !project) redirect("/studio/projects?mode=new");
-  return <section className="studio-writing"><div className="site-container"><header className="writing-heading"><div><p className="studio-kicker">PRIVATE / PROJECT DESK</p><h1>{project ? "编辑项目。" : "建立一个新项目。"}</h1><p>维护项目名称、封面、标签与 Markdown 项目笔记，保存后同步更新公开项目页。</p></div><Link className="studio-sign-out" href="/studio">返回 Media Studio</Link></header><ProjectNotesEditor project={project} projects={projects} /></div></section>;
+  return <section className="studio-writing"><div className="site-container"><header className="writing-heading"><div><p className="studio-kicker">PRIVATE / PROJECT DESK</p><h1>{project ? "编辑项目。" : "建立一个新项目。"}</h1><p>维护项目名称、封面、标签与 Markdown 项目笔记，保存后同步更新公开项目页。</p></div><Link className="studio-sign-out" href="/studio">返回 Media Studio</Link></header><ProjectNotesEditor key={project?.slug ?? "new"} project={project} projects={projects} /></div></section>;
 }

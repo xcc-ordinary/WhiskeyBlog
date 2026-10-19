@@ -41,17 +41,6 @@ function createPublicArchiveClient() {
   );
 }
 
-function createDerivativeSigner(client = createPublicArchiveClient()) {
-  return async (path: string, expiresInSeconds: number) => {
-    const canonicalPath = normalizeDerivativePath(path);
-    if (!canonicalPath) return null;
-    const objectPath = canonicalPath.slice("derivatives/".length);
-    const { data, error } = await client.storage.from("derivatives").createSignedUrl(objectPath, expiresInSeconds);
-    if (error || !data?.signedUrl) return null;
-    return data.signedUrl;
-  };
-}
-
 function toPublicRecord(photo: PublishedPhotograph, galleryUrl: string): PublicArchivePhotograph {
   return {
     id: photo.id,
@@ -74,12 +63,26 @@ export async function getPublicArchivePhotographs(options: PublicPhotographOptio
     const archiveClient = options.getPublished && options.signDerivativeUrl ? null : createPublicArchiveClient();
     const getPublished: () => Promise<PublicArchiveSourcePhotograph[]> = options.getPublished
       ?? (() => getPublishedPhotographs(archiveClient!));
-    const signDerivativeUrl = options.signDerivativeUrl ?? createDerivativeSigner(archiveClient!);
+    const signDerivativeUrl = options.signDerivativeUrl;
     const photographs = await getPublished();
     const safePublished = photographs.filter((photo) =>
       (photo.status === undefined || photo.status === "published")
       && Boolean(photo.galleryPath && normalizeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
     );
+
+    // Sign the public projection in one request so a slow connection cannot
+    // leave individual cards missing while their neighbours have loaded.
+    if (!signDerivativeUrl) {
+      const objectPaths = safePublished.map(photo => normalizeDerivativePath(photo.galleryPath!)!.slice("derivatives/".length));
+      if (!objectPaths.length) return [];
+      const { data, error } = await archiveClient!.storage.from("derivatives").createSignedUrls(objectPaths, SIGNED_DERIVATIVE_URL_SECONDS);
+      if (error || !data) return [];
+      const urls = new Map(data.filter(item => !item.error && item.path && item.signedUrl).map(item => [item.path, item.signedUrl!]));
+      return safePublished.flatMap((photo, i) => {
+        const url = urls.get(objectPaths[i]);
+        return url ? [toPublicRecord(photo, url)] : [];
+      });
+    }
 
     const signed = await Promise.all(
       safePublished.map(async (photo) => {

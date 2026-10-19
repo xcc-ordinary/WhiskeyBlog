@@ -8,5 +8,5 @@ import { ExplorerHero } from "@/components/exhibition/explorer-hero";
 export function ExhibitionHero(): JSX.Element {
   const { content, language } = useLanguage();
 
-  return <ExplorerHero eyebrow={content.home.kicker} title={content.home.title} description={content.home.summary} image="/images/site-backgrounds/home-dieselpunk-harbor-v2.webp" variant="home" cta={{ href: "#selected-work", label: language === "zh" ? "探索精选作品" : "Explore selected work" }} />;
+  return <ExplorerHero eyebrow={content.home.kicker} title={content.home.title} description={content.home.summary} variant="home" cta={{ href: "#selected-work", label: language === "zh" ? "探索精选作品" : "Explore selected work" }} />;
 }

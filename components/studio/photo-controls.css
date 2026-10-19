@@ -1,0 +1,10 @@
+/* Photo-library layout only. Control appearance is shared in app/visual-language.css. */
+.studio-admin .studio-library-tabs {
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--wl-rule);
+  flex-wrap: wrap;
+}
+.studio-admin .studio-library .studio-tab span { font: inherit; margin: 0; opacity: .75; }
+.studio-admin .studio-library .studio-row-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.studio-admin .studio-library .studio-photo-upload { min-width: 110px; }

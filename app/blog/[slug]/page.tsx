@@ -36,17 +36,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const posts = getPosts();
   const currentIndex = posts.findIndex((item) => item.slug === post.slug);
   const nextPost = posts[(currentIndex + 1) % posts.length];
-  const titleParts = post.title.match(/^([A-Za-z][A-Za-z0-9]*(?:\s+[A-Za-z][A-Za-z0-9]*)*)\s+(.+)$/u);
 
   return (
-    <div className="blog-article-page">
+    <div className="blog-article-page" lang="zh-CN">
       <article className="blog-article site-container" aria-labelledby="article-title">
         <div className="blog-article-topline">
           <Link className="blog-back-link" href="/blog">← 返回文章目录</Link>
         </div>
         <header className="blog-article-header">
-          <p className="section-label">{titleParts?.[1] ?? "Whiskey 手记"} · 安装手册 · {post.date.slice(0, 7).replace("-", ".")}</p>
-          <h1 aria-label={post.title} id="article-title">{titleParts?.[2] === "最新版安装教程" ? <><span>最新版</span><span>安装教程</span></> : (titleParts?.[2] ?? post.title)}</h1>
+          <p className="section-label">手记{post.tags.length ? ` / ${post.tags.join(" · ")}` : ""}</p>
+          <h1 id="article-title">{post.title}</h1>
           <p className="blog-article-deck">{post.description}</p>
           <div className="blog-article-meta">
             <p><strong>{post.author ?? "Whiskey"}</strong><span>{post.date.replaceAll("-", ".")} · {post.readingMinutes ?? 1} 分钟阅读</span></p>

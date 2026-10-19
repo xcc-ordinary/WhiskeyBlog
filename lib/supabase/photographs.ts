@@ -215,13 +215,32 @@ export async function unpublishPhotograph(id: string, client?: PhotographClient)
 export async function getStudioPhotographs(client?: PhotographClient): Promise<StudioPhotograph[]> {
   const supabase = client ?? (await createSupabaseServerClient());
   const photographs = await getOwnerPhotographs(supabase);
-  return Promise.all(photographs.map(async (photograph) => {
-    const derivative = normalizeDerivativePath(photograph.galleryPath ?? photograph.thumbnailPath);
-    const bucket = derivative ? "derivatives" : "originals";
-    const objectPath = derivative ? derivative.slice("derivatives/".length) : photograph.originalPath;
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, 60 * 60);
-    return { ...photograph, previewUrl: error ? null : data?.signedUrl ?? null };
+  // Small thumbnails for the library, originals only for unpublished drafts.
+  const sources = photographs.map(photograph => {
+    const derivative = normalizeDerivativePath(photograph.thumbnailPath ?? photograph.galleryPath);
+    return { bucket: derivative ? "derivatives" : "originals", path: derivative ? derivative.slice("derivatives/".length) : photograph.originalPath };
+  });
+  const previews = new Map<string, string>();
+  await Promise.all(["derivatives", "originals"].map(async bucket => {
+    const paths = [...new Set(sources.filter(source => source.bucket === bucket).map(source => source.path))];
+    if (!paths.length) return;
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, 60 * 60);
+    if (!error) for (const item of data ?? []) if (!item.error && item.path && item.signedUrl) previews.set(`${bucket}/${item.path}`, item.signedUrl);
   }));
+  return photographs.map((photograph, index) => ({ ...photograph, previewUrl: previews.get(`${sources[index].bucket}/${sources[index].path}`) ?? null }));
+}
+
+/** Fetch one editor preview without querying/signing the entire library. */
+export async function getStudioPhotograph(id: string, client?: PhotographClient): Promise<StudioPhotograph | null> {
+  const supabase = client ?? (await createSupabaseServerClient());
+  await requireOwner(supabase);
+  const { data, error } = await supabase.from("photographs").select("*").eq("id", id).maybeSingle();
+  throwIfError(error);
+  if (!data) return null;
+  const photograph = mapPhotograph(data);
+  const derivative = normalizeDerivativePath(photograph.galleryPath ?? photograph.thumbnailPath);
+  const { data: preview, error: signError } = await supabase.storage.from(derivative ? "derivatives" : "originals").createSignedUrl(derivative ? derivative.slice("derivatives/".length) : photograph.originalPath, 60 * 60);
+  return { ...photograph, previewUrl: signError ? null : preview?.signedUrl ?? null };
 }
 
 /** Permanently removes an owner photograph record and its private source/display files. */

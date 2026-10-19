@@ -1,0 +1,32 @@
+export const maxProjectImageBytes = 3.75 * 1024 * 1024;
+export const projectImageAccept = "image/jpeg,image/png,image/webp,image/gif";
+
+export type ProjectCoverFit = "cover" | "contain";
+
+export function validProjectCoverPosition(value: string): boolean {
+  if (value === "center") return true;
+  const coordinates = value.match(/^(\d+(?:\.\d+)?)% (\d+(?:\.\d+)?)%$/);
+  return !!coordinates && coordinates.slice(1).every(coordinate => Number(coordinate) <= 100);
+}
+
+/** Local Markdown images are already supported by the site's image routes. */
+export function firstProjectBodyImage(source: string): { src: string; alt: string } | undefined {
+  const prose = source.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, "").replace(/`[^`\n]+`/g, "");
+  for (const match of prose.matchAll(/!\[([^\]]*)\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+["'][^\n]*?["'])?\s*\)/g)) {
+    const src = match[2].replace(/^<|>$/g, "");
+    if (/^\/(?:images|project-media)\//.test(src) && !src.includes("..")) return { src, alt: match[1] };
+  }
+  return undefined;
+}
+
+// Derive the extension from the bytes, never from an uploaded filename.
+export function projectImageExtension(bytes: Uint8Array): string | null {
+  if (bytes.length < 12) return null;
+  const starts = (...signature: number[]) => signature.every((value, index) => bytes[index] === value);
+  const text = (start: number, end: number) => String.fromCharCode(...bytes.slice(start, end));
+  if (starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "png";
+  if (starts(0xff, 0xd8, 0xff)) return "jpg";
+  if (["GIF87a", "GIF89a"].includes(text(0, 6))) return "gif";
+  if (text(0, 4) === "RIFF" && text(8, 12) === "WEBP") return "webp";
+  return null;
+}

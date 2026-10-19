@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { createClient } from "@supabase/supabase-js";
+vi.mock("@supabase/supabase-js", () => ({ createClient: vi.fn() }));
 
 import { getPublicArchivePhotographs } from "@/lib/public-photographs";
 import type { PublishedPhotograph } from "@/lib/supabase/types";
@@ -31,6 +33,28 @@ const fakePublishedClient = {
 };
 
 describe("public photograph archive", () => {
+  it("batches only public derivatives and matches responses by path rather than order", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "local-test-value");
+    const createSignedUrls = vi.fn().mockResolvedValue({ error: null, data: [
+      { path: "published/second.jpg", error: null, signedUrl: "https://images.example/second" },
+      { path: "published/gallery.jpg", error: null, signedUrl: "https://images.example/first" },
+    ] });
+    vi.mocked(createClient).mockReturnValue({ storage: { from: vi.fn().mockReturnValue({ createSignedUrls }) } } as unknown as ReturnType<typeof createClient>);
+    try {
+      const result = await getPublicArchivePhotographs({ getPublished: async () => [
+        published,
+        { ...published, id: "second", galleryPath: "derivatives/published/second.jpg" },
+        { ...published, id: "draft", status: "draft" },
+        { ...published, id: "original", galleryPath: "originals/private.jpg" },
+      ] });
+      expect(createSignedUrls).toHaveBeenCalledWith(["published/gallery.jpg", "published/second.jpg"], 900);
+      expect(result.map(photo => [photo.id, photo.galleryUrl])).toEqual([
+        ["published-id", "https://images.example/first"], ["second", "https://images.example/second"],
+      ]);
+    } finally { vi.unstubAllEnvs(); }
+  });
+
   it("maps only published gallery derivatives into the archive mosaic", async () => {
     const photographs = await getPublicArchivePhotographs(fakePublishedClient);
     expect(photographs[0]).toEqual(expect.objectContaining({ alt: "Published image", galleryUrl: expect.stringContaining("derivatives") }));

@@ -1,0 +1,2093 @@
+/* Whiskey’s Odyssey: the reference coast, a personal journal, and project previews. */
+
+.summer-portal {
+  --portal-paper: #fbf9f0;
+  --portal-ink: #183f54;
+  --portal-blue: #1269b8;
+  background: var(--portal-paper);
+  color: var(--portal-ink);
+  padding: 0 56px;
+  max-width: 1800px;
+  margin: auto;
+}
+
+body:has(.summer-portal) .coastal-site #header .editorial-header-inner {
+  width: calc(100% - 112px);
+  min-height: 88px;
+  border-bottom: 1px solid #183f5430;
+}
+
+body:has(.summer-portal) .coastal-site #header .home-wordmark {
+  font-size: 33px;
+  font-style: italic;
+}
+
+body:has(.summer-portal) .summer-footer {
+  display: none;
+}
+
+.summer-portal #home-title {
+  font: 400 clamp(110px,13vw,205px)/1.14 var(--font-lora),Georgia,serif;
+  margin: 0;
+}
+
+.portal-name-line {
+  display: block;
+}
+
+.portal-premise {
+  font: 500 28px/1.65 var(--font-noto-serif),STSong,serif;
+  margin: 0;
+  color: var(--portal-ink);
+  letter-spacing: -.02em;
+}
+
+.portal-exhibition {
+  align-items: stretch;
+}
+
+.summer-portal .portal-hero {
+  position: relative;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  background: none;
+  overflow: visible;
+  isolation: auto;
+}
+
+.summer-portal .portal-hero::before {
+  display: none;
+}
+
+.portal-art {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #176fba;
+  isolation: isolate;
+}
+
+.summer-portal .summer-art {
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.summer-scene, .summer-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.summer-stage {
+  opacity: 0;
+  transition: opacity .8s;
+}
+
+.summer-scene[data-state=ready] .summer-stage {
+  opacity: 1;
+}
+
+.summer-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.summer-pause {
+  position: absolute;
+  bottom: 18px;
+  background: #fbf9f0dd;
+  color: #183f54;
+  border: 1px solid #183f5440;
+  z-index: 4;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.portal-horizon-note {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  color: #58707b;
+}
+
+.portal-horizon-note>span {
+  font: 400 12px/1.6 var(--font-inter),sans-serif;
+}
+
+.summer-harbor-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.portal-rooms {
+  flex-direction: column;
+}
+
+.portal-index-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  font: 500 20px/1.6 var(--font-noto-serif),STSong,serif;
+  color: #183f54;
+}
+
+.portal-index-title>span {
+  font: 400 12px/1.6 var(--font-inter),sans-serif;
+  color: #58707b;
+}
+
+.portal-room-button {
+  flex: 1;
+  border: 0;
+  background: none;
+  color: #183f54;
+  cursor: pointer;
+}
+
+.portal-mini-book {
+  grid-column: 1;
+  grid-row: 1/3;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  font: italic 22px/1 var(--font-lora),Georgia,serif;
+}
+
+.portal-mini-book img {
+  object-fit: cover;
+}
+
+[data-room-trigger=lumi] .portal-mini-book {
+  background: #1766a5;
+  color: #fff9ed;
+}
+
+.portal-room-type {
+  grid-column: 2;
+  grid-row: 1;
+  font: 400 12px/1.7 var(--font-inter),sans-serif;
+}
+
+.portal-room-title {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font: 500 26px/1.4 var(--font-noto-serif),var(--font-lora),serif;
+}
+
+.portal-room-title>span {
+  font: 400 20px/1 var(--font-inter),sans-serif;
+  color: #58707b;
+  transition: transform .4s cubic-bezier(.22,1,.36,1);
+}
+
+.portal-colophon {
+  min-height: 70px;
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  border-top: 1px solid #183f5430;
+  font: 400 11px/1.6 var(--font-inter),sans-serif;
+  color: #58707b;
+}
+
+.portal-colophon>a {
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.portal-colophon>a:last-child {
+  margin-left: auto;
+  font-size: 14px;
+}
+
+.portal-dialog:not([open]) {
+  display: none;
+}
+
+.portal-dialog[open] {
+  display: block;
+  width: min(1180px,calc(100vw - 80px));
+  max-width: none;
+  max-height: 90dvh;
+  padding: 0;
+  border: 0;
+  background: var(--portal-paper);
+  color: var(--portal-ink);
+  margin: auto;
+  overflow: auto;
+  box-shadow: 0 30px 100px #082f5140;
+}
+
+.portal-dialog-frame {
+  animation: portal-unfold .65s cubic-bezier(.22,1,.36,1);
+}
+
+.portal-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 30px;
+  border-bottom: 1px solid #183f5426;
+}
+
+.portal-dialog-header p {
+  line-height: 1.6;
+  margin: 0 0 10px;
+  color: #58707b;
+}
+
+.portal-dialog-header h2 {
+  font: 500 38px/1.4 var(--font-noto-serif),var(--font-lora),serif;
+  margin: 0;
+  letter-spacing: -.03em;
+}
+
+.portal-dialog-header>button {
+  width: 44px;
+  height: 44px;
+  font-weight: 300;
+  color: var(--portal-ink);
+  cursor: pointer;
+}
+
+.portal-room-footer {
+  padding: 24px 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+  align-items: center;
+}
+
+.portal-room-footer p {
+  line-height: 1.9;
+  max-width: 710px;
+  margin: 0;
+  color: #58707b;
+}
+
+.portal-room-footer a, .portal-room-footer .home-project-read {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  min-height: 44px;
+  padding: 5px 0;
+  margin: 0;
+  border-bottom: 1px solid #183f5470;
+  color: var(--portal-ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dreambook-preview {
+  display: grid;
+  background: #eee6d2;
+  overflow: hidden;
+}
+
+.dreambook-single-art {
+  background: url('/images/projects/dreambook-realm-cover.png') no-repeat;
+}
+
+.dreambook-dialog {
+  align-self: center;
+}
+
+.dreambook-overline {
+  color: #5e675a;
+  margin: 0 0 15px;
+}
+
+.dreambook-dialog h4.dreambook-door-name {
+  font: 500 60px/1.4 var(--font-noto-serif),STSong,serif;
+  margin: 0 0 20px;
+  letter-spacing: .04em;
+  color: #3a504a;
+}
+
+.dreambook-line {
+  font: 400 18px/1.9 var(--font-noto-serif),STSong,serif;
+  color: #526052;
+  margin: 0 0 25px;
+}
+
+.dreambook-choices {
+  display: flex;
+  margin-bottom: 17px;
+  flex-wrap: wrap;
+}
+
+.dreambook-choices button {
+  min-height: 44px;
+  background: none;
+  color: #526052;
+  cursor: pointer;
+}
+
+.dreambook-single-legend small {
+  color: #63705e;
+}
+
+.portal-lumi .home-reply-preview {
+  grid-template-columns: .8fr 1.2fr;
+  column-gap: 50px;
+  min-height: 0;
+  background: none;
+}
+
+.portal-lumi .home-reply-source {
+  grid-column: 1;
+  grid-row: 1/4;
+}
+
+.portal-lumi .home-reply-result {
+  grid-column: 2;
+  grid-row: 1;
+  border: 0;
+}
+
+.portal-lumi .home-reply-choices {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.portal-lumi .home-reply-choices button {
+  min-height: 44px;
+}
+
+.portal-lumi .home-reply-choices button[aria-pressed=true] {
+  border-color: #fff9ed;
+}
+
+.portal-lumi .home-reply-preview small {
+  grid-column: 2;
+  grid-row: 3;
+  margin-top: 15px;
+}
+
+.summer-portal .portal-life {
+  padding: 0;
+  background: none;
+  border: 0;
+}
+
+.portal-photographs {
+  display: grid;
+}
+
+.portal-photographs .home-photo img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+  object-position: 50% 30%;
+}
+
+.portal-photographs .home-photo>span {
+  display: block;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@keyframes portal-unfold {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 90%);
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: none;
+  }
+}
+
+@media(hover:hover) and (pointer:fine) {
+  .portal-room-button:hover .portal-room-title {
+    color: #b45e42;
+  }
+  .portal-room-button:hover .portal-room-title>span {
+    transform: translate(3px,-3px);
+  }
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .summer-portal {
+    padding: 0 36px;
+  }
+  .portal-exhibition {
+    grid-template-columns: minmax(0,1fr) 270px;
+    gap: 28px;
+  }
+  .portal-hero-copy {
+    min-height: 185px;
+  }
+  .portal-index-title {
+    font-size: 18px;
+  }
+}
+
+@media(max-width:760px) {
+  .summer-portal {
+    padding: 0;
+  }
+  .summer-portal #home-title {
+    letter-spacing: -.075em;
+  }
+  body:has(.summer-portal) .coastal-site #header .editorial-header-inner {
+    width: calc(100% - 48px);
+    min-height: 76px;
+    border-bottom: 1px solid #183f5430;
+  }
+  .summer-pause {
+    right: 14px;
+  }
+  .portal-rooms {
+    min-height: 0;
+  }
+  .portal-room-title>span {
+    font-size: 22px;
+  }
+  .portal-colophon {
+    padding: 15px 0;
+    min-height: 65px;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .portal-colophon>a:last-child {
+    font-size: 11px;
+  }
+  .portal-dialog[open] {
+    width: calc(100vw - 24px);
+    max-height: 94dvh;
+  }
+  .portal-dialog-header {
+    gap: 15px;
+  }
+  .portal-dialog-header p {
+    max-width: 230px;
+  }
+  .portal-dialog-header>button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+  }
+  .portal-room-footer {
+    padding: 20px 24px;
+    display: block;
+  }
+  .portal-room-footer p {
+    font-size: 12px;
+  }
+  .portal-room-footer a, .portal-room-footer .home-project-read {
+    display: inline-flex;
+    font-size: 12px;
+    margin-top: 14px;
+  }
+  .dreambook-dialog {
+    padding: 25px 24px;
+  }
+  .dreambook-overline {
+    font-size: 11px;
+  }
+  .dreambook-line {
+    margin-bottom: 20px;
+  }
+  .dreambook-choices button {
+    padding: 7px 11px;
+  }
+  .dreambook-single-legend small {
+    font-size: 10px;
+  }
+  .portal-lumi .home-reply-preview {
+    display: block;
+  }
+  .portal-lumi .home-reply-source {
+    padding-bottom: 22px;
+    border-bottom: 1px solid #fff9ed50;
+  }
+  .portal-lumi .home-reply-result {
+    padding-top: 22px;
+  }
+  .portal-lumi .home-reply-choices {
+    gap: 7px;
+  }
+  .portal-lumi .home-reply-choices button {
+    padding: 8px 11px;
+  }
+  .portal-photographs .home-photo img {
+    height: 300px;
+  }
+}
+
+.portal-premise {
+  font-size: 26px;
+  line-height: 1.7;
+}
+
+.portal-index-title>span {
+  font-size: 14px;
+}
+
+body:has(.summer-portal) .coastal-site #header .liquid-glass-nav-link {
+  font-size: 15px!important;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-exhibition, .portal-hero-copy {
+    grid-template-columns: minmax(0,1fr) 320px;
+    gap: 30px;
+  }
+  .portal-room-button {
+    column-gap: 20px;
+    min-height: 140px;
+  }
+  .portal-premise {
+    font-size: 22px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-premise {
+    font-size: 20px;
+    line-height: 1.8;
+  }
+  .portal-index-title>span {
+    font-size: 13px;
+  }
+  .portal-mini-book {
+    border-width: 4px;
+  }
+  .portal-horizon-note>span {
+    max-width: 175px;
+  }
+}
+
+.portal-biography {
+  padding-bottom: 12px;
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .summer-stage, .portal-room-title>span {
+    transition: none;
+  }
+  .portal-dialog-frame {
+    animation: none;
+  }
+}
+
+.portal-horizon-note>span {
+  font-size: 13px;
+}
+
+.portal-dialog::backdrop {
+  background: #082c48cc;
+  backdrop-filter: blur(2px);
+}
+
+.portal-dialog-header>button {
+  border: 0;
+  border-radius: 50%;
+  background: #183f540a;
+  font-size: 30px;
+}
+
+.portal-dialog-header p {
+  font-size: 14px;
+}
+
+.portal-dialog .home-project-1 {
+  padding-top: 0;
+}
+
+[data-room=lumi] .portal-dialog-header {
+  padding-bottom: 18px;
+}
+
+.portal-lumi {
+  display: grid;
+}
+
+.portal-lumi-intro {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.portal-lumi-intro h3 {
+  font: 400 27px/1.8 var(--font-noto-serif),serif;
+  writing-mode: vertical-rl;
+  letter-spacing: .1em;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.portal-lumi .home-reply-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+}
+
+.portal-lumi .home-reply-source {
+  align-self: flex-start;
+  padding: 0 0 24px;
+  border: 0;
+}
+
+.portal-lumi .home-reply-source p {
+  font: 400 19px/1.8 var(--font-noto-serif),serif;
+  padding: 16px 20px;
+  border-radius: 0 18px 18px 18px;
+  margin: 12px 0 0;
+}
+
+.portal-lumi .home-reply-result {
+  align-self: flex-end;
+  padding: 0;
+}
+
+.portal-lumi .home-reply-result p {
+  font: 400 23px/1.9 var(--font-noto-serif),serif;
+  padding: 22px 24px;
+  border-radius: 18px 0 18px 18px;
+  margin: 12px 0 22px;
+}
+
+.portal-lumi .home-reply-choices {
+  margin-top: 0;
+  align-self: flex-end;
+  gap: 10px;
+}
+
+.portal-lumi .home-reply-choices button {
+  border: 0;
+  border-bottom: 1px solid #fff9ed80;
+  padding: 8px 10px;
+}
+
+.portal-lumi .home-reply-preview small {
+  text-align: right;
+}
+
+[data-room=lumi] .portal-room-footer {
+  border-top: 1px solid #fff9ed30;
+}
+
+[data-room=dreambook] {
+  background: #eee6d2;
+}
+
+[data-room=dreambook] .portal-dialog-header {
+  padding: 26px 40px 20px;
+  border: 0;
+}
+
+.dreambook-preview {
+  align-items: center;
+}
+
+.dreambook-dialog {
+  padding: 0;
+}
+
+.dreambook-dialog h4.dreambook-door-name {
+  margin-bottom: 22px;
+}
+
+.dreambook-line {
+  line-height: 1.9;
+}
+
+.dreambook-overline {
+  font-size: 14px;
+}
+
+.dreambook-choices {
+  gap: 22px;
+}
+
+.dreambook-choices button {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 8px 0;
+  font-size: 16px;
+}
+
+.dreambook-choices button[aria-pressed=true] {
+  background: none;
+  color: #344a3f;
+  border-bottom-color: #344a3f;
+}
+
+.dreambook-single-legend small {
+  font-size: 13px;
+}
+
+[data-room=dreambook] .portal-room-footer {
+  border-top: 1px solid #52605230;
+}
+
+.portal-room-footer p {
+  font-size: 15px;
+}
+
+.portal-room-footer a, .portal-room-footer .home-project-read {
+  font-size: 15px;
+}
+
+.portal-photographs {
+  grid-template-columns: 1.5fr 1fr;
+  gap: 50px;
+  padding: 20px 45px 25px;
+  align-items: end;
+}
+
+.portal-photographs .home-photo:first-child img {
+  height: 410px;
+  object-position: 50% 27%;
+}
+
+.portal-photographs .home-photo:last-child img {
+  height: 270px;
+  object-position: 50% 40%;
+  filter: saturate(.75);
+}
+
+.portal-photographs .home-photo>span {
+  font: 400 23px/1.5 var(--font-lora),serif;
+  margin-top: 20px;
+}
+
+.portal-photographs .home-photo small {
+  display: block;
+  font: 400 12px/1.7 var(--font-inter),sans-serif;
+  letter-spacing: .04em;
+  margin-bottom: 7px;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-lumi-intro {
+    gap: 15px;
+  }
+  .portal-lumi-intro h3 {
+    font-size: 22px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-horizon-note>span {
+    font-size: 10px;
+  }
+  .portal-dialog-header p {
+    font-size: 12px;
+  }
+  .portal-lumi-intro {
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .portal-lumi-intro h3 {
+    writing-mode: horizontal-tb;
+    font-size: 22px;
+    letter-spacing: 0;
+  }
+  .portal-lumi-intro img {
+    width: 100px;
+    height: 180px;
+  }
+  .portal-lumi .home-reply-choices button {
+    padding-inline: 5px;
+  }
+  .dreambook-single-art {
+    background-color: #fff1c6;
+  }
+  .dreambook-dialog h4.dreambook-door-name {
+    margin-bottom: 12px;
+  }
+  .dreambook-choices {
+    gap: 18px;
+  }
+  .dreambook-choices button {
+    font-size: 14px;
+  }
+  .portal-photographs {
+    grid-template-columns: 1fr;
+    padding: 10px 24px 25px;
+    gap: 30px;
+  }
+  .portal-photographs .home-photo:first-child img {
+    height: 320px;
+  }
+  .portal-photographs .home-photo:last-child {
+    width: 80%;
+    margin-left: auto;
+  }
+  .portal-photographs .home-photo:last-child img {
+    height: 220px;
+  }
+  .portal-photographs .home-photo>span {
+    font-size: 20px;
+  }
+  .portal-room-footer p, .portal-room-footer a, .portal-room-footer .home-project-read {
+    font-size: 13px;
+  }
+}
+
+.portal-biography {
+  align-items: start;
+}
+
+.portal-exhibition {
+  grid-template-columns: minmax(0,1fr) 440px;
+  gap: 44px;
+}
+
+.portal-index-title {
+  padding-block: 15px 18px;
+}
+
+.dreambook-single-art {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.dreambook-dialog h4.dreambook-door-name {
+  font-size: 64px;
+}
+
+.dreambook-line {
+  min-height: 80px;
+  font-size: 21px;
+}
+
+.portal-lumi-intro {
+  justify-content: center;
+}
+
+.portal-lumi-intro h3 {
+  display: none;
+}
+
+.portal-lumi-intro img {
+  transform: none;
+}
+
+.portal-lumi .home-reply-preview {
+  position: relative;
+  border-left: 1px solid #fff9ed40;
+  padding-left: 45px;
+}
+
+.portal-lumi .home-reply-source {
+  max-width: 100%;
+  width: 100%;
+}
+
+.portal-lumi .home-reply-result {
+  width: 100%;
+}
+
+.portal-dialog-header {
+  padding: 26px 40px 22px;
+}
+
+.portal-dialog-header h2 {
+  font-size: 42px;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-hero-copy, .portal-exhibition {
+    grid-template-columns: minmax(0,1fr) 340px;
+    gap: 30px;
+  }
+  .portal-lumi .home-reply-preview {
+    padding-left: 25px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-hero-copy {
+    min-height: 0;
+  }
+  .portal-exhibition {
+    display: block;
+  }
+  .portal-dialog:has([data-room=dreambook]) {
+    width: calc(100vw - 24px);
+  }
+  .dreambook-dialog h4.dreambook-door-name {
+    font-size: 48px;
+  }
+  .dreambook-line {
+    min-height: 65px;
+    font-size: 18px;
+  }
+  .portal-lumi .home-reply-preview {
+    border: 0;
+    padding-left: 0;
+  }
+  .portal-dialog-header {
+    padding: 22px 24px;
+  }
+  .portal-dialog-header h2 {
+    font-size: 30px;
+  }
+}
+
+.summer-portal {
+  display: flex;
+  flex-direction: column;
+  padding-top: 30px;
+}
+
+.portal-exhibition {
+  display: contents;
+}
+
+.portal-hero-copy {
+  min-height: 0;
+}
+
+.portal-biography {
+  justify-content: flex-end;
+  gap: 25px;
+}
+
+.portal-rooms {
+  order: 2;
+  display: grid;
+  border-top: 1px solid #183f5450;
+}
+
+.portal-index-title {
+  grid-column: 1/-1;
+  margin: 0;
+}
+
+.portal-room-button {
+  grid-template-columns: 130px 1fr;
+  grid-template-rows: auto auto;
+  border-bottom: 0;
+}
+
+.portal-colophon {
+  order: 3;
+}
+
+.portal-dialog:has([data-room=dreambook]) {
+  width: min(1080px,calc(100vw - 80px));
+}
+
+.dreambook-preview {
+  grid-template-columns: 1fr 1fr;
+  padding: 20px 40px 35px;
+  gap: 55px;
+}
+
+.dreambook-single-art {
+  height: 430px;
+  background-size: 260% auto!important;
+}
+
+.portal-dialog:has([data-room=lumi]) {
+  background: #fbf9f0;
+  color: #183f54;
+  width: min(1080px,calc(100vw - 80px));
+}
+
+[data-room=lumi] .portal-dialog-header {
+  border-color: #183f5426;
+}
+
+[data-room=lumi] .portal-dialog-header p, [data-room=lumi] .portal-dialog-header h2, [data-room=lumi] .portal-dialog-header>button {
+  color: #183f54;
+}
+
+[data-room=lumi] .portal-dialog-header>button {
+  background: #183f540a;
+}
+
+.portal-lumi {
+  grid-template-columns: 300px 1fr;
+  gap: 55px;
+  padding: 30px 45px 35px;
+  background: #e6eceb;
+  align-items: center;
+}
+
+.portal-lumi-intro img {
+  width: 270px;
+  height: 430px;
+  object-fit: cover;
+  object-position: top;
+  box-shadow: 0 10px 30px #183f5415;
+}
+
+.portal-lumi .home-reply-preview {
+  border: 0;
+  padding: 0;
+  color: #183f54;
+}
+
+.portal-lumi .home-reply-source>span, .portal-lumi .home-reply-result>span {
+  color: #38596a;
+  font-size: 14px;
+}
+
+.portal-lumi .home-reply-source p {
+  background: #d0dcde;
+  color: #183f54;
+  font-size: 20px;
+}
+
+.portal-lumi .home-reply-result p {
+  background: #183f54;
+  color: #fff9ed;
+  min-height: 145px;
+  font-size: 24px;
+}
+
+.portal-lumi .home-reply-choices button {
+  color: #183f54;
+  border-color: #183f5450;
+  font-size: 14px;
+}
+
+.portal-lumi .home-reply-choices button[aria-pressed=true] {
+  color: #fff9ed;
+  background: #183f54;
+}
+
+.portal-lumi .home-reply-preview small {
+  color: #38596a;
+  font-size: 12px;
+}
+
+[data-room=lumi] .portal-room-footer {
+  border-color: #183f5426;
+}
+
+[data-room=lumi] .portal-room-footer p, [data-room=lumi] .portal-room-footer a {
+  color: #183f54;
+  border-color: #183f5450;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-room-button {
+    grid-template-columns: 90px 1fr;
+    gap: 8px 18px;
+  }
+  .portal-mini-book {
+    width: 90px;
+  }
+  .portal-lumi {
+    grid-template-columns: 240px 1fr;
+    gap: 30px;
+    padding: 30px;
+  }
+  .portal-lumi-intro img {
+    width: 220px;
+    height: 400px;
+  }
+}
+
+@media(max-width:760px) {
+  .summer-portal {
+    padding-top: 0;
+  }
+  .summer-portal .portal-hero {
+    order: 1;
+  }
+  .portal-hero-copy {
+    order: 0;
+  }
+  .portal-biography {
+    justify-content: flex-start;
+  }
+  .portal-room-title>span {
+    display: block;
+  }
+  .portal-colophon {
+    margin: 25px 24px 0;
+    font-size: 11px;
+  }
+  .portal-dialog:has([data-room=dreambook]), .portal-dialog:has([data-room=lumi]) {
+    width: calc(100vw - 24px);
+  }
+  .dreambook-preview {
+    grid-template-columns: 1fr;
+    padding: 10px 24px 25px;
+    gap: 25px;
+  }
+  .dreambook-single-art {
+    height: 300px;
+    background-size: 240% auto!important;
+  }
+  .portal-lumi {
+    grid-template-columns: 1fr;
+    padding: 24px;
+    gap: 0;
+  }
+  .portal-lumi-intro {
+    display: none;
+  }
+  .portal-lumi .home-reply-result p {
+    font-size: 20px;
+    min-height: 130px;
+  }
+  .portal-lumi .home-reply-source p {
+    font-size: 17px;
+  }
+  .portal-lumi .home-reply-choices button {
+    font-size: 12px;
+  }
+}
+
+.summer-portal {
+  position: relative;
+}
+
+.portal-hero-copy {
+  top: 88px;
+  left: 112px;
+  right: 112px;
+  z-index: 2;
+}
+
+.summer-portal #home-title {
+  letter-spacing: -.065em;
+  overflow: hidden;
+}
+
+.portal-biography .portal-premise {
+  letter-spacing: 0;
+}
+
+.portal-room-button {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 0;
+  padding: 0 0 35px;
+  min-height: 0;
+  text-align: left;
+}
+
+.portal-mini-book {
+  display: block;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  overflow: hidden;
+  background: #e4e4d2;
+}
+
+.portal-mini-book img {
+  object-position: 50% 82%;
+  transition: transform .8s cubic-bezier(.22,1,.36,1);
+}
+
+.portal-room-type {
+  line-height: 1.7;
+  align-self: auto;
+}
+
+.portal-room-title {
+  line-height: 1.5;
+  align-self: stretch;
+  letter-spacing: -.025em;
+}
+
+.portal-room-title>span {
+  font-size: 23px;
+}
+
+.portal-colophon {
+  font-size: 13px;
+}
+
+@media(hover:hover) and (pointer:fine) {
+  .portal-room-button:hover .portal-mini-book img {
+    transform: scale(1.025);
+  }
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-hero-copy {
+    top: 75px;
+    left: 80px;
+  }
+  .portal-biography {
+    margin-top: 12px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-hero-copy {
+    position: static;
+    pointer-events: auto;
+  }
+  .summer-portal #home-title {
+    color: #183f54;
+  }
+  .portal-name-line>span {
+    color: #b45e42;
+  }
+  .portal-biography .portal-premise {
+    color: #183f54;
+  }
+  .portal-rooms {
+    gap: 0;
+  }
+  .portal-room-button {
+    grid-template-columns: 85px 1fr;
+    grid-template-rows: auto auto auto;
+    min-height: 145px;
+  }
+  .portal-mini-book {
+    grid-row: 1/4;
+    margin: 0;
+  }
+  .portal-room-type {
+    margin: 0;
+  }
+  .portal-room-title {
+    margin: 0;
+  }
+  .portal-room-excerpt {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .portal-mini-book img {
+    transition: none;
+  }
+  .portal-room-button:hover .portal-mini-book img {
+    transform: none;
+  }
+}
+
+[data-room-trigger=lumi] .portal-mini-book img {
+  object-position: 50% 0%;
+}
+
+.dreambook-single-art {
+  background-position: var(--door-x,63%) var(--door-y,30%)!important;
+}
+
+.portal-biography {
+  margin-top: 20px;
+}
+
+.portal-horizon-note {
+  justify-content: flex-end;
+}
+
+.portal-rooms {
+  grid-template-columns: 1.5fr 1fr;
+  gap: 0 55px;
+}
+
+.portal-index-title {
+  font-size: 30px;
+  padding: 28px 0 35px;
+  font-weight: 600;
+}
+
+.portal-mini-book {
+  aspect-ratio: auto;
+  height: 350px;
+  margin-bottom: 25px;
+}
+
+.portal-room-title {
+  font-size: 40px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.portal-room-type {
+  font-size: 15px;
+  color: #38596a;
+  margin-bottom: 12px;
+}
+
+.portal-room-excerpt {
+  font-size: 17px;
+  color: #38596a;
+  line-height: 1.9;
+}
+
+.portal-room-title>span {
+  display: none;
+}
+
+[data-room-trigger=life] {
+  grid-column: 1/-1;
+  margin-top: 30px;
+  display: grid;
+  border-top: 1px solid #183f5430;
+}
+
+[data-room-trigger=life] .portal-mini-book {
+  grid-column: 2;
+  margin: 0;
+}
+
+[data-room-trigger=life] .portal-room-type {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  margin: 0;
+}
+
+[data-room-trigger=life] .portal-room-title {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  margin: 0;
+}
+
+[data-room-trigger=life] .portal-room-excerpt {
+  grid-column: 1;
+  grid-row: 3;
+  align-self: start;
+}
+
+.portal-colophon {
+  margin-top: 0;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-rooms {
+    gap: 0 35px;
+  }
+  .portal-mini-book {
+    height: 290px;
+  }
+  .portal-room-title {
+    font-size: 33px;
+  }
+  .portal-room-type {
+    font-size: 13px;
+  }
+  .portal-room-excerpt {
+    font-size: 15px;
+  }
+  [data-room-trigger=life] .portal-room-title {
+    font-size: 46px;
+  }
+  [data-room-trigger=life] .portal-mini-book {
+    height: 270px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-rooms {
+    display: flex;
+    margin: 20px 24px 0;
+  }
+  .portal-index-title {
+    font-size: 26px;
+    padding: 20px 0 25px;
+  }
+  .portal-room-button {
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 32px;
+    margin: 0 0 28px;
+    gap: 0;
+    border-bottom: 1px solid #183f5430;
+    align-items: stretch;
+  }
+  .portal-mini-book {
+    width: 100%;
+    height: 230px;
+    aspect-ratio: auto;
+    margin-bottom: 20px;
+  }
+  .portal-mini-book img {
+    object-position: 50% 82%;
+  }
+  .portal-room-type {
+    font-size: 13px;
+    margin-bottom: 8px;
+    align-self: auto;
+  }
+  .portal-room-title {
+    font-size: 30px;
+    margin-bottom: 8px;
+  }
+  .portal-room-excerpt {
+    font-size: 15px;
+    line-height: 1.8;
+    align-self: auto;
+  }
+  [data-room-trigger=life] {
+    margin: 0;
+    border-top: 0;
+    border-bottom: 0;
+  }
+  [data-room-trigger=life] .portal-mini-book {
+    order: 0;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  [data-room-trigger=life] .portal-room-type {
+    order: 1;
+    align-self: auto;
+    margin-bottom: 8px;
+  }
+  [data-room-trigger=life] .portal-room-title {
+    order: 2;
+    align-self: auto;
+    margin-bottom: 8px;
+  }
+  [data-room-trigger=life] .portal-room-excerpt {
+    order: 3;
+    align-self: auto;
+  }
+  .portal-colophon {
+    border-top: 1px solid #183f5430;
+    margin-top: 0;
+  }
+}
+
+[data-room-trigger=dreambook] .portal-mini-book img {
+  object-position: 50% 94%;
+}
+
+.portal-life-copy {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+[data-room-trigger=life] {
+  grid-template-rows: auto;
+}
+
+[data-room-trigger=life] .portal-mini-book {
+  grid-row: 1;
+}
+
+[data-room-trigger=life] .portal-room-type, [data-room-trigger=life] .portal-room-title, [data-room-trigger=life] .portal-room-excerpt {
+  align-self: auto;
+  margin: 0;
+}
+
+.portal-room-title::after {
+  align-self: center;
+  margin-left: auto;
+}
+
+.summer-harbor-toggle {
+  gap: 22px;
+  color: #183f54;
+  border-bottom: 1px solid #183f5460;
+}
+
+.portal-horizon-note {
+  padding-block: 8px;
+}
+
+@media(min-width:761px) {
+  .summer-portal.portal-exploring #home-title {
+    color: #183f54;
+  }
+  .portal-exploring .portal-name-line>span {
+    color: #b45e42;
+  }
+}
+
+@media(max-width:760px) {
+  [data-room-trigger=life] .portal-room-type, [data-room-trigger=life] .portal-room-title {
+    margin: 0;
+  }
+  .portal-horizon-note {
+    padding-block: 5px;
+  }
+}
+
+.portal-hero-copy {
+  position: static;
+  display: grid;
+  padding: 10px 0 30px;
+  pointer-events: auto;
+  order: 0;
+}
+
+.summer-portal #home-title {
+  font-size: clamp(90px,8.6vw,140px);
+  color: #183f54;
+  line-height: 1.25;
+}
+
+.portal-name-line>span {
+  color: #b45e42;
+}
+
+.portal-biography {
+  display: block;
+  margin: 0;
+}
+
+.portal-biography .portal-premise {
+  color: #183f54;
+}
+
+.portal-mobile-portrait {
+  display: none;
+}
+
+.summer-portal .portal-hero {
+  order: 1;
+}
+
+.portal-pair {
+  display: grid;
+  grid-template-columns: .75fr 1.5fr;
+  gap: 28px;
+}
+
+.portal-author-art {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
+.portal-author-art img {
+  object-fit: cover;
+  object-position: 62% 35%;
+}
+
+.portal-art {
+  aspect-ratio: 1.5;
+}
+
+.portal-work-lumi {
+  min-width: 0;
+}
+
+.portal-lumi-live {
+  height: 350px;
+  margin-bottom: 25px;
+  background: #e5edeb;
+}
+
+.portal-lumi-live .home-reply-preview {
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: #e5edeb;
+  color: #183f54;
+  display: flex;
+  flex-direction: column;
+}
+
+.portal-lumi-live .home-reply-source>span, .portal-lumi-live .home-reply-result>span {
+  letter-spacing: 0;
+}
+
+.portal-lumi-live .home-reply-source p {
+  margin: 10px 0 18px;
+}
+
+.portal-lumi-live .home-reply-result {
+  border-top: 1px solid #183f5430;
+}
+
+.portal-lumi-live .home-reply-result p {
+  margin: 10px 0 15px;
+}
+
+.portal-lumi-live .home-reply-choices {
+  display: flex;
+  gap: 20px;
+  margin-top: auto;
+}
+
+.portal-lumi-live .home-reply-choices button {
+  min-height: 44px;
+  padding: 5px 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+}
+
+.portal-lumi-live .home-reply-preview small {
+  margin-top: 12px;
+}
+
+.portal-work-lumi .portal-room-button {
+  padding-top: 0;
+  width: 100%;
+}
+
+@media(min-width:761px) {
+  .portal-exploring .portal-hero-copy {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    background: none;
+  }
+  .summer-portal.portal-exploring #home-title {
+    font-size: clamp(90px,8.6vw,140px);
+    line-height: 1.25;
+  }
+  .portal-exploring .portal-biography {
+    display: block;
+  }
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-pair {
+    gap: 24px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-biography {
+    align-items: center;
+  }
+  .portal-mobile-portrait {
+    display: block;
+    width: 70px;
+    height: 105px;
+    object-fit: cover;
+    object-position: 62% 35%;
+    filter: saturate(.75);
+  }
+  .portal-pair {
+    display: block;
+  }
+  .portal-author-art {
+    display: none;
+  }
+  .portal-art {
+    aspect-ratio: 1.5;
+  }
+  .portal-lumi-live {
+    margin-bottom: 20px;
+  }
+  .portal-lumi-live .home-reply-choices {
+    gap: 20px;
+  }
+  .portal-work-lumi .portal-room-button {
+    margin-bottom: 28px;
+  }
+}
+
+.portal-author-art {
+  background: #1d607d;
+}
+
+.portal-author-art img {
+  filter: grayscale(1) contrast(1.04);
+  mix-blend-mode: luminosity;
+}
+
+.portal-mobile-portrait {
+  filter: grayscale(1);
+}
+
+[data-room-trigger=life] .portal-mini-book {
+  background: #1d607d;
+}
+
+[data-room-trigger=life] .portal-mini-book img {
+  filter: grayscale(1) contrast(1.03);
+  mix-blend-mode: luminosity;
+}
+
+.portal-premise, .portal-room-type, .portal-room-excerpt, .portal-lumi-live .home-reply-source, .portal-lumi-live .home-reply-choices, .portal-lumi-live small, .portal-colophon, .summer-harbor-toggle {
+  font-family: var(--font-inter),'PingFang SC','Microsoft YaHei',sans-serif;
+}
+
+.portal-biography .portal-premise {
+  font-weight: 400;
+}
+
+[data-room-trigger=life] {
+  gap: 65px;
+  padding: 38px 0;
+}
+
+[data-room-trigger=life] .portal-mini-book {
+  height: 290px;
+}
+
+[data-room-trigger=life] .portal-room-title {
+  font-size: 42px;
+}
+
+.portal-life-copy {
+  gap: 14px;
+}
+
+.portal-room-title::after {
+  content: '展开';
+  font: 400 14px/1.5 var(--font-inter),'PingFang SC','Microsoft YaHei',sans-serif;
+  color: #38596a;
+  letter-spacing: 0;
+}
+
+.summer-portal[lang=en] .portal-room-title::after {
+  content: 'Open';
+}
+
+.portal-lumi-live, .portal-lumi-live .home-reply-preview {
+  background: #183f54;
+  color: #fff9ed;
+}
+
+.portal-lumi-live .home-reply-preview {
+  padding: 26px 32px;
+}
+
+.portal-lumi-live .home-reply-source>span, .portal-lumi-live .home-reply-result>span {
+  color: #fff9edc9;
+  font-size: 13px;
+}
+
+.portal-lumi-live .home-reply-source p {
+  font: 400 17px/1.8 var(--font-inter),'PingFang SC','Microsoft YaHei',sans-serif;
+  color: #fff9ed;
+  margin-block: 12px 20px;
+}
+
+.portal-lumi-live .home-reply-result {
+  border-color: #fff9ed40;
+  padding-top: 17px;
+}
+
+.portal-lumi-live .home-reply-result p {
+  font: 500 26px/1.8 var(--font-noto-serif),serif;
+  min-height: 94px;
+  margin-block: 13px 15px;
+  color: #fff9ed;
+}
+
+.portal-lumi-live .home-reply-choices button {
+  color: #fff9edc9;
+  font-size: 14px;
+}
+
+.portal-lumi-live .home-reply-choices button[aria-pressed=true] {
+  color: #fff9ed;
+  border-color: #e0a17e;
+}
+
+.portal-lumi-live .home-reply-preview small {
+  color: #fff9edb8;
+  font-size: 12px;
+}
+
+.portal-horizon-note {
+  position: absolute;
+  right: 18px;
+  left: auto;
+  min-height: 0;
+  padding: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.summer-harbor-toggle {
+  min-height: 44px;
+  background: #fbf9f0f2;
+  border: 1px solid #183f5425;
+  padding: 11px 17px;
+  font-size: 14px;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+
+.summer-pause {
+  right: auto;
+  left: 18px;
+  width: 44px;
+  height: 44px;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-lumi-live .home-reply-preview {
+    padding: 20px;
+  }
+  .portal-lumi-live .home-reply-result p {
+    font-size: 23px;
+    min-height: 110px;
+  }
+  .portal-lumi-live .home-reply-source p {
+    font-size: 15px;
+  }
+  .portal-lumi-live .home-reply-choices {
+    gap: 14px;
+  }
+  .portal-lumi-live .home-reply-choices button {
+    font-size: 12px;
+  }
+  [data-room-trigger=life] {
+    gap: 35px;
+  }
+  .portal-horizon-note {
+    right: 12px;
+  }
+  .summer-harbor-toggle {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-horizon-note {
+    right: 14px;
+    padding: 0;
+    min-height: 0;
+  }
+  .summer-harbor-toggle {
+    font-size: 12px;
+    padding: 10px 12px;
+    gap: 14px;
+  }
+  .summer-pause {
+    left: 14px;
+    bottom: 14px;
+    width: 44px;
+    height: 44px;
+  }
+  .portal-lumi-live .home-reply-preview {
+    padding: 22px 24px;
+  }
+  .portal-lumi-live .home-reply-result p {
+    font-size: 22px;
+    min-height: 88px;
+  }
+  .portal-lumi-live .home-reply-source p {
+    font-size: 15px;
+  }
+  .portal-lumi-live .home-reply-choices button {
+    font-size: 13px;
+  }
+  .portal-lumi-live .home-reply-preview small {
+    font-size: 11px;
+  }
+  [data-room-trigger=life] {
+    display: flex;
+    padding: 0 0 25px;
+    gap: 0;
+  }
+  [data-room-trigger=life] .portal-mini-book {
+    height: 250px;
+  }
+  [data-room-trigger=life] .portal-room-title {
+    font-size: 30px;
+  }
+  .portal-life-copy {
+    gap: 9px;
+  }
+  .portal-room-title::after {
+    font-size: 13px;
+  }
+}
+
+.portal-author-art img, [data-room-trigger=life] .portal-mini-book img {
+  filter: grayscale(1) contrast(1.04);
+  mix-blend-mode: normal;
+}
+
+.summer-portal {
+  --portal-preview-height: 410px;
+}
+
+.summer-portal[lang=en] {
+  --portal-preview-height: 490px;
+}
+
+.portal-rooms>.portal-room-button .portal-mini-book, .portal-lumi-live {
+  height: var(--portal-preview-height);
+}
+
+[data-room-trigger=life] {
+  grid-template-columns: 1fr 1fr;
+}
+
+.portal-rooms>[data-room-trigger=life] .portal-mini-book {
+  height: 360px;
+}
+
+[data-room-trigger=life] .portal-mini-book img {
+  object-position: 50% 18%;
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .summer-portal {
+    --portal-preview-height: 440px;
+  }
+  .summer-portal[lang=en] {
+    --portal-preview-height: 520px;
+  }
+  .portal-rooms>[data-room-trigger=life] .portal-mini-book {
+    height: 310px;
+  }
+}
+
+@media(max-width:760px) {
+  .summer-portal {
+    --portal-preview-height: 410px;
+  }
+  .summer-portal[lang=en] {
+    --portal-preview-height: 490px;
+  }
+  .portal-rooms>.portal-room-button .portal-mini-book {
+    height: 230px;
+  }
+  .portal-lumi-live {
+    height: var(--portal-preview-height);
+  }
+  .portal-rooms>[data-room-trigger=life] .portal-mini-book {
+    height: 270px;
+  }
+  [data-room-trigger=life] .portal-mini-book img {
+    object-position: 50% 28%;
+  }
+}
+
+.portal-hero-copy {
+  grid-template-columns: .75fr 1.5fr;
+  gap: 28px;
+  align-items: end;
+  padding-block: 15px 32px;
+}
+
+.summer-portal #home-title, .summer-portal.portal-exploring #home-title {
+  font-size: clamp(72px,6.4vw,112px);
+  line-height: 1.08;
+  letter-spacing: -.055em;
+}
+
+.portal-biography {
+  justify-self: start;
+  padding: 0 0 9px;
+}
+
+.portal-biography .portal-premise {
+  font-size: 25px;
+  line-height: 1.8;
+}
+
+.portal-author-art {
+  aspect-ratio: .75;
+}
+
+.portal-view-caption {
+  height: 44px;
+  margin: 14px 0 0;
+  font: 400 14px/1.7 var(--font-inter),'PingFang SC','Microsoft YaHei',sans-serif;
+  color: #38596a;
+}
+
+.portal-horizon-note {
+  bottom: 76px;
+}
+
+.portal-room-title::after, .summer-portal[lang=en] .portal-room-title::after {
+  content: none;
+}
+
+.portal-room-title>span.portal-room-action {
+  display: inline;
+  font: 400 14px/1.6 var(--font-inter),'PingFang SC','Microsoft YaHei',sans-serif;
+  letter-spacing: 0;
+  color: #38596a;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.portal-rooms {
+  margin-top: 24px;
+}
+
+[data-room-trigger=life] .portal-room-excerpt {
+  line-height: 1.9;
+}
+
+@media(min-width:761px) {
+  .portal-exploring .portal-hero-copy {
+    padding: 15px 0 32px;
+  }
+}
+
+@media(max-width:1100px) and (min-width:761px) {
+  .portal-hero-copy {
+    gap: 24px;
+  }
+  .summer-portal #home-title, .summer-portal.portal-exploring #home-title {
+    font-size: clamp(48px,6vw,70px);
+  }
+  .portal-biography .portal-premise {
+    font-size: 21px;
+  }
+  .portal-view-caption {
+    font-size: 13px;
+  }
+  .portal-horizon-note {
+    bottom: 70px;
+  }
+}
+
+@media(max-width:760px) {
+  .portal-hero-copy {
+    display: block;
+    padding: 20px 24px 28px;
+  }
+  .summer-portal #home-title {
+    font-size: 16vw;
+    line-height: 1.1;
+  }
+  .portal-biography {
+    display: grid;
+    padding: 0;
+    margin-top: 24px;
+    grid-template-columns: 70px 1fr;
+    gap: 18px;
+  }
+  .portal-biography .portal-premise {
+    font-size: 17px;
+    line-height: 1.9;
+  }
+  .portal-author-view {
+    display: none;
+  }
+  .portal-view-caption {
+    font-size: 12px;
+    height: 44px;
+    margin-top: 14px;
+    padding-inline: 24px;
+  }
+  .portal-horizon-note {
+    bottom: 72px;
+  }
+  .portal-room-title>span.portal-room-action {
+    font-size: 12px;
+  }
+  .portal-rooms {
+    margin-top: 16px;
+  }
+}

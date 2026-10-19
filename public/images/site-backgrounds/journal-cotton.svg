@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240">
+  <filter id="cotton" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".78" numOctaves="3" seed="17" stitchTiles="stitch"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .35 0 0 0 0 .31 0 0 0 0 .24 0 0 0 .045 0"/>
+  </filter>
+  <rect width="240" height="240" filter="url(#cotton)"/>
+  <g fill="none" stroke="#8b806b" stroke-width=".4" stroke-linecap="round" opacity=".035">
+    <path d="m17 43 7 1m39 89 9-1m40-105 2 8m59 34 9 2m-34 97 7-2m-119 40 3 6m158-13 6 1m-76 30 2 5m-96-136 5-1m154 40 2 6"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960">
+  <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#0c5fbb"/><stop offset="1" stop-color="#83c9e6"/></linearGradient><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs>
+  <path fill="url(#sky)" d="M0 0h1440v960H0z"/>
+  <path fill="#0871b7" d="M0 484h1440v476H0z"/>
+  <path fill="#0c86b9" d="M0 590h1440v370H0z"/>
+  <g fill="none" stroke="#72c5db" opacity=".45" stroke-width="2"><path d="M0 531h120m70 15h175m80-34h185m260 48h160m120-35h190M20 637h200m60-30h220M0 728h145m100-37h95M30 813h210"/></g>
+  <!-- A coastal stair, alternating sunlit treads and cool vertical planes. -->
+  <path fill="#f7edcf" d="M1440 329l-285 28v74l-143 21v78l-153 22v81l-163 24v86l-170 28v93L0 960h1440z"/>
+  <path fill="#a6c7cf" d="M1155 357l285-28v31l-285 29zm-143 95l428-58v35l-428 57zm-153 100l581-82v38l-581 79zm-163 105l744-108v42L696 697zM526 771l914-135v46L526 815z"/>
+  <path fill="#e1dfc3" d="M0 960l526-96 914-139v235z"/>
+  <path fill="#89b1c2" d="M1440 743l-473 77-267 140h360l380-157z"/>
+  <path fill="#faf1d4" d="M1330 133l78-7v387l-78 14z"/>
+  <path fill="#c3d7d5" d="M1408 126l32 19v374l-32-6z"/>
+  <path fill="#c96c48" d="M1172 288h73v23h-73z"/>
+  <path fill="#123f4b" d="M1209 288q-46-51-30-99 28 24 30 99m0 0q-2-63 33-92 8 59-33 92m0 0q-14-81 2-120 24 64-2 120"/>
+  <path fill="#fff" d="M430 467l7-24 9 24z"/>
+  <path d="M0 0h1440v960H0z" filter="url(#grain)" opacity=".025"/>
+</svg>

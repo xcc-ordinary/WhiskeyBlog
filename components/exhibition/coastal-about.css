@@ -1,0 +1,25 @@
+.coastal-about-page{padding:40px 4vw 70px;background:var(--wl-paper);color:var(--wl-ink)}
+.coastal-about-page>header>p{font:11px var(--font-inter),sans-serif;letter-spacing:1px}
+.coastal-about-page h1{margin:20px 0 40px;display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid var(--wl-rule);padding-bottom:30px;gap:30px}
+.coastal-about-page h1>span{font:900 clamp(90px,18vw,290px)/.85 var(--font-edition-display),Georgia,serif;letter-spacing:-.075em}
+.coastal-about-page h1>small{font:24px/1.6 var(--font-noto-serif),serif;letter-spacing:-1px}
+.coastal-about-intro{display:grid;grid-template-columns:1fr 1.3fr;gap:5vw;align-items:start}
+.coastal-about-portrait{height:680px;position:relative;border:1px solid var(--wl-ink);overflow:hidden}
+.coastal-about-portrait img{object-fit:cover;object-position:44% 40%;filter:grayscale(1)}
+.coastal-about-intro h2{font:600 clamp(30px,3.6vw,58px)/1.4 var(--font-noto-serif),Georgia,serif;letter-spacing:-.06em;margin:0 0 22px}
+.coastal-about-intro p{font:23px/1.9 var(--font-noto-serif),serif;margin:0 0 15px}
+.coastal-about-intro figure{margin:35px 0 0}.coastal-about-intro figure img{width:100%;height:300px;object-fit:cover;border:1px solid var(--wl-ink)}
+.coastal-about-intro figcaption{font:11px var(--font-inter),sans-serif;margin-top:12px}
+.coastal-about-notes{margin-top:60px;border-top:1px solid var(--wl-rule)}
+.coastal-about-notes article{border-bottom:1px solid var(--wl-rule)}
+.coastal-about-notes button{display:flex;align-items:center;width:100%;gap:25px;text-align:left;border:0;background:none;color:var(--wl-ink);padding:30px 0;cursor:pointer}
+.coastal-about-notes button>span{font:11px var(--font-inter),sans-serif}.coastal-about-notes h2{font:500 clamp(25px,3vw,48px)/1.4 var(--font-noto-serif),Georgia,serif;letter-spacing:-.045em;margin:0}
+.coastal-about-notes button>b{font-size:40px;font-weight:400;margin-left:auto;transition:transform 1.3s cubic-bezier(.16,1,.3,1)}
+.coastal-about-notes button[aria-expanded=true]>b{transform:rotate(180deg)}
+.coastal-about-note-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.645,.045,.355,1)}
+.coastal-about-note-content[data-open=true]{grid-template-rows:1fr}.coastal-about-note-content>div{overflow:hidden;min-height:0}
+.coastal-about-note-content p{font:21px/1.9 var(--font-noto-serif),serif;max-width:42em;padding:0 0 30px 42px;margin:0;transform:translateY(-100%);transition:transform .6s cubic-bezier(.16,1,.3,1)}
+.coastal-about-note-content[data-open=true] p{transform:translateY(0)}
+@media(max-width:760px){.coastal-about-page{padding:30px 18px 45px}.coastal-about-page h1{display:block;margin:25px 0;padding-bottom:25px}.coastal-about-page h1>span{font-size:27vw;display:block}.coastal-about-page h1>small{font-size:19px;display:block;margin-top:25px}.coastal-about-intro{grid-template-columns:1fr;gap:30px}.coastal-about-portrait{height:410px}.coastal-about-intro h2{font-size:32px}.coastal-about-intro p{font-size:18px}.coastal-about-intro figure img{height:230px}.coastal-about-notes{margin-top:35px}.coastal-about-notes button{gap:15px;padding:22px 0}.coastal-about-notes h2{font-size:23px}.coastal-about-note-content p{font-size:17px;padding-left:28px}}
+@media(prefers-reduced-motion:reduce){.coastal-about-notes *{transition:none!important}}
+@media(max-width:760px){.coastal-about-page h1>span{font-size:22vw}}

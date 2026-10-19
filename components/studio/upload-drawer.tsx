@@ -28,18 +28,21 @@ export function UploadDrawer() {
 
   async function createDraft(path: string) {
     setProgress(85); setMessage("正在建立照片草稿…");
+    try {
     const draft = await createUploadedDraft(path);
     setIsUploading(false); setProgress(draft.ok ? 100 : null);
     if (!draft.ok || !draft.photographId) { setPendingPath(path); setMessage(draft.message ?? "无法创建照片草稿，请稍后重试。"); return; }
     setPendingPath(null);
     router.push(`/studio/${draft.photographId}`);
     router.refresh();
+    } catch { setIsUploading(false); setProgress(null); setPendingPath(path); setMessage("照片已上传，但草稿未建立，请重试建立草稿。"); }
   }
 
   async function upload() {
     const file = inputRef.current?.files?.[0];
     if (!file) { setMessage("请先选择一张图片。"); return; }
     setIsUploading(true); setProgress(10); setMessage("正在准备私密上传…");
+    try {
     const intent = await createOriginalUploadIntent({ name: file.name, size: file.size, type: file.type });
     if (!intent.ok || !intent.path || !intent.token) { setIsUploading(false); setProgress(null); setMessage(intent.message ?? "无法准备上传，请稍后重试。"); return; }
 
@@ -49,10 +52,11 @@ export function UploadDrawer() {
 
     setProgress(85); setMessage("正在建立照片草稿…");
     await createDraft(intent.path);
+    } catch { setIsUploading(false); setProgress(null); setMessage("上传请求未完成，请检查网络后重试。"); }
   }
 
   return <>
-    <button className="studio-button" onClick={() => { setMessage(null); setProgress(null); setPendingPath(null); setIsOpen(true); }} ref={triggerRef} type="button">上传照片</button>
+    <button className="studio-button studio-photo-upload" onClick={() => { setMessage(null); setProgress(null); setPendingPath(null); setIsOpen(true); }} ref={triggerRef} type="button">上传照片</button>
     <dialog aria-labelledby="upload-drawer-title" className="studio-drawer-backdrop" onCancel={(event) => { if (isUploading) event.preventDefault(); }} onClose={() => setIsOpen(false)} onMouseDown={(event) => { if (event.target === event.currentTarget && !isUploading) setIsOpen(false); }} ref={dialogRef}>
       <section className="studio-drawer">
         <p className="studio-kicker">PRIVATE ORIGINAL / STEP 01</p>

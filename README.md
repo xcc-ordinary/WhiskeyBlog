@@ -1,6 +1,8 @@
 # WhiskeyBlog
 
-一个桌面优先的中文个人开发者网站，使用 Next.js、TypeScript、Tailwind CSS 与本地 MDX 内容。
+Whiskey 的个人杂志网站 **The Personal Journal**，使用 Next.js、TypeScript、Tailwind CSS 与本地 MDX 内容。当前视觉以奶油白 `#f3efdf`、深蓝 `#173e55`、大衬线标题和细分栏线为准，桌面与手机均需可读。
+
+当前身份与内容边界见 `CONTEXT.md`，视觉规范见 [docs/visual-language.md](docs/visual-language.md)，项目维护见 [docs/project-editing.md](docs/project-editing.md)。`design/` 内的旧风格探索仅用于历史回顾。
 
 ## 本地开发
 
@@ -14,7 +16,7 @@
 
 桌面端在视口宽度大于 760px、精细指针且未开启“减少动态效果”时启用 Lenis：滚轮输入带有明显但可中断的镜头滑行，页面仍保留原生滚动位置、键盘操作与公开锚点。粗指针设备、390px 等移动端尺寸和 `prefers-reduced-motion: reduce` 会回退为原生滚动，所有视差层保持静止。
 
-视差速度由 `components/exhibition/parallax.tsx` 统一限制；具体节奏可在 `exhibition-hero.tsx`、`life-archive-teaser.tsx`、`archive-mosaic.tsx` 与 `project-media.tsx` 的 `speed` 参数中调整。数值应保持小幅、只应用于图片层，标题、正文和图注不参与持续位移。
+视差速度由 `components/exhibition/parallax.tsx` 统一限制。数值应保持小幅、只应用于图片层，标题、正文和图注不参与持续位移。旧海岸与港湾场景不是当前动效或视觉规范。
 
 发布前请分别手动验收鼠标滚轮和触控板的阻尼感；用 Tab、方向键、Page Up/Down 与 `/#selected-work` 检查键盘和锚点定位；在 390px 手机视口确认原生滚动与静态图片；最后开启系统“减少动态效果”，确认 Lenis 未启用且图片不随滚动位移。
 
@@ -22,11 +24,11 @@
 
 文章放在 content/posts/，项目放在 content/projects/。每个 MDX 文件需要 title、description、date（YYYY-MM-DD）、tags 和 slug 五个 frontmatter 字段。
 
-发布前请把示例项目与个人介绍替换为真实内容。不要提交 .env、密钥或私人凭据。
+项目与博客使用同一套 Markdown 阅读样式，项目可在本地 `/studio/projects` 编辑和上传封面。首页展示、排序、封面和简介均由项目内容驱动，保存后同步到相应公开页面。不要提交 .env、密钥或私人凭据。
 
-## 数字展厅内容替换清单
+## 个人杂志内容维护
 
-首页、关于页和小红书入口的公开文案集中在 `lib/exhibition.ts`：
+`lib/exhibition.ts` 保留部分公共内容配置；首页杂志刊头和个人介绍还由 `components/exhibition/coastal-edition.tsx` 等现行组件维护。它不是网站所有文案的唯一来源。配置包括：
 
 - `homeIdentity`：首屏编号、标题、简介、主图路径与替代文本。
 - `currentFacts`：About 页的三条当前状态；可按需改为真实的在做项目、关注方向和所在地。
@@ -34,7 +36,7 @@
 
 项目和文章继续由本地 MDX 管理：`content/projects/*.mdx` 与 `content/posts/*.mdx`。每份文件都必须包含 `title`、`description`、`date`（`YYYY-MM-DD`）、`tags` 和 `slug`。项目可额外填写字符串类型的 `coverImage`、`coverAlt`、`role`；图片地址请替换为自己拥有使用权的素材，并写准确的替代文本。
 
-`public/images/placeholders/hero-editorial.svg` 是明确标注的个人照片占位图。替换首屏或 About 图片时，把自己的已授权图片放在 `public/images/`，再在 `lib/exhibition.ts` 或相应组件数据中使用该路径。设计探索过程中生成的草图或 mockup 图片不是生产资产，不能直接作为对外站点素材。
+本人照片与项目图片放在 `public/images/`，项目封面通过 MDX 或本地 Studio 维护；`public/images/placeholders/hero-editorial.svg` 仅作为缺图回退。设计探索稿不自动成为生产素材，应先确认内容与裁切。保留历史素材不意味着公开页面需要继续展示旧风格背景。
 
 ## Media Studio（Supabase）
 
@@ -83,4 +85,4 @@ Vercel 的部署文件系统不可作为内容数据库：线上 `/studio/writin
 
 ## 发布
 
-将 GitHub 仓库导入 Vercel；可复制 .env.example 为 .env.local 并填写生产地址。部署后检查暖白色数字展厅在桌面和窄屏中的布局、键盘焦点、页面标题、减少动态效果与降低透明度偏好，以及访问分析。
+将 GitHub 仓库导入 Vercel；可复制 .env.example 为 .env.local 并填写生产地址。部署后检查奶油白与深蓝的个人杂志页面在桌面和窄屏中的布局、图片构图、键盘焦点、页面标题、减少动态效果偏好，以及访问分析。构建通过与本地浏览器验证不代表线上已部署。

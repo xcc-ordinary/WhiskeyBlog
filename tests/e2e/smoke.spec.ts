@@ -15,7 +15,7 @@ test("publishes crawl metadata and baseline security headers", async ({ page }) 
 
 test("visits home, a project, and a post", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /语言的边界/i })).toBeVisible();
+  await expect(page.locator("#home-title")).toHaveText("WHISKEY");
   await page.goto("/projects/whiskey-blog");
   await expect(page.getByRole("heading", { level: 1, name: "WhiskeyBlog", exact: true })).toBeVisible();
   await page.goto("/blog/building-this-site");

@@ -1,0 +1,13 @@
+.notes-preview-document .studio-markdown-preview {
+  width: 100%;
+  margin: 2rem 0 0;
+}
+.notes-preview-document .studio-markdown-preview > .prose {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.studio-markdown-preview .prose img { display: block; max-width: 100%; height: auto; }
+.studio-markdown-preview .prose pre { max-width: 100%; overflow-x: auto; }
+.studio-preview-status { font-size: .75rem; opacity: .6; }

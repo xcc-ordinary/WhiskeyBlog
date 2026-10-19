@@ -1,15 +1,21 @@
 import type { Metadata } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Lora, Noto_Serif_SC, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
+import "./coastal.css";
+import "./coastal-paper-cards.css";
+import "./visual-language.css";
+import "katex/dist/katex.min.css";
+import "./reading.css";
 import { LanguageProvider } from "@/components/language-provider";
-import { EditorialHeader } from "@/components/exhibition/editorial-header";
 import { PublicScrollBoundary } from "@/components/exhibition/public-scroll-boundary";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteVisualShell } from "@/components/site-visual-shell";
 import { site } from "@/lib/site";
 import { getSiteUrl } from "@/lib/site-url";
 
+const editionDisplay = Bodoni_Moda({ display: "swap", subsets: ["latin"], variable: "--font-edition-display", weight: ["700", "900"] });
 const inter = Inter({ display: "swap", subsets: ["latin"], variable: "--font-inter", weight: ["400", "500", "600", "700"] });
 const lora = Lora({ display: "swap", subsets: ["latin"], variable: "--font-lora", weight: ["400", "500", "600", "700"] });
+const notoSerif = Noto_Serif_SC({ display: "swap", subsets: ["latin"], variable: "--font-noto-serif", preload: false });
 
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
@@ -22,15 +28,15 @@ export const metadata: Metadata = {
     siteName: site.name,
     title: site.name,
     description: site.description,
-    images: ["/images/site-backgrounds/home-dieselpunk-harbor-v2.webp"],
+    images: ["/images/whiskey-journal-card.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: site.name,
     description: site.description,
-    images: ["/images/site-backgrounds/home-dieselpunk-harbor-v2.webp"],
+    images: ["/images/whiskey-journal-card.png"],
   },
 };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html className={`${inter.variable} ${lora.variable}`} lang="zh-CN" suppressHydrationWarning><body className="editorial-shell font-sans antialiased text-gray-900"><LanguageProvider><PublicScrollBoundary><EditorialHeader /><main>{children}</main><SiteFooter /></PublicScrollBoundary></LanguageProvider></body></html>;
+  return <html className={`${editionDisplay.variable} ${inter.variable} ${lora.variable} ${notoSerif.variable}`} lang="zh-CN" suppressHydrationWarning><body className="editorial-shell font-sans antialiased text-gray-900"><LanguageProvider><PublicScrollBoundary><SiteVisualShell><main>{children}</main></SiteVisualShell></PublicScrollBoundary></LanguageProvider></body></html>;
 }

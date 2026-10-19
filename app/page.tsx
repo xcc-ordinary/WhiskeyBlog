@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 
-import { ExhibitionHero } from "@/components/exhibition/exhibition-hero";
-import { LifeArchiveTeaser } from "@/components/exhibition/life-archive-teaser";
-import { SelectedWorks } from "@/components/exhibition/selected-works";
+import { HomeStudio } from "@/components/exhibition/home-studio";
+import { getProjects } from "@/lib/content";
 import { getPublicArchivePhotographs, type PublicArchiveSourcePhotograph } from "@/lib/public-photographs";
 
 const playwrightGalleryFixture: PublicArchiveSourcePhotograph[] = [
@@ -15,15 +14,10 @@ const playwrightGalleryFixture: PublicArchiveSourcePhotograph[] = [
 export const revalidate = 240;
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
-const featuredProjects = [
-  { slug: "dreambook-realm", coverImage: "/images/projects/dreambook-realm-cover.png" },
-  { slug: "lumi", coverImage: "/images/projects/lumi-cover.png" },
-] as const;
-
 export default async function Home() {
   const photographs = process.env.PLAYWRIGHT_ARCHIVE_FIXTURE === "1"
     ? await getPublicArchivePhotographs({ getPublished: async () => playwrightGalleryFixture, signDerivativeUrl: async () => "/archive-e2e-frame.svg" })
     : await getPublicArchivePhotographs();
 
-  return <><ExhibitionHero /><SelectedWorks projects={featuredProjects} /><LifeArchiveTeaser photographs={photographs} /></>;
+  return <HomeStudio photographs={photographs} projects={getProjects()} />;
 }

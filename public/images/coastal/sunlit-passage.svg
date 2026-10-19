@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 960">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#0963bc"/><stop offset="1" stop-color="#89ceeb"/></linearGradient>
+    <linearGradient id="sea" x2="0" y2="1"><stop stop-color="#0869b1"/><stop offset="1" stop-color="#138dbe"/></linearGradient>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feBlend in="SourceGraphic" mode="soft-light"/></filter>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h1440v960H0z"/>
+  <path fill="url(#sea)" d="M0 495h1440v235H0z"/>
+  <path stroke="#6bbad3" stroke-width="2" opacity=".5" d="M40 542h150m230-20h210m170 45h190m120-38h160M0 600h180m80-25h190m220 37h160m180-18h190"/>
+  <path fill="#f7edcf" d="M0 695l1440-80v345H0z"/>
+  <path fill="#dedfc9" d="M0 756l1440-80v21L0 780z"/>
+  <!-- A white passage frames the sea. All edges share one vanishing direction. -->
+  <path fill="#f7edcf" fill-rule="evenodd" d="M170 170h580v552l-580 33zM248 253v452l408-23V253z"/>
+  <path fill="#b6ced1" d="M656 253l41 34v393l-41 2zM248 253h408l41 34H290z"/>
+  <path fill="#e3e3cc" d="M170 170l-55 29v559l55-3z"/>
+  <path fill="#8eb7c7" d="M170 755l580-33 355 173-581 65H330z"/>
+  <!-- Quiet pool, terrace rim and one small warm accent. -->
+  <path fill="#fff5d8" d="M857 740l583-33v253h-216z"/>
+  <path fill="#31b0c7" d="M906 759l534-29v230h-168z"/>
+  <path fill="#0c7fae" d="M906 759l534-29v13l-505 28z"/>
+  <g stroke="#a4e0df" fill="none" opacity=".64" stroke-width="2"><path d="M967 798q65-12 130 0t130-3 160-5m-380 53q80-10 160 0t200-4m-302 65q60-16 130-6t190-2m-287 48q80-14 160-3"/></g>
+  <path fill="#c76646" d="M1065 638l90-4 26 30-96 6z"/>
+  <path fill="#e99b70" d="M1065 638l-14-53 83-1 21 50z"/>
+  <path stroke="#f7edcf" stroke-width="5" fill="none" d="M1054 589l30 94m-28-14 126-7m-26-28 38 47"/>
+  <path fill="#f7edcf" d="M0 0h1440v960H0z" filter="url(#grain)" opacity=".035"/>
+</svg>

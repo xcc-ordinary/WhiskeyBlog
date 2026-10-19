@@ -1,0 +1,23 @@
+/* Projects inherit the public Notes document layout and typography. */
+.project-article-page .project-article-cover {
+  aspect-ratio: auto;
+  overflow: visible;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.project-article-page .project-article-cover img {
+  display: block;
+  position: static;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(85svh, 960px);
+  margin-inline: auto;
+  object-fit: contain;
+}
+.project-article .project-case-nav {
+  width: min(100%, 740px);
+  margin: 5rem auto 0;
+}

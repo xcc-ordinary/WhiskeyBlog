@@ -1,0 +1,11 @@
+.project-home-settings{min-width:0;margin:2rem 0;padding:1.5rem;border:1px solid rgba(42,58,66,.18)}
+.project-home-settings legend{padding:0 .5rem;font-size:1rem}
+.project-home-settings>p{max-width:52rem;color:rgba(42,58,66,.72);font-size:.85rem;line-height:1.7}
+.project-home-settings .project-featured-toggle{display:flex;align-items:center;gap:.7rem;align-self:center}
+.project-home-settings .project-featured-toggle input{width:1.1rem;height:1.1rem;accent-color:#173e55}
+.project-body-upload{display:grid;gap:.6rem;margin:2rem 0;max-width:34rem;font-size:.85rem}
+.project-body-upload small{color:rgba(42,58,66,.68);line-height:1.6}
+.notes-editor-status .project-body-upload{margin:0;max-width:22rem}
+.notes-editor .project-home-settings{margin:1rem 0;padding:1rem}
+.notes-editor .project-home-settings .notes-editor-meta{grid-template-columns:1fr}
+.notes-editor .project-extra-settings{margin-top:1.25rem}

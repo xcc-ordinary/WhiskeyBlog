@@ -2,10 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDeferredValue, useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { saveStudioPost, uploadStudioPostCover } from "@/app/studio/writing/actions";
+import { MarkdownPreview } from "@/components/studio/markdown-preview";
 import type { PostDocument, PostSummary } from "@/lib/content";
 
 type Fields = {
@@ -46,23 +47,6 @@ const fieldsFrom = (post?: PostDocument | null): Fields => post ? {
   source: post.source.trim(),
 } : initial;
 
-const escape = (text: string) => text
-  .replace(/&/g, "&amp;")
-  .replace(/</g, "&lt;")
-  .replace(/>/g, "&gt;");
-
-function preview(markdown: string) {
-  return escape(markdown).split("\n").map((line) => {
-    if (/^###\s/.test(line)) return `<h3>${line.slice(4)}</h3>`;
-    if (/^##\s/.test(line)) return `<h2>${line.slice(3)}</h2>`;
-    if (/^#\s/.test(line)) return `<h1>${line.slice(2)}</h1>`;
-    if (/^>\s/.test(line)) return `<blockquote>${line.slice(2)}</blockquote>`;
-    if (/^-\s/.test(line)) return `<li>${line.slice(2)}</li>`;
-    if (!line.trim()) return "";
-    return `<p>${line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`(.+?)`/g, "<code>$1</code>")}</p>`;
-  }).join("");
-}
-
 const viewLabels: Array<{ value: WorkspaceView; label: string }> = [
   { value: "split", label: "双栏" },
   { value: "write", label: "仅写作" },
@@ -75,12 +59,12 @@ export function PostEditor({ post = null, posts = [] }: { post?: PostDocument | 
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [view, setView] = useState<WorkspaceView>("split");
   const [isNavigating, startNavigation] = useTransition();
 
   // Long Notes should never block typing while the preview catches up.
   const deferredFields = useDeferredValue(fields);
-  const html = useMemo(() => preview(deferredFields.source), [deferredFields.source]);
   const set = (key: keyof Fields, value: string) => setFields((current) => ({ ...current, [key]: value }));
 
   function openPost(slug: string) {
@@ -158,7 +142,8 @@ export function PostEditor({ post = null, posts = [] }: { post?: PostDocument | 
       </header>
 
       <div className="notes-editor-layout">
-        <aside className="notes-editor-settings" aria-label="Notes 设置">
+        <button type="button" className="studio-settings-toggle" aria-expanded={settingsOpen} aria-controls="notes-document-settings" onClick={() => setSettingsOpen(!settingsOpen)}>文章设置：标题、封面与日期 {settingsOpen ? "−" : "+"}</button>
+        <aside id="notes-document-settings" data-open={settingsOpen} className="notes-editor-settings" aria-label="Notes 设置">
           <div className="notes-editor-section-heading">
             <p className="studio-kicker">DOCUMENT</p>
             <h2>文章设置</h2>
@@ -193,7 +178,7 @@ export function PostEditor({ post = null, posts = [] }: { post?: PostDocument | 
                 <h2>{deferredFields.title || "未命名 Notes"}</h2>
                 <p className="post-preview-description">{deferredFields.description || "文章摘要会显示在这里。"}</p>
                 {deferredFields.coverImage ? <Image alt={deferredFields.coverAlt || "文章封面预览"} height={675} sizes="(max-width: 900px) 100vw, 50vw" src={deferredFields.coverImage} unoptimized width={1200} /> : null}
-                <div className="prose" dangerouslySetInnerHTML={{ __html: html }} />
+                <MarkdownPreview source={deferredFields.source} />
               </article>
             </section>
           ) : null}

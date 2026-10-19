@@ -64,7 +64,7 @@ export function ArticleReadingTools({ headings }: { headings: ArticleHeading[] }
         onPointerLeave={() => setRailOpen(false)}
       >
         <button aria-expanded={railOpen} aria-label="展开本文目录" className="article-rail-trigger" onClick={() => setRailOpen((open) => !open)} type="button">
-          <span aria-hidden="true" className="article-progress-value"><span>航标</span><strong>{Math.round(progress * 100)}%</strong></span>
+          <span aria-hidden="true" className="article-progress-value"><span>目录</span><strong>{Math.round(progress * 100)}%</strong></span>
           <span aria-hidden="true" className="article-progress-track">
             <span className="article-progress-fill" style={{ height: `${progress * 100}%` }} />
             <span className="article-progress-marker" style={{ top: `${progress * 100}%` }} />
@@ -72,7 +72,7 @@ export function ArticleReadingTools({ headings }: { headings: ArticleHeading[] }
         </button>
         {headings.length ? (
           <nav aria-hidden={!railOpen} aria-label="本文目录" className="article-toc-panel">
-            <span>阅读航标</span>
+            <span>本文目录</span>
             <ol>
               {visibleHeadings.map((heading) => (
                 <li data-level={heading.level} key={heading.id}>

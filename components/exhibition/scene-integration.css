@@ -17,3 +17,70 @@
 .notes-workbench::before {
   pointer-events: none;
 }
+
+/* Keep controls above the next chapter's painted overlap and preserve the title's two beats. */
+.explorer-hero--home [data-scene-controls] {
+  bottom: calc(18svh + 1.25rem);
+  color: #2a4248;
+}
+.explorer-hero--home h1 {
+  font-size: clamp(3rem, 4.5vw, 5.5rem) !important;
+  line-height: 1.16 !important;
+}
+
+/* An independent painted silhouette gives the harbor its explorer's signature. */
+.harbor-airship-fallback {
+  position: absolute;
+  z-index: -1;
+  left: 69%;
+  top: 28.5%;
+  width: 29%;
+  aspect-ratio: 3 / 2;
+  transform: translate(-50%, -50%);
+  background: url("/images/site-backgrounds/harbor-explorer-airship-v1.webp") center / contain no-repeat;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 1.2s ease;
+}
+.explorer-hero--home:has(.living-scene[data-state="ready"] .living-scene-surface[data-airship="painted"]) .harbor-airship-fallback {
+  opacity: 0;
+}
+.explorer-hero--home [data-scene-controls] {
+  padding: .65rem .8rem;
+  border-radius: 999px !important;
+  background: rgba(253, 251, 247, .78);
+  border: 1px solid rgba(253, 251, 247, .85);
+  backdrop-filter: blur(12px);
+}
+.explorer-hero--home [data-scene-controls] [role="group"] {
+  background: transparent !important;
+  border: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .explorer-hero--home [data-scene-controls] { background: #fdfbf7; backdrop-filter: none; }
+}
+
+/* Portrait framing keeps spatial proportions instead of squeezing the harbor. */
+@media (max-width: 700px) {
+  .selected-works { width: 100% !important; margin-inline: 0; padding-inline: 6vw !important; }
+  .harbor-airship-fallback { left: 73%; top: 14.5%; width: 48%; transition-duration: .7s; }
+  .explorer-hero--home [data-scene-controls] {
+    bottom: calc(12svh + 1.25rem);
+  }
+  .explorer-hero--home h1 {
+    font-size: clamp(2rem, 9.7vw, 3.25rem) !important;
+    max-width: 100% !important;
+  }
+  .explorer-hero--home .living-scene {
+    background-size: cover !important;
+    background-position: center !important;
+  }
+  .explorer-hero--home .explorer-hero-vignette {
+    background: linear-gradient(180deg, rgba(253,251,247,.42), transparent 64%) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .harbor-airship-fallback { transition: none; }
+}

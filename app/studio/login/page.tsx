@@ -12,5 +12,5 @@ export default async function StudioLoginPage({ searchParams }: { searchParams: 
   const { error: errorCode } = await searchParams;
   const errorMessage = errorCode ? loginErrors[errorCode] : null;
   try { await requireOwner(); redirect("/studio"); } catch (error) { if (!(error instanceof MediaStudioAuthorizationError)) throw error; }
-  return <section className="studio-auth site-container"><p className="studio-kicker">PRIVATE / WHISKEYBLOG</p><h1>进入 Media Studio。</h1><p>这是仅供站点所有者使用的摄影工作台。请输入获授权的邮箱，我们会发送一次性登录链接。</p>{errorMessage ? <p aria-live="polite" className="studio-form-message" role="alert">{errorMessage}</p> : null}<SignInForm /></section>;
+  return <section className="studio-auth site-container"><p className="studio-kicker">PRIVATE / WHISKEYBLOG</p><h1>进入 Media Studio。</h1><p>在这里管理项目、文章与照片。请输入获授权的邮箱，我们会发送一次性登录链接。</p>{errorMessage ? <p aria-live="polite" className="studio-form-message" role="alert">{errorMessage}</p> : null}<SignInForm /></section>;
 }

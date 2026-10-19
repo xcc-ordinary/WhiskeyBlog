@@ -1,81 +1,31 @@
-# Personal Website
+# Whiskey · The Personal Journal
 
-This context defines the public-facing content and identity of a personal website. It keeps the first release focused on presenting a person and their work.
+更新日期：2026-10-18。此文件定义当前网站身份与内容边界；视觉细则见 `docs/visual-language.md`，项目维护见 `docs/project-editing.md`。`design/` 中的旧探索不再作为新实现的指导。
 
-## Language
+## 网站身份
 
-**Personal Website**:
-A public site for a growing developer, composed of an introduction, a project showcase, and a blog.
-_Avoid_: Portfolio-only site, corporate site
+Whiskey 的个人网站，记录一名人工智能专业学生的作品、实践、阅读与生活。公开表达应具体、诚实，区分概念、进行中项目与已经验证的功能。刊名为 **The Personal Journal**。
 
-**Growing Developer**:
-The site's owner, presented through an honest record of learning, practice, and progressively stronger work.
-_Avoid_: Established expert, company
+## 当前视觉方向
 
-**Visual Direction**:
-A lively, spacious visual language inspired by Apple's clarity, craft, and natural feedback, without restricting the palette to black and white.
-_Avoid_: Monochrome minimalism, ornamental maximalism
+采用奶油白 `#f3efdf` 与深蓝 `#173e55` 的个人杂志排版：大衬线标题、细分栏线、明确留白、作品封面与本人照片。辅助文字 `#566d72`，少量陶土色 `#b65b39` 用于标签与强调。展示字体使用 Bodoni Moda / Noto Serif SC，阅读字体使用 Lora / Noto Serif SC，操作控件使用 Inter。
 
-**Visual Assets**:
-Project screenshots and CSS-generated abstract color and shape treatments used as the site's primary imagery.
-_Avoid_: Unlicensed stock imagery, generic photo library
+不再沿用早期 Apple 风格、系统深浅主题、海岸蓝、泳池棕榈、港湾场景或装饰性 3D 主图作为视觉目标。部分代码保留历史 coastal 命名，实际行为与本规范冲突时以当前规范和现行页面为准，勿按文件名整批删除。
 
-**Theme Preference**:
-A light or dark presentation selected from the visitor's system preference and optionally overridden by the visitor.
-_Avoid_: Light-only interface, forced dark interface
+## 内容与编辑
 
-**Media Studio**:
-A protected owner-only workspace for uploading, publishing, and managing the photographs used by the Personal Website.
-_Avoid_: Visitor uploads, public media library
+- 首页、关于、项目、博客与生活档案构成公开网站；GitHub 与邮箱为联系入口。
+- 公开界面可切换中文与英文；作者正文以实际写作语言渲染，缺少英文项目字段时回退到原文。
+- 项目与文章以本地 MDX 保存。项目封面、标题、简介、首页展示与排序来自同一份内容，项目正文与博客共用 Markdown 阅读和编辑体验。
+- 阅读采用 700px 正文栏、18px 中文系统无衬线字体与 1.85 行高；手机 17px。`app/reading.css` 统一文章、项目及 Studio 预览，避免恢复旧版大标题、负字距和重复覆盖。Markdown 兼容 Obsidian 常用语法；不执行 JSX 表达式或 vault 插件。
+- 本地 Studio 可维护项目与文章；Vercel 部署文件系统不作为内容数据库，线上写入停用，内容通过 Git 发布。
+- Media Studio 使用 Supabase Auth、私有 Storage 与 Postgres 管理照片；上传照片仍是私有草稿，只有所有者明确发布并补全元数据后才对外显示。
+- 不虚构上线状态、多人使用规模或未经测量的收益。未知个人材料留待本人填写。
 
-**Published Photograph**:
-A photograph from the Media Studio that has been explicitly marked for public display and supplied with its presentation metadata.
-_Avoid_: Uploaded file, draft media
+## 交互与可访问性
 
-**Photograph Draft**:
-An uploaded photograph visible only in the Media Studio until its owner supplies metadata and publishes it.
-_Avoid_: Automatically public upload
+公开页面使用有依据的纸面展开与版面转场，正文保持稳定可读。手机、键盘和减少动态效果设置均可完成浏览；Studio 与认证保持原生滚动。视觉规范不授权删除作品原画、个人照片、历史设计文件或业务数据。
 
-**Project Showcase**:
-A curated set of completed or in-progress projects, each with a short detail page covering its context, problem, technology choices, evidence, and learning.
-_Avoid_: Product catalog, gallery
+## 发布与验证
 
-**Blog**:
-A collection of authored posts through which the site's owner shares ideas, experiences, or technical learning.
-_Avoid_: News feed, forum
-
-**Primary Language**:
-Simplified Chinese is the language of the first release's interface and authored content; English is a future extension.
-_Avoid_: Bilingual-first launch
-
-**Public Profile**:
-The owner's chosen name or stable handle together with GitHub and a dedicated public contact email, excluding sensitive personal information.
-_Avoid_: Full personal dossier, anonymous profile
-
-**Launch Content**:
-The smallest publishable set: one introduction, two project showcase entries, and one article documenting the site's creation.
-_Avoid_: Empty launch, exhaustive archive
-
-**First Release Boundary**:
-The initial public website has no user accounts, comments, reactions, or server-backed contact form; contact happens through the Public Profile.
-_Avoid_: Community platform, full-stack launch
-
-**Launch**:
-Publishing the first release through Vercel, initially at its generated address and later at a custom domain.
-_Avoid_: Local-only completion, domain-first launch
-
-**Public Repository**:
-The GitHub repository containing the site's source code and learning history, with all credentials and secrets excluded.
-_Avoid_: Private-only source, credential archive
-
-**Release Verification**:
-Automated checks for critical content logic plus a browser smoke test of the home, project, and blog pages.
-_Avoid_: Manual-only release check, exhaustive test suite
-
-**Privacy-Respecting Analytics**:
-Lightweight Vercel traffic insights used to understand reach without advertising, tracking pixels, or user profiling.
-_Avoid_: Behavioral surveillance, ad analytics
-
-**Site Navigation**:
-The first release's four primary destinations: Home, About, Projects, and Blog. GitHub and email are action links, not primary destinations.
-_Avoid_: Link-dense navigation, contact page
+源代码与内容放入公开 Git 仓库；所有凭据、密钥和私人信息排除。Vercel 承担网站部署，Supabase 承担照片管理。提交、推送、构建、真实浏览器验证与线上部署是不同阶段，应分别报告证据，不将本地截图当作线上结果。

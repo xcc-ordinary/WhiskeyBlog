@@ -14,6 +14,8 @@ vi.mock("@/app/studio/writing/actions", () => ({
   uploadStudioPostCover: vi.fn(),
 }));
 
+vi.mock("@/app/studio/markdown-preview-actions", () => ({ renderStudioMarkdown: vi.fn().mockResolvedValue(null) }));
+
 afterEach(cleanup);
 
 const posts: PostSummary[] = [{

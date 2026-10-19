@@ -3,6 +3,13 @@ on: [push, pull_request]
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      # Non-secret placeholders. The anon key and project URL are public by design,
+      # and Studio only needs them present so an unauthenticated visit resolves to
+      # the sign-in redirect instead of a missing-configuration error. The
+      # service-role key is deliberately never provided here.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

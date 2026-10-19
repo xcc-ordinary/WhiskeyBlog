@@ -9,7 +9,7 @@ const languageNames: Record<string, string> = {
   text: "Text",
 };
 
-export function ArticleCodeBlock({ code, language = "text" }: { code: string; language?: string }) {
+export function ArticleCodeBlock({ code, language = "text", highlightedHtml }: { code: string; language?: string; highlightedHtml?: string }) {
   const [label, setLabel] = useState("复制");
 
   async function copyCode() {
@@ -25,7 +25,7 @@ export function ArticleCodeBlock({ code, language = "text" }: { code: string; la
   return (
     <figure className="article-code-block">
       <figcaption><span>{languageNames[language] ?? language}</span><button onClick={copyCode} type="button">{label}</button></figcaption>
-      <pre><code className={`language-${language}`}>{code}</code></pre>
+      <pre>{highlightedHtml ? <code className={`language-${language} hljs`} dangerouslySetInnerHTML={{ __html: highlightedHtml }} /> : <code className={`language-${language}`}>{code}</code>}</pre>
     </figure>
   );
 }

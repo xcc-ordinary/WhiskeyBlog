@@ -1,5 +1,8 @@
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { createAirship, createSailboat } from "./scene-models";
+import { createPaintedAirship } from "./painted-airship";
 import { paintingDepth, paintingWater, scenePresets, type SceneKind } from "./scene-presets";
 
 export type SceneController = {
@@ -27,6 +30,7 @@ const fragmentShader = `
   uniform float time;
   uniform vec3 ripple;
   uniform vec2 look;
+  uniform float harborMotion;
   varying vec2 vUv;
   varying float vWater;
   void main() {
@@ -42,6 +46,9 @@ const fragmentShader = `
     vec4 color = texture2D(painting, clamp(uv, .001, .999));
     float glint = pow(max(0.0, sin(uv.y * 580.0 + sin(uv.x * 190.0) * 2.0 + time * .55)), 18.0);
     color.rgb += vec3(.07, .052, .023) * glint * vWater * (.5 + .5 * sin(time * .2 + uv.x * 70.0));
+    // Broad, slow bands of reflected sunlight; never warp the painted skyline.
+    float lightBand = .5 + .5 * sin(uv.x * 24.0 + uv.y * 9.0 - time * .32);
+    color.rgb += vec3(.045, .032, .008) * lightBand * vWater * harborMotion;
     // Changing incidence is subtle: the original illustration already contains its light.
     color.rgb *= 1.0 + look.x * .012 * (uv.x - .3);
     gl_FragColor = color;
@@ -52,6 +59,7 @@ const fragmentShader = `
 /** Perspective-correct, textured relief plus independently lit, fully volumetric sculptures. */
 export async function createPaintingScene(host: HTMLDivElement, options: SceneOptions): Promise<SceneController> {
   const { kind, fit, position, interaction } = options;
+  const modeledHarbor = kind === "harbor" && options.image.includes("home-painted-harbor-v3");
   const preset = scenePresets[kind];
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("webgl2", { alpha: true, antialias: true, powerPreference: "low-power" });
@@ -64,7 +72,19 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
   catch (error) { renderer.dispose(); renderer.forceContextLoss(); throw error; }
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+  let architecture: THREE.Group | null = null;
+  if (modeledHarbor) {
+    try {
+      architecture = (await new GLTFLoader().loadAsync("/models/painted-harbor-v1.glb")).scene;
+    } catch (error) {
+      texture.dispose(); renderer.dispose(); renderer.forceContextLoss();
+      throw error;
+    }
+  }
   const scene = new THREE.Scene();
+  // This optional detail must never prevent the main harbor from rendering.
+  const paintedAirship = modeledHarbor ? await createPaintedAirship().catch(() => null) : null;
+  if (paintedAirship) scene.add(paintedAirship.mesh);
   const camera = new THREE.PerspectiveCamera(35, 1, .1, 40);
   camera.position.z = 10;
   scene.add(new THREE.HemisphereLight(0xe5f6ee, 0x776647, 2.6));
@@ -83,10 +103,53 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
     painting: { value: texture }, time: { value: 0 },
     ripple: { value: new THREE.Vector3(-2, -2, -100) },
     look: { value: new THREE.Vector2() },
+    harborMotion: { value: modeledHarbor ? 1 : 0 },
   };
   const material = new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms });
   const painting = new THREE.Mesh(geometry, material);
   scene.add(painting);
+
+  // Blender geometry and background share one painting and one shader. There is
+  // no independently lit plastic prop: its light and brushwork come from the art.
+  const architecturalMeshes: { mesh: THREE.Mesh; source: Float32Array }[] = [];
+  architecture?.traverse((object) => {
+    if (!(object instanceof THREE.Mesh)) return;
+    const originalMaterials = Array.isArray(object.material) ? object.material : [object.material];
+    originalMaterials.forEach((item) => item.dispose());
+    object.material = material;
+    const positions = object.geometry.getAttribute("position");
+    const source = new Float32Array(positions.count * 3);
+    const projectedUv = new Float32Array(positions.count * 2);
+    for (let i = 0; i < positions.count; i++) {
+      source[i * 3] = positions.getX(i) + .5;
+      source[i * 3 + 1] = .5 - positions.getY(i);
+      source[i * 3 + 2] = positions.getZ(i);
+      projectedUv[i * 2] = source[i * 3];
+      projectedUv[i * 2 + 1] = 1 - source[i * 3 + 1];
+    }
+    object.geometry.setAttribute("uv", new THREE.BufferAttribute(projectedUv, 2));
+    object.geometry.setAttribute("water", new THREE.BufferAttribute(new Float32Array(positions.count), 1));
+    architecturalMeshes.push({ mesh: object, source });
+  });
+  const architecturalParts = architecturalMeshes.length;
+  if (architecture) {
+    // Keep Blender's editable parts, but submit the same material as one draw on the web.
+    const merged = mergeGeometries(architecturalMeshes.map(({ mesh }) => mesh.geometry));
+    if (merged) {
+      const source = new Float32Array(architecturalMeshes.reduce((sum, part) => sum + part.source.length, 0));
+      let cursor = 0;
+      for (const part of architecturalMeshes) {
+        source.set(part.source, cursor);
+        cursor += part.source.length;
+        part.mesh.geometry.dispose();
+      }
+      architecture.clear();
+      const mesh = new THREE.Mesh(merged, material);
+      architecture.add(mesh);
+      architecturalMeshes.splice(0, architecturalMeshes.length, { mesh, source });
+    }
+    scene.add(architecture);
+  }
 
   const model = preset.model === "airship" ? createAirship() : preset.model === "sailboat" ? createSailboat() : null;
   if (model) scene.add(model);
@@ -106,6 +169,7 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
   const dustMaterial = new THREE.PointsMaterial({ color: 0xffedb9, size: .012, transparent: true, opacity: .38, depthWrite: false });
   const dust = new THREE.Points(dustGeometry, dustMaterial);
   scene.add(dust);
+  dust.visible = !modeledHarbor;
 
   let width = 1;
   let height = 1;
@@ -124,6 +188,7 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
   let frames = 0;
   let lift = 0;
   let targetLift = 0;
+  let scrollProgress = 0;
   const target = new THREE.Vector2();
   const current = new THREE.Vector2();
   const coarse = window.matchMedia("(pointer: coarse)").matches;
@@ -137,8 +202,9 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     viewWidth = viewHeight * camera.aspect;
+    paintedAirship?.resize(viewWidth, viewHeight, width <= 700);
     const aspect = (texture.image as HTMLImageElement).width / (texture.image as HTMLImageElement).height;
-    const cover = fit === "cover" || (kind === "gallery" && width <= 768);
+    const cover = fit === "cover" || (kind === "gallery" && width <= 768) || (modeledHarbor && width <= 700);
     cropX = cover ? Math.min(1, camera.aspect / aspect) : 1;
     cropY = cover ? Math.min(1, aspect / camera.aspect) : 1;
     const horizontal = Number.parseFloat(position) / 100;
@@ -151,16 +217,28 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
       const sy = row / 96;
       const x = offsetX + sx * cropX;
       const y = offsetY + sy * cropY;
-      const depth = paintingDepth(kind, x, y);
+      const waterMask = modeledHarbor ? harborWater(x, y) : paintingWater(kind, x, y);
+      const depth = modeledHarbor ? .02 + waterMask * .22 : paintingDepth(kind, x, y);
       // Compensate depth at rest so architecture aligns with the original painting.
       points.setXYZ(i, (sx - .5) * viewWidth * 1.045 * (10 - depth) / 10, (.5 - sy) * viewHeight * 1.045 * (10 - depth) / 10, depth);
       uv.setXY(i, x, 1 - y);
-      water[i] = paintingWater(kind, x, y);
+      water[i] = waterMask;
     }
     points.needsUpdate = true;
     uv.needsUpdate = true;
     geometry.setAttribute("water", new THREE.BufferAttribute(water, 1));
     geometry.computeBoundingSphere();
+    for (const { mesh, source } of architecturalMeshes) {
+      const vertices = mesh.geometry.getAttribute("position");
+      for (let i = 0; i < vertices.count; i++) {
+        const sx = (source[i * 3] - offsetX) / cropX;
+        const sy = (source[i * 3 + 1] - offsetY) / cropY;
+        const depth = source[i * 3 + 2];
+        vertices.setXYZ(i, (sx - .5) * viewWidth * 1.045 * (10 - depth) / 10, (.5 - sy) * viewHeight * 1.045 * (10 - depth) / 10, depth);
+      }
+      vertices.needsUpdate = true;
+      mesh.geometry.computeBoundingSphere();
+    }
     if (model) {
       const x = (preset.anchor[0] - offsetX) / cropX;
       const y = (preset.anchor[1] - offsetY) / cropY;
@@ -189,6 +267,11 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
     targetLift = .2;
     if (event.pointerType === "touch") target.set((point.x - .5) * .7, (.5 - point.y) * .4);
   };
+  const sampleScroll = () => {
+    if (!modeledHarbor) return;
+    const rect = interaction.getBoundingClientRect();
+    scrollProgress = THREE.MathUtils.clamp(-rect.top / Math.max(1, rect.height), 0, 1);
+  };
 
   const render = (now: number) => {
     raf = 0;
@@ -200,10 +283,12 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
     current.lerp(target, damping);
     lift += (targetLift - lift) * damping;
     targetLift *= Math.exp(-delta * .8);
-    camera.position.set(current.x * .27, current.y * .18, 10);
-    camera.lookAt(current.x * .035, current.y * .025, 0);
+    const travel = modeledHarbor ? .85 : 1;
+    camera.position.set(current.x * .27 * travel + scrollProgress * .045, current.y * .18 * travel, 10 - scrollProgress * .16);
+    camera.lookAt(current.x * .035 * travel, current.y * .025 * travel, 0);
     uniforms.time.value = time;
     uniforms.look.value.copy(current);
+    paintedAirship?.update(time, current);
     if (model) {
       model.position.copy(modelBase);
       model.position.y += Math.sin(time * .42) * .035 + lift;
@@ -215,7 +300,7 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
     dust.rotation.z = Math.sin(time * .045) * .02;
     renderer.render(scene, camera);
     frames++;
-    if (frames % 8 === 0) { host.dataset.view = `${current.x.toFixed(3)},${current.y.toFixed(3)}`; host.dataset.frames = String(frames); }
+    if (frames % 8 === 0) { host.dataset.view = `${current.x.toFixed(3)},${current.y.toFixed(3)}`; host.dataset.frames = String(frames); host.dataset.scroll = scrollProgress.toFixed(3); host.dataset.drawCalls = String(renderer.info.render.calls); }
     raf = requestAnimationFrame(render);
   };
   const schedule = () => { lastTime = 0; if (!raf && !disposed && visible && !isPaused) raf = requestAnimationFrame(render); };
@@ -225,8 +310,13 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
   interaction.addEventListener("pointermove", pointerMove, { passive: true });
   interaction.addEventListener("pointerleave", pointerLeave, { passive: true });
   interaction.addEventListener("pointerdown", pointerDown, { passive: true });
+  if (modeledHarbor) window.addEventListener("scroll", sampleScroll, { passive: true });
   host.appendChild(canvas);
   host.dataset.view = "0.000,0.000";
+  host.dataset.model = modeledHarbor ? "blender-harbor" : "painting-relief";
+  host.dataset.meshes = String(architecturalParts);
+  host.dataset.airship = paintedAirship ? "painted" : "none";
+  sampleScroll();
   resize();
   observer.observe(host);
   renderer.render(scene, camera);
@@ -245,6 +335,7 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
       interaction.removeEventListener("pointermove", pointerMove);
       interaction.removeEventListener("pointerleave", pointerLeave);
       interaction.removeEventListener("pointerdown", pointerDown);
+      if (modeledHarbor) window.removeEventListener("scroll", sampleScroll);
       const geometries = new Set<THREE.BufferGeometry>();
       const materials = new Set<THREE.Material>();
       const textures = new Set<THREE.Texture>([texture]);
@@ -264,4 +355,13 @@ export async function createPaintingScene(host: HTMLDivElement, options: SceneOp
       canvas.remove();
     },
   };
+}
+
+/** Shoreline of the approved v3 artwork; keep ripples off buildings and the pier. */
+function harborWater(x: number, y: number): number {
+  const shore = .726 + .14 * Math.max(0, x - .28);
+  const belowShore = THREE.MathUtils.smoothstep(y, shore, shore + .028);
+  const rightPier = 1 - THREE.MathUtils.smoothstep(x, .75, .80);
+  const boat = x > .66 && x < .74 && y > .85 && y < .95 ? 0 : 1;
+  return belowShore * rightPier * boat;
 }

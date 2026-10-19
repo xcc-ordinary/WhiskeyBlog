@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireRepositoryContentWrites } from "@/lib/content-writes";
 import { requireOwner } from "@/lib/supabase/auth";
+import { maxProjectImageBytes, projectImageExtension, validProjectCoverPosition } from "@/lib/project-images";
 
 const projectDirectory = path.join(process.cwd(), "content", "projects");
 const clean = (value: FormDataEntryValue | null) => typeof value === "string" ? value.trim() : "";
@@ -24,10 +25,19 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
     const role = clean(form.get("role"));
     const coverImage = clean(form.get("coverImage"));
     const coverAlt = clean(form.get("coverAlt"));
+    const coverFit = clean(form.get("coverFit")) || "cover";
+    const coverPosition = clean(form.get("coverPosition")) || "center";
     const source = clean(form.get("source"));
+    const featured = form.get("featured") !== "false";
+    const homeOrder = Number(clean(form.get("homeOrder")) || "0");
+    const titleEn = clean(form.get("titleEn"));
+    const descriptionEn = clean(form.get("descriptionEn"));
+    const homeLabel = clean(form.get("homeLabel"));
     const tags = clean(form.get("tags")).split(",").map((tag) => tag.trim()).filter(Boolean);
     if (!validSlug(slug) || !title || !description || !source || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !tags.length) return { ok: false, message: "请填写项目名称、简介、日期、至少一个标签、笔记正文和有效 slug。" };
     if (originalSlug && originalSlug !== slug) return { ok: false, message: "已有项目的 slug 不能直接修改，请新建一个项目。" };
+    if (!Number.isSafeInteger(homeOrder) || homeOrder < 0) return { ok: false, message: "首页排序请填写大于或等于 0 的整数。" };
+    if (!["cover", "contain"].includes(coverFit) || !validProjectCoverPosition(coverPosition)) return { ok: false, message: "请选择铺满或完整显示封面；焦点使用 center 或 0% 0% 至 100% 100% 的坐标。" };
 
     await mkdir(projectDirectory, { recursive: true });
     const targetPath = path.join(projectDirectory, `${slug}.mdx`);
@@ -45,7 +55,14 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
       `slug: ${yaml(slug)}`,
       coverImage ? `coverImage: ${yaml(coverImage)}` : "",
       coverAlt ? `coverAlt: ${yaml(coverAlt)}` : "",
+      `coverFit: ${yaml(coverFit)}`,
+      `coverPosition: ${yaml(coverPosition)}`,
       role ? `role: ${yaml(role)}` : "",
+      `featured: ${featured}`,
+      `homeOrder: ${homeOrder}`,
+      titleEn ? `titleEn: ${yaml(titleEn)}` : "",
+      descriptionEn ? `descriptionEn: ${yaml(descriptionEn)}` : "",
+      homeLabel ? `homeLabel: ${yaml(homeLabel)}` : "",
       "---",
       "",
       source,
@@ -55,8 +72,30 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
     revalidatePath("/");
     revalidatePath("/projects");
     revalidatePath(`/projects/${slug}`);
+    revalidatePath("/studio/projects");
+    revalidatePath("/studio");
+    revalidatePath("/sitemap.xml");
     return { ok: true, message: "项目已保存并刷新公开页面。" };
   } catch (error) {
     return { ok: false, message: error instanceof Error ? error.message : "保存失败。" };
+  }
+}
+
+export async function uploadStudioProjectImage(form: FormData): Promise<{ ok: boolean; message?: string; path?: string }> {
+  try {
+    await requireOwner();
+    requireRepositoryContentWrites();
+    const file = form.get("image");
+    if (!(file instanceof File) || !file.size || file.size > maxProjectImageBytes) return { ok: false, message: "请选择 3.75MB 以内的 JPG、PNG、WebP 或 GIF 图片。" };
+    const bytes = Buffer.from(await file.arrayBuffer());
+    const extension = projectImageExtension(bytes);
+    if (!extension) return { ok: false, message: "图片格式无法识别，请使用 JPG、PNG、WebP 或 GIF。" };
+    const directory = path.join(process.cwd(), "public", "images", "projects", "uploads");
+    const filename = `${crypto.randomUUID()}.${extension}`;
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, filename), bytes, { flag: "wx" });
+    return { ok: true, path: `/project-media/${filename}` };
+  } catch (error) {
+    return { ok: false, message: error instanceof Error ? error.message : "图片上传失败，请稍后重试。" };
   }
 }

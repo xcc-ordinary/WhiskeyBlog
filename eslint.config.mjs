@@ -13,7 +13,15 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".worktrees/**",
+    // Local visual evidence and vendored browser runtimes are not app source.
+    "design/**",
+    "public/prototypes/**",
+    "public/models/**",
   ]),
+  {
+    files: ["scripts/**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
 ]);
 
 export default eslintConfig;

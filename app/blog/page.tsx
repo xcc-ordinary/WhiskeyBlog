@@ -12,12 +12,11 @@ export const metadata: Metadata = {
 
 export default function BlogPage() {
   return (
-    <div className="blog-page">
+    <div className="blog-page" lang="zh-CN">
       <ExplorerHero
         eyebrow="05 / FIELD NOTES"
         title="把过程，写成证据。"
         description="关于设计、开发、项目过程，以及那些不想被快速略过的生活观察。"
-        image="/images/site-backgrounds/notes-open-water-v1.webp"
       />
       <div className="blog-directory painted-index-transition">
         <div className="blog-directory-canvas site-container">

@@ -1,31 +1,32 @@
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import { markdownText, remarkObsidian } from "@/lib/markdown";
+import type { Root, RootContent } from "mdast";
+
 export type ArticleHeading = {
   id: string;
   level: 2 | 3;
   text: string;
 };
 
-export function headingId(value: string): string {
-  return value
-    .trim()
-    .toLocaleLowerCase("zh-CN")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-}
-
-function plainHeading(value: string): string {
-  return value
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/[`*_~]/g, "")
-    .trim();
-}
+export { headingId } from "@/lib/heading-id";
 
 export function extractArticleHeadings(source: string): ArticleHeading[] {
-  return Array.from(source.matchAll(/^(##|###)\s+(.+)$/gm), (match) => {
-    const text = plainHeading(match[2]);
-    return { id: headingId(text), level: match[1].length as 2 | 3, text };
-  }).filter((heading) => heading.id && heading.text);
+  const parser = unified().use(remarkParse).use(remarkGfm).use(remarkMath).use(remarkObsidian);
+  const tree = parser.runSync(parser.parse(source)) as Root;
+  const headings: ArticleHeading[] = [];
+  function visit(node: Root | RootContent) {
+    if (node.type === "heading" && (node.depth === 2 || node.depth === 3)) {
+      const text = markdownText(node).trim();
+      const id = String(node.data?.hProperties?.id ?? "");
+      if (id && text) headings.push({ text, id, level: node.depth });
+    }
+    if ("children" in node) node.children.forEach((child) => visit(child as RootContent));
+  }
+  visit(tree);
+  return headings;
 }
 
 export function estimateReadingMinutes(source: string): number {
