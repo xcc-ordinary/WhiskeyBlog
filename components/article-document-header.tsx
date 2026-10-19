@@ -11,6 +11,6 @@ export function ArticleDocumentHeader({ document, kind = "post", preview = false
     <h1 id="article-title">{document.title}</h1>
     {document.description && <p className="blog-article-deck">{document.description}</p>}
     <div className="blog-article-meta"><p><strong>{document.author || "Whiskey"}</strong><span>{document.date.replaceAll("-", ".")} · {document.readingMinutes ?? 1} 分钟阅读</span></p>{!preview && <ArticleShareButton title={document.title} />}</div>
-    {document.coverImage && isSupportedDocumentCover(document.coverImage) && <figure className={`blog-article-cover${kind === "project" ? " project-article-cover" : ""}`} style={kind === "project" ? { aspectRatio: "auto" } : undefined}>{kind === "project" ? <Image alt={document.coverAlt || document.title} width={1600} height={1067} style={{ width: "100%", height: "auto" }} priority={!preview} unoptimized={preview} sizes="(max-width: 760px) 100vw, 700px" src={document.coverImage} /> : <Image alt={document.coverAlt || document.title} fill priority={!preview} unoptimized={preview} sizes="(max-width: 760px) 100vw, 700px" src={document.coverImage} />}</figure>}
+    {document.coverImage && isSupportedDocumentCover(document.coverImage) && <figure className={`blog-article-cover${kind === "project" ? " project-article-cover" : ""}`}><Image alt={document.coverAlt || document.title} width={1600} height={1067} style={{ width: "100%", height: "auto" }} priority={!preview} unoptimized={preview} sizes="(max-width: 760px) 100vw, 700px" src={document.coverImage} /></figure>}
   </header>;
 }

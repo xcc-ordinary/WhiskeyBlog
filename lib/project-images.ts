@@ -43,3 +43,11 @@ export function projectImageExtension(bytes: Uint8Array): string | null {
   if (text(0, 4) === "RIFF" && text(8, 12) === "WEBP") return "webp";
   return null;
 }
+
+/** Cover remains available to cards, but appears only once in the reading document. */
+export function documentHeaderCover(cover: string | undefined, source: string): string | undefined {
+  if (!cover) return undefined;
+  const normalize = (value: string) => value.replace(/&amp;/g, "&").split("#")[0];
+  const images = [...source.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, "").matchAll(/!\[[^\]]*\]\(\s*(<[^>]+>|[^\s)]+)(?:\s+["'][^\n]*?["'])?\s*\)|<img\b[^>]*\bsrc=["']([^"']+)["']/gi)];
+  return images.some(match => normalize((match[1] || match[2]).replace(/^<|>$/g, "")) === normalize(cover)) ? undefined : cover;
+}

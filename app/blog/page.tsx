@@ -1,3 +1,4 @@
+import "./journal-index.css";
 import type { Metadata } from "next";
 
 import { ExplorerHero } from "@/components/exhibition/explorer-hero";

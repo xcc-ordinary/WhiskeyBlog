@@ -1,3 +1,4 @@
+import { documentHeaderCover } from "@/lib/project-images";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -44,7 +45,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <div className="blog-article-topline">
           <Link className="blog-back-link" href="/blog">← 返回文章目录</Link>
         </div>
-        <ArticleDocumentHeader document={post} />
+        <ArticleDocumentHeader document={{ ...post, coverImage: documentHeaderCover(post.coverImage, post.source) }} />
         <ArticleReadingTools headings={headings} />
         <div className="blog-article-reading-layout"><MdxContent source={post.source.replace(/^\s*#\s+[^\n]+\r?\n+/, "")} /></div>
         {nextPost && nextPost.slug !== post.slug ? (

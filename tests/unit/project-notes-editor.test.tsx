@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render as mount, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { saveStudioProjectNotes, uploadStudioProjectImage } from "@/app/studio/projects/actions";
@@ -16,6 +16,7 @@ vi.mock("@/app/studio/projects/actions", () => ({
 }));
 vi.mock("@/app/studio/markdown-preview-actions", () => ({ renderStudioMarkdown: vi.fn().mockResolvedValue(null) }));
 
+function render(ui: Parameters<typeof mount>[0]) { const result = mount(ui); fireEvent.click(screen.getByRole("button", { name: /^即时排版$/ })); return result; }
 beforeEach(() => localStorage.clear());
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
@@ -38,7 +39,7 @@ describe("ProjectNotesEditor", () => {
     vi.mocked(saveStudioProjectNotes).mockResolvedValue({ ok: true, message: "已保存" });
     render(<ProjectNotesEditor project={project} projects={projects} />);
     fireEvent.click(screen.getByRole("button", { name: /发布设置/ }));
-    fireEvent.click(screen.getByLabelText("在首页展示"));
+    fireEvent.click(screen.getByLabelText("在首页展示此作品"));
     fireEvent.change(screen.getByLabelText(/首页排序/), { target: { value: "3" } });
     fireEvent.click(screen.getByRole("button", { name: "更新项目" }));
     await waitFor(() => expect(saveStudioProjectNotes).toHaveBeenCalledOnce());
@@ -78,7 +79,7 @@ describe("ProjectNotesEditor", () => {
     render(<ProjectNotesEditor project={project} projects={projects} />);
     fireEvent.click(screen.getByRole("button", { name: /发布设置/ }));
 
-    expect(screen.getByLabelText("选择项目")).toHaveValue("whiskey-blog");
+    expect(screen.getByLabelText("选择项目")).toHaveTextContent("WhiskeyBlog");
     expect(screen.getByLabelText("项目名称")).toHaveValue("WhiskeyBlog");
     expect(screen.getByLabelText("项目笔记（Markdown）")).toHaveValue("## 项目过程");
     expect(screen.getByRole("link", { name: "查看公开页面 ↗" })).toHaveAttribute("href", "/projects/whiskey-blog");

@@ -15,3 +15,11 @@ export const uploadStudioPostCover = async () => ({ ok: true, path: "/images/whi
 export const uploadStudioProjectImage = uploadStudioPostCover;
 export const signOutOfStudio = async () => {};
 export async function importStudioMarkdown(form) { const file = form.get("document"); const source = await file.text(); return { metadata: { title: source.match(/^# (.+)$/m)?.[1] ?? "导入文章" }, source }; }
+
+export const deleteStudioPhotograph = async () => ({ ok: true, message: "已删除" });
+export const quickPublishStudioPhotograph = async () => ({ ok: true, message: "已公开" });
+export const unpublishStudioPhotograph = async () => ({ ok: true, message: "已撤回" });
+export const savePhotographDraft = async () => ({ ok: true, message: "照片信息已保存" });
+export const createOriginalUploadIntent = async () => ({ ok: true, path: "qa/test.jpg", token: "qa-fixture" });
+export const createUploadedDraft = async () => ({ ok: true, photographId: "qa-photo" });
+export const createSupabaseBrowserClient = () => ({ storage: { from: () => ({ uploadToSignedUrl: async () => ({ error: null }) }) } });

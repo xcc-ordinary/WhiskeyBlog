@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render as mount, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PostEditor } from "@/components/studio/post-editor";
@@ -10,6 +10,7 @@ vi.mock("@/app/studio/writing/actions", () => ({ saveStudioPost: vi.fn(), upload
 vi.mock("@/app/studio/projects/actions", () => ({ saveStudioProjectNotes: vi.fn(), uploadStudioProjectImage: vi.fn() }));
 vi.mock("@/app/studio/markdown-preview-actions", () => ({ importStudioMarkdown: vi.fn() }));
 const post: PostDocument = { kind: "post", title: "第一篇 Notes", description: "已发布内容", slug: "first-note", date: "2026-10-19", tags: ["随笔"], href: "/blog/first-note", source: "## 已有正文" };
+function render(ui: Parameters<typeof mount>[0]) { const result = mount(ui); fireEvent.click(screen.getByRole("button", { name: /^即时排版$/ })); return result; }
 beforeEach(() => { localStorage.clear(); vi.resetAllMocks(); });
 afterEach(cleanup);
 describe("journal authoring workflow", () => {
@@ -43,6 +44,7 @@ describe("journal authoring workflow", () => {
     fireEvent.click(screen.getByRole("button", { name: /发布设置/ }));
     expect(screen.getByLabelText("公开地址")).toHaveValue("first-note");
     expect(saveStudioPost).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "收起发布设置" }));
     fireEvent.click(screen.getByRole("button", { name: "撤销导入" }));
     expect(screen.getByLabelText("Markdown")).toHaveValue(post.source);
   });

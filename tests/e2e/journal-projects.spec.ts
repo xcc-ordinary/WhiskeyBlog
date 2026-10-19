@@ -70,7 +70,10 @@ test("a newly saved MDX project enters home, directory and the same article rend
     await expect(prose.locator("strong")).toHaveText("粗体");
     await expect(prose.locator("ul>li")).toHaveCount(2);
     await expect(prose.getByRole("link", { name: "项目链接" })).toHaveAttribute("href", "https://github.com/xcc-ordinary/ListenBand");
-    await expect(page.locator(".project-article-cover img")).toHaveCSS("object-fit", "contain");
+    // Body-derived covers remain in listing cards and render only once in the article.
+    await expect(page.locator(".project-article-cover img")).toHaveCount(0);
+    await expect(prose.locator("img")).toHaveCount(1);
+    await expect(prose.locator("img")).toHaveCSS("object-fit", "contain");
     const headingId = await prose.locator("h2").getAttribute("id");
     expect(headingId).toBeTruthy();
     await expect(page.locator('nav[aria-label="本文目录"] a').first()).toHaveAttribute("href", `#${headingId}`);

@@ -11,9 +11,13 @@ import { MarkdownPreview } from "@/components/studio/markdown-preview";
 import { estimateReadingMinutes } from "@/lib/article";
 import type { PostDocument, PostSummary, ProjectDocument, ProjectSummary } from "@/lib/content";
 import { documentDate, documentIssues, documentMarkdown, insertMarkdown, type StudioDocumentFields } from "@/lib/studio-document";
-import { firstProjectBodyImage, maxProjectImageBytes, projectImageAccept } from "@/lib/project-images";
+import { documentHeaderCover, maxProjectImageBytes, projectImageAccept } from "@/lib/project-images";
 
 type Props = { kind: "post" | "project"; document?: PostDocument | ProjectDocument | null; documents?: (PostSummary | ProjectSummary)[]; wikiLinks?: Record<string, string> };
+import { AutoTextarea } from "./auto-textarea";
+import { StudioDialog } from "./studio-dialog";
+import { LiveManuscript, type LiveManuscriptHandle } from "./live-manuscript";
+
 type View = "write" | "split" | "preview";
 
 function fieldsFrom(document: Props["document"], kind: Props["kind"]): StudioDocumentFields {
@@ -35,6 +39,11 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
   const [view, setView] = useState<View>("write");
   const [focused, setFocused] = useState(false);
   const [settings, setSettings] = useState(false);
+  const [picker, setPicker] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sourceMode, setSourceMode] = useState(false);
+  const live = useRef<LiveManuscriptHandle>(null);
+  const coverInput = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -52,7 +61,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
   const serial = JSON.stringify(fields), dirty = serial !== saved;
   const draftKey = `whiskey:studio:${kind}:${document?.slug ?? "new"}`;
   const deferred = useDeferredValue(fields);
-  const bodyCover = !isPost && !deferred.coverImage ? firstProjectBodyImage(deferred.source) : undefined;
+  const headerCover = documentHeaderCover(deferred.coverImage, deferred.source);
   const issues = documentIssues(fields);
   const busy = saving || importing;
   const set = (key: keyof StudioDocumentFields, value: string) => { if (key === "slug") slugEdited.current = true; setFields(current => ({ ...current, [key]: value })); };
@@ -85,11 +94,11 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
   useEffect(() => {
     const shortcut = (event: globalThis.KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") { event.preventDefault(); saveBackup(); }
-      if (event.key === "Escape") { setFocused(false); setSettings(false); }
+      if (event.key === "Escape") { if (settings || picker) { setSettings(false); setPicker(false); } else setFocused(false); }
     };
     window.addEventListener("keydown", shortcut);
     return () => window.removeEventListener("keydown", shortcut);
-  }, [saveBackup]);
+  }, [saveBackup, settings, picker]);
 
   useEffect(() => {
     if (!dirty || recovery) return;
@@ -109,6 +118,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
   }
 
   function format(before: string, after = "", placeholder = "文字") {
+    if (view === "write" && !sourceMode) { live.current?.format(before, after, placeholder); return; }
     const input = sourceInput.current;
     const result = insertMarkdown(fields.source, input?.selectionStart ?? fields.source.length, input?.selectionEnd ?? fields.source.length, before, after, placeholder);
     set("source", result.source);
@@ -130,7 +140,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
       const result = await importStudioMarkdown(form);
       const metadata = Object.fromEntries(Object.entries(result.metadata).filter(([key]) => key in fields)) as Partial<StudioDocumentFields>;
       if (metadata.slug) slugEdited.current = true;
-      setBeforeImport(fields);
+      setBeforeImport(fields); setSourceMode(true);
       setFields(current => ({ ...current, ...metadata, slug: document?.slug ?? metadata.slug ?? (current.slug || generateSlug(metadata.title ?? file.name)), source: result.source }));
       setMessage(`已导入「${file.name}」，可继续编辑；尚未发布。文中的本地附件需另行上传。`);
     } catch (error) { setMessage(error instanceof Error ? error.message : "导入失败，原内容未改变。"); }
@@ -141,6 +151,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
     if (!file) return;
     if (!file.size || file.size > maxProjectImageBytes) { setMessage("请选择 3.75MB 以内的 JPG、PNG、WebP 或 GIF 图片。"); return; }
     const anchor = { ...selection.current }, previousSource = fields.source;
+    if (target === "body") setSourceMode(true);
     setUploading(true); setMessage("");
     try {
       const form = new FormData(); form.set(isPost ? "cover" : "image", file);
@@ -168,7 +179,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
 
   async function publish() {
     setShowIssues(true);
-    if (issues.length) { setMessage("发布前还有信息需要补充。"); if (!fields.title.trim() || !fields.source.trim() || !fields.description.trim()) { setView("write"); requestAnimationFrame(() => titleInput.current?.focus()); } return; }
+    if (issues.length) { setMessage("发布前还有信息需要补充。"); if (!fields.title.trim() || !fields.source.trim() || !fields.description.trim()) { setSettings(false); setView("write"); requestAnimationFrame(() => titleInput.current?.focus()); } return; }
     setSaving(true); setMessage("");
     const snapshot = JSON.stringify(fields);
     const form = new FormData(); Object.entries(fields).forEach(([key, value]) => form.set(key, key === "tags" ? value.replaceAll("，", ",") : value));
@@ -176,7 +187,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
     try {
       const result = await (isPost ? saveStudioPost(form) : saveStudioProjectNotes(form));
       if (!result.ok) throw new Error(result.message);
-      setSaved(snapshot); setMessage(`${noun}已${document ? "更新" : "发布"}，公开页面已同步。`); setBackup(""); setBeforeImport(null);
+      setSaved(snapshot); setSettings(false); setMessage(`${noun}已${document ? "更新" : "发布"}，公开页面已同步。`); setBackup(""); setBeforeImport(null);
       try { localStorage.removeItem(draftKey); } catch { /* Publishing must not depend on local storage. */ }
       if (!document) router.replace(`/studio/${route}?${isPost ? "post" : "project"}=${encodeURIComponent(fields.slug)}`);
       router.refresh();
@@ -187,7 +198,7 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
   const input = (key: keyof StudioDocumentFields, label: string, options: { type?: string; hint?: string } = {}) => <label>{label}<input aria-label={label} type={options.type ?? "text"} value={fields[key]} onChange={event => set(key, event.target.value)} disabled={busy} readOnly={key === "slug" && Boolean(document)} />{options.hint && <small>{options.hint}</small>}</label>;
 
   return <section className="journal-editor" data-view={view} data-focus={focused} data-settings={settings} aria-label={isPost ? "Notes 编辑器" : "项目编辑器"}>
-    <header className="journal-editor-heading"><div><p className="studio-kicker">THE WRITING ROOM / {isPost ? "NOTES" : "PROJECTS"}</p><h1>{document ? "继续，把它写好。" : "为新的想法，留一页。"}</h1></div><label className="journal-document-picker"><span>切换{noun}</span><select aria-label={isPost ? "选择 Notes" : "选择项目"} value={document?.slug ?? "new"} disabled={busy} onChange={event => navigate(event.target.value)}><option value="new">＋ 新建{noun}</option>{documents.map(item => <option key={item.slug} value={item.slug}>{item.title}</option>)}</select></label></header>
+    <header className="journal-editor-heading"><div><p className="studio-kicker">THE WRITING ROOM / {isPost ? "NOTES" : "PROJECTS"}</p><h1>{document ? "继续，把它写好。" : "为新的想法，留一页。"}</h1></div><button type="button" className="journal-document-trigger" aria-label={isPost ? "选择 Notes" : "选择项目"} aria-haspopup="dialog" disabled={busy} onClick={() => { setQuery(""); setPicker(true); }}><span>{document ? document.title : `新建${noun}`}</span><span aria-hidden="true">⌄</span></button></header>
     <div className="journal-editor-toolbar">
       <div className="journal-view-switch" aria-label="编辑视图">{(["write", "split", "preview"] as const).map((mode, index) => <button type="button" key={mode} aria-pressed={view === mode} onClick={() => setView(mode)}>{["写作", "对照", "预览"][index]}</button>)}</div>
       <div className="journal-file-actions"><button type="button" disabled={busy} onClick={() => importInput.current?.click()}>{importing ? "导入中…" : "导入 .md"}</button><button type="button" onClick={exportFile}>导出</button><button type="button" aria-pressed={focused} onClick={() => setFocused(!focused)}>{focused ? "退出专注" : "专注"}</button></div>
@@ -200,24 +211,25 @@ export function DocumentEditor({ kind, document = null, documents = [], wikiLink
       <div className="journal-canvas">
         {view !== "preview" && <section className="journal-source" aria-label="写作区">
           <div className="journal-page-label"><span>MANUSCRIPT / {noun}</span><span>{dirty ? "编辑中" : document ? "已发布" : "新稿"}</span></div>
-          <label className="journal-title"><span className="sr-only">{isPost ? "标题" : "项目名称"}</span><textarea aria-label={isPost ? "标题" : "项目名称"} ref={titleInput} rows={1} value={fields.title} placeholder={isPost ? "写下标题" : "项目名称"} disabled={busy} onChange={event => setFields(current => ({ ...current, title: event.target.value, slug: !document && !slugEdited.current ? (/[a-z0-9]/i.test(event.target.value) ? generateSlug(event.target.value) : current.slug || generateSlug(event.target.value)) : current.slug }))} /></label>
-          <label className="journal-deck"><span className="sr-only">{isPost ? "摘要" : "项目简介"}</span><textarea aria-label={isPost ? "摘要" : "项目简介"} value={fields.description} placeholder="用一两句话，介绍这一页。" rows={2} disabled={busy} onChange={event => set("description", event.target.value)} /></label>
-          <div className="journal-formatbar" aria-label="Markdown 工具"><button type="button" disabled={busy} onClick={() => format("## ", "", "小标题")}>H₂</button><button type="button" disabled={busy} aria-label="加粗" onClick={() => format("**", "**")}><b>B</b></button><button type="button" disabled={busy} aria-label="斜体" onClick={() => format("*", "*")}><i>I</i></button><button type="button" disabled={busy} onClick={() => format("[", "](https://)", "链接文字")}>链接</button><button type="button" disabled={busy} onClick={() => format("\n> ", "", "引用")}>引用</button><button type="button" disabled={busy} onClick={() => format("\n- ", "", "列表项")}>列表</button><button type="button" disabled={busy} onClick={() => format("\n```text\n", "\n```\n", "代码")}>代码</button><button type="button" disabled={busy || uploading} onClick={() => imageInput.current?.click()}>{uploading ? "上传中…" : "插入图片"}</button></div>
-          <textarea ref={sourceInput} className="journal-source-input" aria-label={isPost ? "Markdown" : "项目笔记（Markdown）"} value={fields.source} placeholder={"从第一句话开始。\n\n支持 Markdown，也可以直接导入已有的 .md 文件。"} spellCheck={false} disabled={busy} onChange={event => set("source", event.target.value)} onKeyDown={sourceKey} onSelect={event => { selection.current = { start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd }; }} onPaste={event => { const file = Array.from(event.clipboardData.files).find(file => file.type.startsWith("image/")); if (file && !uploading && !busy) { event.preventDefault(); void upload(file, "body"); } }} onDragOver={event => { if (event.dataTransfer.types.includes("Files")) event.preventDefault(); }} onDrop={event => { const file = event.dataTransfer.files[0]; if (!file) return; event.preventDefault(); if (busy || uploading) return; if (/\.(md|markdown|mdx)$/i.test(file.name)) void importFile(file); else void upload(file, "body"); }} />
-          <p className="journal-source-tip">Markdown · Ctrl / ⌘ B 加粗 · Ctrl / ⌘ S 备份草稿 · 图片可粘贴或拖入</p>
+          <label className="journal-title"><span className="sr-only">{isPost ? "标题" : "项目名称"}</span><AutoTextarea aria-label={isPost ? "标题" : "项目名称"} inputRef={titleInput} rows={1} value={fields.title} placeholder={isPost ? "写下标题" : "项目名称"} disabled={busy} onChange={event => setFields(current => ({ ...current, title: event.target.value, slug: !document && !slugEdited.current ? (/[a-z0-9]/i.test(event.target.value) ? generateSlug(event.target.value) : current.slug || generateSlug(event.target.value)) : current.slug }))} /></label>
+          <label className="journal-deck"><span className="sr-only">{isPost ? "摘要" : "项目简介"}</span><AutoTextarea aria-label={isPost ? "摘要" : "项目简介"} value={fields.description} placeholder="用一两句话，介绍这一页。" rows={2} disabled={busy} onChange={event => set("description", event.target.value)} /></label>
+          <div className="journal-formatbar" aria-label="Markdown 工具" onMouseDown={event => { if (event.target instanceof Element && event.target.closest("button")) event.preventDefault(); }}><button type="button" className="journal-edit-mode" aria-pressed={sourceMode} onClick={() => setSourceMode(!sourceMode)}>{sourceMode || view === "split" ? "Markdown 源码" : "即时排版"}</button><button type="button" disabled={busy} onClick={() => format("## ", "", "小标题")}>H₂</button><button type="button" disabled={busy} aria-label="加粗" onClick={() => format("**", "**")}><b>B</b></button><button type="button" disabled={busy} aria-label="斜体" onClick={() => format("*", "*")}><i>I</i></button><button type="button" disabled={busy} onClick={() => format("[", "](https://)", "链接文字")}>链接</button><button type="button" disabled={busy} onClick={() => format("\n> ", "", "引用")}>引用</button><button type="button" disabled={busy} onClick={() => format("\n- ", "", "列表项")}>列表</button><button type="button" disabled={busy} onClick={() => format("\n```text\n", "\n```\n", "代码")}>代码</button><button type="button" disabled={busy || uploading} onClick={() => imageInput.current?.click()}>{uploading ? "上传中…" : "插入图片"}</button></div>
+          {view === "write" && !sourceMode ? <div onPaste={event => { const file = Array.from(event.clipboardData.files).find(file => file.type.startsWith("image/")); if (file && !uploading && !busy) { event.preventDefault(); void upload(file, "body"); } }} onDragOver={event => { if (event.dataTransfer.types.includes("Files")) event.preventDefault(); }} onDrop={event => { const file = event.dataTransfer.files[0]; if (!file || busy || uploading) return; event.preventDefault(); if (/\.(md|markdown|mdx)$/i.test(file.name)) void importFile(file); else void upload(file, "body"); }}><LiveManuscript source={fields.source} onChange={value => set("source", value)} onSelection={(start, end) => { selection.current = { start, end }; }} wikiLinks={wikiLinks} disabled={busy} handleRef={live} /></div> : <AutoTextarea inputRef={sourceInput} className="journal-source-input" aria-label={isPost ? "Markdown" : "项目笔记（Markdown）"} value={fields.source} placeholder={"从第一句话开始。\n\n支持 Markdown，也可以直接导入已有的 .md 文件。"} spellCheck={false} disabled={busy} onChange={event => set("source", event.target.value)} onKeyDown={sourceKey} onSelect={event => { selection.current = { start: event.currentTarget.selectionStart, end: event.currentTarget.selectionEnd }; }} onPaste={event => { const file = Array.from(event.clipboardData.files).find(file => file.type.startsWith("image/")); if (file && !uploading && !busy) { event.preventDefault(); void upload(file, "body"); } }} onDragOver={event => { if (event.dataTransfer.types.includes("Files")) event.preventDefault(); }} onDrop={event => { const file = event.dataTransfer.files[0]; if (!file) return; event.preventDefault(); if (busy || uploading) return; if (/\.(md|markdown|mdx)$/i.test(file.name)) void importFile(file); else void upload(file, "body"); }} />}
+          <p className="journal-source-tip">点击段落即可编辑 · Ctrl / ⌘ B 加粗 · Ctrl / ⌘ S 备份 · 支持粘贴与拖入图片</p>
         </section>}
-        {view !== "write" && <section className="journal-preview" aria-label={isPost ? "Markdown 实时预览" : "项目预览"} aria-busy={deferred !== fields} lang="zh-CN"><div className="journal-page-label"><span>READING PROOF</span><span>与博客同版式</span></div><article className="blog-article"><ArticleDocumentHeader kind={kind} preview document={{ ...deferred, coverImage: deferred.coverImage || bodyCover?.src, coverAlt: deferred.coverAlt || bodyCover?.alt, title: deferred.title || `未命名${noun}`, tags: deferred.tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean), author: isPost ? deferred.author : deferred.role, readingMinutes: estimateReadingMinutes(deferred.source) }} /><MarkdownPreview source={deferred.source} wikiLinks={wikiLinks} /></article></section>}
+        {view !== "write" && <section className="journal-preview" aria-label={isPost ? "Markdown 实时预览" : "项目预览"} aria-busy={deferred !== fields} lang="zh-CN"><div className="journal-page-label"><span>READING PROOF</span><span>与博客同版式</span></div><article className="blog-article"><ArticleDocumentHeader kind={kind} preview document={{ ...deferred, coverImage: headerCover, coverAlt: deferred.coverAlt, title: deferred.title || `未命名${noun}`, tags: deferred.tags.split(/[,，]/).map(tag => tag.trim()).filter(Boolean), author: isPost ? deferred.author : deferred.role, readingMinutes: estimateReadingMinutes(deferred.source) }} /><MarkdownPreview source={deferred.source} wikiLinks={wikiLinks} /></article></section>}
       </div>
-      {settings && <aside className="journal-publish" id="document-publish-settings" aria-label="发布设置"><div className="journal-publish-heading"><div><p className="studio-kicker">READY FOR THE JOURNAL</p><h2>准备发布</h2></div><button type="button" aria-label="收起发布设置" onClick={() => setSettings(false)}>×</button></div><p className="journal-publish-intro">检查这一页的展示信息，再把它放进你的个人杂志。</p>
-        <fieldset disabled={busy}><legend className="sr-only">发布信息</legend>{input("slug", "公开地址", { hint: document ? "已发布内容的地址保持不变。" : "可修改；使用小写英文、数字和连字符。" })}{input("date", "日期", { type: "date" })}{input("tags", "标签", { hint: "多个标签用逗号分隔。" })}{isPost ? input("author", "作者") : input("role", "项目角色")}
-          <details className="journal-cover-settings" open={Boolean(fields.coverImage)}><summary>封面与图片说明</summary><label>上传封面<input aria-label="上传封面" type="file" accept={projectImageAccept} disabled={uploading} onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void upload(file, "cover"); }} /><small>公开配图，JPG / PNG / WebP / GIF，最大 3.75MB。</small></label>{input("coverImage", "封面地址")}{input("coverAlt", "封面替代文本")}{fields.coverImage && <button type="button" className="journal-text-button" onClick={() => set("coverImage", "")}>移除这页的封面</button>}</details>
-          {!isPost && <details><summary>首页展示与英文信息</summary><label className="journal-check"><input type="checkbox" checked={fields.featured === "true"} onChange={event => set("featured", String(event.target.checked))} />在首页展示</label>{input("homeOrder", "首页排序", { type: "number" })}{input("titleEn", "英文项目名")}{input("descriptionEn", "英文简介")}{input("homeLabel", "首页小标签")}<label>封面排布<select value={fields.coverFit} onChange={event => set("coverFit", event.target.value)}><option value="cover">铺满图框</option><option value="contain">完整显示</option></select></label>{input("coverPosition", "封面焦点", { hint: "center 或 50% 50%" })}</details>}
-        </fieldset>
-        {showIssues && issues.length > 0 && <div className="journal-publish-issues" role="alert"><p>还差这几项：</p><ul>{issues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
-        <button className="studio-button journal-publish-button" type="button" disabled={busy || uploading} onClick={() => void publish()}>{saving ? "正在发布…" : `${document ? "更新" : "发布"}${noun}`}</button><p className="journal-publish-note">点击后公开展示。草稿备份只保存在此浏览器中，不会自动发布。</p>{document && <Link className="journal-public-link" href={document.href} target="_blank" rel="noreferrer">查看公开页面 ↗</Link>}
-      </aside>}
     </div>
+    {picker && <StudioDialog title={`切换${noun}`} onClose={() => setPicker(false)} className="journal-picker-dialog"><header className="studio-modal-heading"><div><p className="studio-kicker">YOUR JOURNAL</p><h2>选择一页，继续写。</h2></div><button type="button" aria-label="关闭内容切换" onClick={() => setPicker(false)}>×</button></header><input type="search" autoFocus aria-label="搜索文章或项目" placeholder="搜索标题…" value={query} onChange={event => setQuery(event.target.value)} /><div className="journal-picker-list"><button type="button" onClick={() => { setPicker(false); navigate("new"); }}><span className="journal-picker-icon">＋</span><span>新建{noun}<small>给新的想法留一页</small></span></button>{documents.filter(item => `${item.title} ${item.tags.join(" ")}`.toLowerCase().includes(query.toLowerCase())).map(item => <button type="button" key={item.slug} aria-current={document?.slug === item.slug ? "page" : undefined} onClick={() => { setPicker(false); navigate(item.slug); }}><span className="journal-picker-icon">{item.title.slice(0, 1)}</span><span>{item.title}<small>{item.date} · {item.tags.join(" / ")}</small></span><span aria-hidden="true">{document?.slug === item.slug ? "✓" : "↗"}</span></button>)}</div></StudioDialog>}
+    {settings && <StudioDialog title="发布设置" onClose={() => setSettings(false)} className="journal-publish-dialog"><header className="studio-modal-heading"><div><p className="studio-kicker">PUBLISH TO YOUR JOURNAL</p><h2>{document ? "更新这一页" : "准备发布"}</h2></div><button type="button" aria-label="收起发布设置" onClick={() => setSettings(false)}>×</button></header><div className="journal-publish" id="document-publish-settings"><div className="journal-publish-summary"><span>{isPost ? "手记" : "作品"}</span><h3>{fields.title || "未命名"}</h3><p>{fields.description || "请在正文中补充摘要。"}</p></div>
+      <fieldset disabled={busy}><legend className="sr-only">发布信息</legend><div className="journal-publish-basics">{input("date", "发布日期", { type: "date" })}{input("tags", "标签", { hint: "用逗号分隔" })}</div>
+      <section className="journal-cover-picker"><div><h3>目录封面 <small>可选</small></h3><p>{fields.coverImage ? "用于首页和内容目录；正文已有相同图片时不会再重复展示。" : !isPost ? "默认取正文首图作为目录封面，不会在正文中重复插入。" : "没有封面的文章，以文字排版呈现。"}</p></div><input ref={coverInput} className="journal-file-input" type="file" accept={projectImageAccept} aria-label="上传封面" disabled={uploading} onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; void upload(file, "cover"); }} /><div className="journal-cover-actions"><button className="studio-secondary-button" type="button" disabled={uploading} onClick={() => coverInput.current?.click()}>{uploading ? "上传中…" : fields.coverImage ? "更换封面" : "选择封面"}</button>{fields.coverImage && <button type="button" className="journal-text-button" onClick={() => set("coverImage", "")}>移除封面</button>}</div></section>
+      {!isPost && <label className="journal-check"><input type="checkbox" checked={fields.featured === "true"} onChange={event => set("featured", String(event.target.checked))} />在首页展示此作品</label>}
+      <details className="journal-more-settings"><summary>更多设置 <span>地址、署名{!isPost ? "与首页排序" : ""}</span></summary><div className="journal-more-fields">{input("slug", "公开地址", { hint: document ? "已发布地址保持不变。" : "小写英文、数字和连字符" })}{isPost ? input("author", "作者") : input("role", "项目角色")}{input("coverImage", "封面地址")}{input("coverAlt", "图片描述")}{!isPost && <>{input("homeOrder", "首页排序", { type: "number" })}{input("titleEn", "英文项目名")}{input("descriptionEn", "英文简介")}{input("homeLabel", "首页小标签")}<label>封面排布<select value={fields.coverFit} onChange={event => set("coverFit", event.target.value)}><option value="cover">铺满图框</option><option value="contain">完整显示</option></select></label>{input("coverPosition", "封面焦点", { hint: "center 或 50% 50%" })}</>}</div></details>
+      </fieldset>{showIssues && issues.length > 0 && <div className="journal-publish-issues" role="alert"><p>发布前请补充：</p><ul>{issues.map(issue => <li key={issue}>{issue}</li>)}</ul></div>}
+      {message && <p className="journal-modal-message" role="status">{message}</p>}
+      <footer className="journal-publish-footer"><span>点击后公开同步到网站</span><button className="studio-button" type="button" disabled={busy || uploading} onClick={() => void publish()}>{saving ? "正在发布…" : `${document ? "更新" : "发布"}${noun}`}</button></footer>{document && <Link className="journal-public-link" href={document.href} target="_blank" rel="noreferrer">查看公开页面 ↗</Link>}</div></StudioDialog>}
     <footer className="journal-editor-status"><span><span className={`journal-state-dot${dirty ? " is-dirty" : ""}`} />{dirty ? backup || "有未发布的修改" : document ? "与已发布版本一致" : "尚未发布"}</span><span>{fields.source.length.toLocaleString("zh-CN")} 字符 · 约 {estimateReadingMinutes(fields.source)} 分钟阅读</span><button type="button" onClick={saveBackup}>备份草稿</button></footer>
-    {message && <div className="journal-editor-message" role="status"><p>{message}</p>{beforeImport && <button type="button" onClick={() => { setFields(beforeImport); setBeforeImport(null); setMessage("已撤销导入。"); }}>撤销导入</button>}</div>}
+    {message && !settings && <div className="journal-editor-message" role="status"><p>{message}</p>{beforeImport && <button type="button" onClick={() => { setFields(beforeImport); setBeforeImport(null); setMessage("已撤销导入。"); }}>撤销导入</button>}</div>}
   </section>;
 }

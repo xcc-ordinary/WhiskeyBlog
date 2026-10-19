@@ -1,3 +1,4 @@
+import { documentHeaderCover } from "@/lib/project-images";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,7 +30,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
         <div className="blog-article-topline">
           <Link className="blog-back-link" href="/projects">← 返回项目目录</Link>
         </div>
-        <ArticleDocumentHeader kind="project" document={{ ...project, author: project.role || "Whiskey", readingMinutes: estimateReadingMinutes(source) }} />
+        <ArticleDocumentHeader kind="project" document={{ ...project, coverImage: documentHeaderCover(project.coverImage, source), author: project.role || "Whiskey", readingMinutes: estimateReadingMinutes(source) }} />
         <ArticleReadingTools headings={headings} />
         <div className="blog-article-reading-layout"><MdxContent source={source} /></div>
         <ProjectCaseStudyNav currentSlug={project.slug} projects={projects} />

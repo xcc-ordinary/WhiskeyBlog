@@ -21,6 +21,7 @@ const server = await createServer({
     { find: /^next\/link$/, replacement: path.join(root, "tests/studio-preview/link.jsx") },
     { find: /^next\/image$/, replacement: path.join(root, "tests/studio-preview/image.jsx") },
     { find: /^@\/app\/studio\/(?:writing\/actions|projects\/actions|actions|markdown-preview-actions)$/, replacement: mocks },
+    { find: /^@\/lib\/supabase\/client$/, replacement: mocks },
     { find: "@", replacement: root },
   ] },
   plugins: [{ name: "qa-fonts", configureServer(server) {
