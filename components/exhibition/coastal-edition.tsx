@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { gsap } from "gsap";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/components/language-provider";
 import { site } from "@/lib/site";
 import type { ProjectSummary } from "@/lib/content";
+import { NewspaperSpread } from "./newspaper-spread";
 import { featuredProjects } from "@/lib/featured-projects";
 
 import { CoastalNoteCards } from "./coastal-note-cards";
@@ -17,10 +18,8 @@ import "./coastal-edition.css";
 type Room = "dreambook" | "lumi" | "life";
 export function CoastalEdition({ projects, openRoom, tone, setTone }: {projects:ProjectSummary[];openRoom:(room:Room,event:MouseEvent<HTMLButtonElement>)=>void;tone:number;setTone:(tone:number)=>void}) {
   const {language}=useLanguage();const zh=language==="zh";
-  const root=useRef<HTMLDivElement>(null),strip=useRef<HTMLDivElement>(null);
-  const drag=useRef<{x:number;scroll:number;active:boolean}>({x:0,scroll:0,active:false});
-  const dragTarget=useRef(0),dragFrame=useRef(0);
-  const suppressClick=useRef(false);const [intro,setIntro]=useState(false);
+  const root=useRef<HTMLDivElement>(null);
+  const [intro,setIntro]=useState(false);
   useEffect(()=>{
     if(root.current)root.current.dataset.hydrated="true";
     const shell=document.querySelector(".coastal-site");
@@ -39,24 +38,13 @@ export function CoastalEdition({ projects, openRoom, tone, setTone }: {projects:
     },root);
     return()=>{context.revert();document.body.style.overflow=previousOverflow;};
   },[]);
-  useEffect(()=>()=>cancelAnimationFrame(dragFrame.current),[]);
-  function settleDrag(){const element=strip.current;if(!element)return;const delta=dragTarget.current-element.scrollLeft;element.scrollLeft+=delta*.15;dragFrame.current=Math.abs(delta)>.5?requestAnimationFrame(settleDrag):0;}
-  function down(event:PointerEvent<HTMLDivElement>){if(event.pointerType!=="mouse")return;cancelAnimationFrame(dragFrame.current);dragFrame.current=0;drag.current={x:event.clientX,scroll:event.currentTarget.scrollLeft,active:true};suppressClick.current=false;}
-  function move(event:PointerEvent<HTMLDivElement>){if(!drag.current.active)return;const delta=event.clientX-drag.current.x;if(Math.abs(delta)>5){suppressClick.current=true;if(!event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.setPointerCapture(event.pointerId);}const element=event.currentTarget;dragTarget.current=Math.max(0,Math.min(element.scrollWidth-element.clientWidth,drag.current.scroll-delta));if(matchMedia("(prefers-reduced-motion: reduce)").matches)element.scrollLeft=dragTarget.current;else if(!dragFrame.current)dragFrame.current=requestAnimationFrame(settleDrag);}
   const dreambook=projects.find(project=>project.slug==="dreambook-realm");
   const lumi=projects.find(project=>project.slug==="lumi");
   const dreambookDescription=dreambook ? (!zh && dreambook.descriptionEn ? dreambook.descriptionEn : dreambook.description) : (zh?"五种情绪，五位角色。一个关于阅读、陪伴与想象力的进行中概念。":"Five emotions. Five characters. An evolving concept about reading, companionship and imagination.");
   const works=[...featuredProjects(projects).map(project=>({id:project.slug,name:!zh&&project.titleEn?project.titleEn:project.title,image:project.coverImage??"/images/placeholders/hero-editorial.svg",alt:project.coverAlt??project.title,coverFit:project.coverFit??"cover",coverPosition:project.coverPosition??"center",description:!zh&&project.descriptionEn?project.descriptionEn:project.description,tag:project.homeLabel??project.tags[0]??"PROJECT",href:project.href})),{id:"life",name:zh?"生活档案":"OFF SCREEN",image:"/images/coastal/whiskey-on-stage.webp",alt:zh?"Whiskey 在分享现场":"Whiskey speaking on stage",coverFit:"cover" as const,coverPosition:"50% 35%",description:zh?"从分享现场，到具体而普通的日常。":"On stage, and ordinary moments away from the screen.",tag:"JOURNAL",href:"/archive"}];
   return <div className="coastal-edition" ref={root} data-intro={intro?"playing":"complete"}>
     {intro&&createPortal(<button className="edition-skip" onClick={()=>root.current?.dispatchEvent(new Event("coastal-skip-intro"))}>{zh?"跳过入场":"Skip intro"} ↗</button>,document.body)}
-    <section className="edition-featured" aria-label={zh?"横向作品目录":"Featured work carousel"}>
-      <div className="edition-strip" ref={strip} onDragStart={event=>event.preventDefault()} onPointerDown={down} onPointerMove={move} onPointerUp={()=>{drag.current.active=false;}} onPointerCancel={()=>{drag.current.active=false;}} onClickCapture={event=>{if(suppressClick.current){event.preventDefault();event.stopPropagation();suppressClick.current=false;}}}>
-        {works.map((work,index)=><Fragment key={work.href}>
-          {index===Math.min(1,works.length-1)&&<div className="edition-strip-index"><h2><Link href="/projects">ALL WORK!</Link></h2><p>{zh?<>一些正在发生的<br/>想法、作品与生活。</>:<>A selection of work,<br/>ideas & everyday life.</>}</p><small>{zh?"提示：左右拖动探索":"TIP! Drag sideways to explore"}</small><div className="edition-strip-arrows"><button aria-label={zh?"向前浏览作品":"Previous works"} onClick={()=>strip.current?.scrollBy({left:-450,behavior:"smooth"})}>←</button><button aria-label={zh?"向后浏览作品":"Next works"} onClick={()=>strip.current?.scrollBy({left:450,behavior:"smooth"})}>→</button></div></div>}
-          <Link className={`edition-work-teaser edition-teaser-${work.id==="dreambook-realm"?"dreambook":work.id}`} draggable={false} href={work.href}><span className="edition-teaser-image" data-cover-fit={work.coverFit}><Image src={work.image} alt={work.alt} fill style={{objectFit:work.coverFit,objectPosition:work.coverPosition}} sizes="(max-width:760px) 76vw, 30vw" draggable={false} loading={index===0?"eager":"lazy"}/></span><span className="edition-teaser-title">{work.name}<small>{work.tag}</small></span><span className="edition-teaser-description">{work.description}</span></Link>
-        </Fragment>)}
-      </div>
-    </section>
+    <NewspaperSpread works={works} zh={zh} />
     <h1 className="edition-masthead" id="home-title"><span>WHISKEY</span></h1>
     <section className="edition-cover" aria-label={zh?"个人刊物与创作介绍":"Personal journal and introduction"}>
       <aside className="edition-cover-profile"><p className="edition-eyebrow">THE PERSON BEHIND THE WORK</p><h2>{zh?<>保持好奇，<br/><em>去创造。</em></>:<>CURIOUS<br/><em>BY NATURE.</em></>}</h2><Link href="/about" className="edition-portrait"><Image src="/images/coastal/whiskey-on-stage.webp" alt={zh?"Whiskey 在分享现场":"Whiskey speaking on stage"} fill sizes="(max-width:760px) 40vw, 27vw"/></Link><p className="edition-dropcap">{zh?"我是 Whiskey，一名人工智能专业的学生。正在自己的「奥德赛时期」，把技术、阅读和生活里的问题，慢慢做成能被使用的东西。":"I’m Whiskey, an AI student in my Odyssey years. Turning curiosity about technology, reading and everyday life into things people can use."}</p><Link className="edition-text-link" href="/about">{zh?"认识我":"Meet the person"} ↗</Link></aside>

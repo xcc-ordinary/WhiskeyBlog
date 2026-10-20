@@ -13,17 +13,18 @@ test("homepage selection and project pages use the same saved project content", 
   await expect(teasers).toHaveCount(featured.length);
   for (let index = 0; index < featured.length; index++) {
     const project = featured[index];
-    await expect(teasers.nth(index)).toHaveAttribute("href", `/projects/${project.slug}`);
-    await expect(teasers.nth(index).locator(".edition-teaser-title")).toContainText(project.title);
-    await expect(teasers.nth(index).locator(".edition-teaser-description")).toHaveText(project.description);
+    const teaser = page.locator(`.edition-work-teaser[href="/projects/${project.slug}"]`);
+    await expect(teaser.locator(".edition-teaser-title")).toContainText(project.title);
+    await expect(teaser.locator(".edition-teaser-description")).toHaveText(project.description);
     if (project.coverImage) {
-      await expect(teasers.nth(index).locator("img")).toHaveAttribute("src", new RegExp(encodeURIComponent(project.coverImage)));
+      await expect(teaser.locator("img")).toHaveAttribute("src", new RegExp(encodeURIComponent(project.coverImage)));
     }
   }
   await page.locator(".editorial-header-actions .language-toggle").click();
   for (let index = 0; index < featured.length; index++) {
-    await expect(teasers.nth(index).locator(".edition-teaser-title")).toContainText(featured[index].titleEn || featured[index].title);
-    await expect(teasers.nth(index).locator(".edition-teaser-description")).toHaveText(featured[index].descriptionEn || featured[index].description);
+    const teaser = page.locator(`.edition-work-teaser[href="/projects/${featured[index].slug}"]`);
+    await expect(teaser.locator(".edition-teaser-title")).toContainText(featured[index].titleEn || featured[index].title);
+    await expect(teaser.locator(".edition-teaser-description")).toHaveText(featured[index].descriptionEn || featured[index].description);
   }
   if (featured.length) {
     const project = featured[0];

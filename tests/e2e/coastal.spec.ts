@@ -28,17 +28,15 @@ test("coastal home preserves language, reply choices, project routes and archive
   await expect(page.locator(".home-project-read").first()).toContainText("Read the story");
 });
 
-test("featured works can be dragged without accidentally opening a project", async ({ page }) => {
+test("featured works switch numbered editions without scrolling the page sideways", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const strip = page.locator(".edition-strip");
-  const box = await strip.boundingBox();
-  await page.mouse.move(box!.x + box!.width * .8, box!.y + 65);
-  await page.mouse.down();
-  await page.mouse.move(box!.x + 120, box!.y + 65, { steps: 15 });
-  await page.mouse.up();
-  await expect.poll(() => strip.evaluate(element => element.scrollLeft)).toBeGreaterThan(100);
-  await expect(page.locator(".portal-dialog")).not.toBeVisible();
+  const spread = page.locator(".edition-newspaper");
+  await spread.locator('.edition-issue-arrows button').last().click();
+  await expect(spread.getByRole("status")).toContainText("2 /");
+  await expect(spread).toHaveAttribute("data-phase", "idle");
+  await expect(spread.locator('.edition-work-teaser[data-active=true]')).toHaveCount(2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(1280);
 });
 
 test("mobile directory restores focus and navigates to existing pages", async ({ page }) => {
