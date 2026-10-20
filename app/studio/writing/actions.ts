@@ -2,6 +2,7 @@
 
 import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { documentTags } from "@/lib/content-tags";
 import { revalidatePath } from "next/cache";
 
 import { requireRepositoryContentWrites } from "@/lib/content-writes";
@@ -29,7 +30,7 @@ export async function saveStudioPost(form: FormData): Promise<Result> {
     const slug = clean(form.get("slug"));
     const originalSlug = clean(form.get("originalSlug"));
     const date = clean(form.get("date"));
-    const tags = clean(form.get("tags")).split(",").map((tag) => tag.trim()).filter(Boolean);
+    const tags = documentTags(clean(form.get("tags")), clean(form.get("source")));
     const coverImage = clean(form.get("coverImage"));
     const coverAlt = clean(form.get("coverAlt"));
     const source = clean(form.get("source"));

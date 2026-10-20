@@ -14,7 +14,7 @@ const documents = cache(async (collection: ContentCollection) => {
 });
 
 function merge<T extends PostSummary | ProjectSummary>(local: T[], cloud: T[]): T[] {
-  return [...new Map([...local, ...cloud].map(item => [item.slug, item])).values()].sort((a, b) => b.date.localeCompare(a.date));
+  return [...new Map([...local, ...cloud].map(item => [item.slug, item])).values()].filter(item => !item.studioDeleted).sort((a, b) => b.date.localeCompare(a.date));
 }
 function summary<T extends PostDocument | ProjectDocument>(document: T): Omit<T, "source"> {
   const { source, ...meta } = document;
@@ -23,5 +23,11 @@ function summary<T extends PostDocument | ProjectDocument>(document: T): Omit<T,
 }
 export const getPosts = cache(async (): Promise<PostSummary[]> => merge(localPosts(), (await documents("posts") as PostDocument[]).map(summary)));
 export const getProjects = cache(async (): Promise<ProjectSummary[]> => merge(localProjects(), (await documents("projects") as ProjectDocument[]).map(summary)));
-export const getPost = cache(async (slug: string): Promise<PostDocument | null> => await documents("posts").then(rows => rows.find(row => row.slug === slug) as PostDocument | undefined) ?? localPost(slug));
-export const getProject = cache(async (slug: string): Promise<ProjectDocument | null> => await documents("projects").then(rows => rows.find(row => row.slug === slug) as ProjectDocument | undefined) ?? localProject(slug));
+export const getPost = cache(async (slug: string): Promise<PostDocument | null> => {
+  const cloud = (await documents("posts")).find(row => row.slug === slug);
+  return cloud ? cloud.studioDeleted ? null : cloud as PostDocument : localPost(slug);
+});
+export const getProject = cache(async (slug: string): Promise<ProjectDocument | null> => {
+  const cloud = (await documents("projects")).find(row => row.slug === slug);
+  return cloud ? cloud.studioDeleted ? null : cloud as ProjectDocument : localProject(slug);
+});

@@ -128,3 +128,7 @@ body:has(.coastal-edition) #header button.editorial-mobile-index {background:tra
 body:has(.coastal-edition) #header button.editorial-mobile-index::before,body:has(.coastal-edition) #header button.editorial-mobile-index::after {position:static!important;inset:auto!important;box-shadow:none!important;filter:none!important;opacity:1!important;background:var(--wl-ink)!important;border-radius:0!important;height:1px!important;}
 
 @media(max-width:760px){.edition-interlude{grid-template-columns:minmax(0,1fr) 25%}.edition-interlude h2{font-size:14vw;letter-spacing:-.085em}.edition-cover-profile{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr)}.edition-cover-profile h2{overflow-wrap:anywhere}}
+
+/* Every work owns the same paper frame, regardless of the source image's ratio. */
+.edition-work-teaser .edition-teaser-image{box-sizing:border-box;aspect-ratio:3/2;height:auto;min-height:0;background:var(--wl-panel);isolation:isolate}
+.edition-work-teaser .edition-teaser-image img{width:100%;height:100%;inset:0;max-width:none;max-height:none}

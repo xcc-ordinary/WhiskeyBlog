@@ -23,3 +23,7 @@ export const savePhotographDraft = async () => ({ ok: true, message: "照片信�
 export const createOriginalUploadIntent = async () => ({ ok: true, path: "qa/test.jpg", token: "qa-fixture" });
 export const createUploadedDraft = async () => ({ ok: true, photographId: "qa-photo" });
 export const createSupabaseBrowserClient = () => ({ storage: { from: () => ({ uploadToSignedUrl: async () => ({ error: null }) }) } });
+
+window.__qaRemoved = new Set();
+export const changeStudioContentState = async (collection, slug, deleted) => { if (window.__failSave) return { ok: false, message: "网络暂时中断，请重试。" }; if (deleted) window.__qaRemoved.add(`${collection}:${slug}`); else window.__qaRemoved.delete(`${collection}:${slug}`); return { ok: true, message: deleted ? "已移至回收站，可随时恢复。" : "内容已恢复到网站。" }; };
+export const getStudioTrash = async () => (window.__qaDocuments ?? []).filter(item => window.__qaRemoved.has(`${item.kind === "post" ? "posts" : "projects"}:${item.slug}`));

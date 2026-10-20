@@ -20,15 +20,16 @@ const server = await createServer({
     { find: /^next\/navigation$/, replacement: mocks },
     { find: /^next\/link$/, replacement: path.join(root, "tests/studio-preview/link.jsx") },
     { find: /^next\/image$/, replacement: path.join(root, "tests/studio-preview/image.jsx") },
-    { find: /^@\/app\/studio\/(?:writing\/actions|projects\/actions|actions|markdown-preview-actions)$/, replacement: mocks },
+    { find: /^@\/app\/studio\/(?:writing\/actions|projects\/actions|actions|markdown-preview-actions|content-actions)$/, replacement: mocks },
     { find: /^@\/lib\/supabase\/client$/, replacement: mocks },
     { find: "@", replacement: root },
   ] },
   plugins: [{ name: "qa-fonts", configureServer(server) {
     server.middlewares.use((request, response, next) => {
       if (request.url === "/qa-fonts.css") { response.setHeader("Content-Type", "text/css"); response.end(fontCss); return; }
-      if (request.url?.startsWith("/qa-fonts/") && /^[a-z0-9_.-]+\.woff2$/i.test(request.url.slice(10))) {
-        try { response.setHeader("Content-Type", "font/woff2"); response.end(readFileSync(path.join(root, ".next/static/media", request.url.slice(10)))); } catch { response.statusCode = 404; response.end(); }
+      const fontPrefix = request.url?.startsWith("/_next/static/media/") ? "/_next/static/media/" : "/qa-fonts/";
+      if (request.url?.startsWith(fontPrefix) && /^[a-z0-9_.-]+\.woff2$/i.test(request.url.slice(fontPrefix.length))) {
+        try { response.setHeader("Content-Type", "font/woff2"); response.end(readFileSync(path.join(root, ".next/static/media", request.url.slice(fontPrefix.length)))); } catch { response.statusCode = 404; response.end(); }
         return;
       }
       next();

@@ -17,6 +17,7 @@ if (new URLSearchParams(location.search).has("duplicate")) { sample.source = "![
 const photo = { id: "sample-photo", originalPath: "owner/photo.jpg", previewUrl: "/images/whiskey-journal-card.png", title: "把日常，收进相册。", alt: "日常影像", location: "青岛", category: "日常", caption: "记录平凡的一天。", capturedAt: "2026-10-19", createdAt: "2026-10-19T00:00:00Z", displayOrder: 0, status: "draft", crop: {}, thumbnailPath: null, galleryPath: null, detailPath: null, publishedAt: null };
 const photos = new URLSearchParams(location.search).has("photos");
 const photoEdit = new URLSearchParams(location.search).has("photoEdit");
+window.__qaDocuments = [{ ...sample, kind: "project" }, { ...sample, kind: "post" }];
 const fresh = new URLSearchParams(location.search).get("mode") === "new";
 const dashboard = new URLSearchParams(location.search).has("dashboard");
 createRoot(document.getElementById("root")).render(<StudioShell>{photoEdit ? <PhotographEditor photograph={photo} /> : photos ? <PhotographLibrary photographs={[photo, { ...photo, id: "second", title: "清晨", status: "published" }]} /> : dashboard ? <ContentDashboard writable projects={[{...sample, kind:"project"}]} posts={[{...sample,kind:"post"}]} /> : project ? <ProjectNotesEditor project={fresh ? null : sample} projects={[sample]} /> : <PostEditor post={fresh ? null : sample} posts={[sample]} />}</StudioShell>);

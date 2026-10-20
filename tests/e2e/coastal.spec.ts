@@ -61,7 +61,7 @@ test("mobile directory restores focus and navigates to existing pages", async ({
 test("blog categories still filter content and the project page remains linked", async ({ page }) => {
   await page.goto("/blog");
   const all = await page.locator(".notes-directory>li").count();
-  await page.getByRole("toolbar", { name: "按分类筛选文章" }).getByRole("button", { name: "Codex", exact: true }).click();
+  await page.getByRole("toolbar", { name: "按分类筛选文章" }).getByRole("button", { name: "#Codex", exact: true }).click();
   await expect(page.locator(".notes-directory>li")).toHaveCount(1);
   await expect(page.locator(".notes-directory")).toContainText("Codex 安装与使用教程");
   await page.getByRole("button", { name: "全部", exact: true }).click();

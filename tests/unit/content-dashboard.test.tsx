@@ -1,8 +1,27 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { ContentDashboard } from "@/components/studio/content-dashboard";
+import { changeStudioContentState, getStudioTrash } from "@/app/studio/content-actions";
+vi.mock("@/app/studio/content-actions", () => ({ changeStudioContentState: vi.fn(), getStudioTrash: vi.fn() }));
 afterEach(cleanup);
+const work = { kind: "project" as const, slug: "work", title: "Lumi", description: "AI 工具", date: "2026-10-17", tags: ["AI"], href: "/projects/work", featured: true };
+it("keeps a failed removal intact, then supports removal and restoration", async () => {
+  vi.mocked(changeStudioContentState).mockResolvedValueOnce({ ok: false, message: "网络中断" }).mockResolvedValue({ ok: true, message: "已完成" });
+  vi.mocked(getStudioTrash).mockResolvedValue([work]);
+  render(<ContentDashboard writable projects={[work]} posts={[]} />);
+  fireEvent.click(screen.getByRole("button", { name: "删除Lumi" }));
+  fireEvent.click(screen.getByRole("button", { name: "移至回收站" }));
+  await screen.findByRole("alert");
+  expect(screen.getByRole("link", { name: "编辑Lumi" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "移至回收站" }));
+  await screen.findByRole("status");
+  expect(screen.queryByRole("link", { name: "编辑Lumi" })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("tab", { name: "回收站" }));
+  fireEvent.click(await screen.findByRole("button", { name: "恢复" }));
+  await screen.findByText("回收站为空");
+  expect(changeStudioContentState).toHaveBeenLastCalledWith("projects", "work", false);
+});
 it("filters immediately and switches between editable projects and Notes", () => {
   render(<ContentDashboard writable projects={[{ kind: "project", slug: "work", title: "Lumi", description: "AI 工具", date: "2026-10-17", tags: ["AI"], href: "/projects/work", featured: true }]} posts={[{ kind: "post", slug: "note", title: "日记", description: "记录日常", date: "2026-10-17", tags: ["生活"], href: "/blog/note" }]} />);
   expect(screen.getByRole("link", { name: "编辑Lumi" })).toHaveAttribute("href", "/studio/projects?project=work");

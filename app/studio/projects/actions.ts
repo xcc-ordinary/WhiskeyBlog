@@ -2,6 +2,7 @@
 
 import { access, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { documentTags } from "@/lib/content-tags";
 import { revalidatePath } from "next/cache";
 
 import { requireRepositoryContentWrites } from "@/lib/content-writes";
@@ -34,7 +35,7 @@ export async function saveStudioProjectNotes(form: FormData): Promise<{ ok: bool
     const titleEn = clean(form.get("titleEn"));
     const descriptionEn = clean(form.get("descriptionEn"));
     const homeLabel = clean(form.get("homeLabel"));
-    const tags = clean(form.get("tags")).split(",").map((tag) => tag.trim()).filter(Boolean);
+    const tags = documentTags(clean(form.get("tags")), clean(form.get("source")));
     if (!validSlug(slug) || !title || !description || !source || !/^\d{4}-\d{2}-\d{2}$/.test(date) || !tags.length) return { ok: false, message: "请填写项目名称、简介、日期、至少一个标签、笔记正文和有效 slug。" };
     if (source.length > 200_000) return { ok: false, message: "正文请缩短到 200,000 字符以内。" };
     if (originalSlug && originalSlug !== slug) return { ok: false, message: "已有项目的 slug 不能直接修改，请新建一个项目。" };

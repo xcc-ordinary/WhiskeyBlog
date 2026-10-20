@@ -26,4 +26,12 @@ describe("published content shared by Studio and public routes", () => {
     cloud.mockRejectedValue(new Error("unavailable"));
     await expect(getProjects()).rejects.toThrow("unavailable");
   });
+  it("keeps a recycled repository project hidden instead of resurrecting its fallback", async () => {
+    const deleted = document("whiskey-blog").replace("---\n", "---\nstudioDeleted: true\n");
+    cloud.mockImplementation(async collection => collection === "projects" ? [{ slug: "whiskey-blog", document: deleted }] : []);
+    expect((await getProjects()).some(item => item.slug === "whiskey-blog")).toBe(false);
+    expect(await getProject("whiskey-blog")).toBeNull();
+    cloud.mockResolvedValue([]);
+    expect(await getProject("whiskey-blog")).not.toBeNull();
+  });
 });

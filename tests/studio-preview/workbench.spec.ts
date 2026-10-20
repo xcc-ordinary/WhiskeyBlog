@@ -159,3 +159,65 @@ test("photo contact sheet, search, centered upload and photo information desk", 
   await page.screenshot({ path: `${screenshots}/desktop-photo-edit.png`, fullPage: true });
   expect(errors).toEqual([]);
 });
+
+test("publication fields share a baseline and authors can create hashtags", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/?kind=project");
+  await page.getByRole("button", { name: /发布设置/ }).click();
+  const date = await page.getByLabel("发布日期", { exact: true }).boundingBox();
+  const tags = await page.locator(".journal-tag-control").boundingBox();
+  expect(Math.abs(date!.y - tags!.y)).toBeLessThan(1);
+  expect(date!.height).toBe(44);
+  await page.getByLabel("添加标签").fill("#todo");
+  await page.getByLabel("添加标签").press("Enter");
+  await expect(page.locator(".journal-tag-token").filter({ hasText: "#todo" })).toBeVisible();
+  await page.getByText("更多设置", { exact: false }).first().click();
+  const slug = await page.getByLabel("公开地址", { exact: true }).boundingBox();
+  const role = await page.getByLabel("项目角色", { exact: true }).boundingBox();
+  expect(Math.abs(slug!.y - role!.y)).toBeLessThan(1);
+  await page.screenshot({ path: `${screenshots}/aligned-project-publication.png` });
+  await page.getByRole("button", { name: "更新项目" }).click();
+  expect(await page.evaluate(() => (window as unknown as { __studioSubmissions: { tags: string }[] }).__studioSubmissions[0].tags)).toContain("todo");
+});
+
+test("content removal is reversible and keeps the existing action style", async ({ page }) => {
+  await page.goto("/?dashboard=1");
+  await page.getByRole("button", { name: /^删除/ }).click();
+  await expect(page.getByRole("dialog", { name: "移至回收站" })).toBeVisible();
+  await page.getByRole("button", { name: "移至回收站", exact: true }).click();
+  await expect(page.locator(".studio-content-row")).toHaveCount(0);
+  await page.getByRole("tab", { name: "回收站", exact: true }).click();
+  await expect(page.locator(".studio-content-row")).toHaveCount(1);
+  await page.getByRole("button", { name: "恢复", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "回收站为空" })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("tab", { name: /^项目/ }).click();
+  await expect(page.getByRole("button", { name: /^删除/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `${screenshots}/mobile-content-actions.png`, fullPage: true });
+});
+
+test("newspaper motion proposals are operable and preserve equal frames", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto("/prototypes/journal-motion-2026-10-20/index.html");
+  const frames = page.locator(".frame");
+  await expect(frames).toHaveCount(2);
+  const boxes = await frames.evaluateAll(elements => elements.map(element => ({ width: element.clientWidth, height: element.clientHeight })));
+  expect(boxes[0]).toEqual(boxes[1]);
+  await page.screenshot({ path: `${screenshots}/motion-a-newspaper.png`, fullPage: true });
+  await page.getByRole("button", { name: "下一版", exact: true }).click();
+  await expect(page.locator("#demo")).toContainText("Lumi");
+  await page.getByRole("button", { name: /B · 纵向分栏/ }).click();
+  await expect(page.locator(".vertical .work")).toHaveCount(4);
+  for (const card of await page.locator(".vertical .work").all()) { await card.scrollIntoViewIfNeeded(); await expect(card).toHaveCSS("opacity", "1"); }
+  await page.screenshot({ path: `${screenshots}/motion-b-columns.png`, fullPage: true });
+  await page.getByRole("button", { name: /C · 叠页索引/ }).click();
+  await expect(page.locator(".stack .work")).toHaveCount(1);
+  await page.screenshot({ path: `${screenshots}/motion-c-stack.png`, fullPage: true });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.getByRole("button", { name: /A · 报刊翻版/ }).click();
+  await expect(page.locator(".sheet .work").first()).toHaveCSS("animation-name", "none");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `${screenshots}/motion-a-mobile.png`, fullPage: true });
+});

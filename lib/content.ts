@@ -1,3 +1,4 @@
+import { documentTags } from "@/lib/content-tags";
 import "server-only";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -5,7 +6,7 @@ import matter from "gray-matter";
 import { cache } from "react";
 import { estimateReadingMinutes } from "@/lib/article";
 import { firstProjectBodyImage, validProjectCoverPosition, type ProjectCoverFit } from "@/lib/project-images";
-export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; author?: string; coverImage?: string; coverAlt?: string; readingMinutes?: number };
+export type ContentMeta = { title: string; description: string; date: string; tags: string[]; slug: string; author?: string; coverImage?: string; coverAlt?: string; readingMinutes?: number; studioDeleted?: boolean };
 export type PostSummary = ContentMeta & { kind: "post"; href: string };
 export type ProjectSummary = ContentMeta & { kind: "project"; href: string; coverImage?: string; coverAlt?: string; coverFit?: ProjectCoverFit; coverPosition?: string; role?: string; featured?: boolean; homeOrder?: number; titleEn?: string; descriptionEn?: string; homeLabel?: string };
 export type PostDocument = PostSummary & { source: string };
@@ -15,7 +16,7 @@ function readCollection<T extends PostSummary | ProjectSummary>(collection: "pos
   const directory = path.join(contentRoot, collection);
   return readdirSync(directory).filter((file) => file.endsWith(".mdx")).map((file) => {
     return parseContentDocument<T>(readFileSync(path.join(directory, file), "utf8"), collection, kind, file);
-  }).sort((a, b) => b.date.localeCompare(a.date));
+  }).filter(item => !item.studioDeleted).sort((a, b) => b.date.localeCompare(a.date));
 }
 export function parseContentDocument<T extends PostSummary | ProjectSummary>(document: string, collection: "posts" | "projects", kind: T["kind"], file = "Studio"): T {
   const parsed = matter(document);
@@ -31,7 +32,8 @@ export function parseContentDocument<T extends PostSummary | ProjectSummary>(doc
     title: data.title,
     description: data.description,
     date: data.date,
-    tags: data.tags,
+    tags: documentTags(data.tags, parsed.content),
+    ...(parsed.data.studioDeleted === true ? { studioDeleted: true } : {}),
     slug: data.slug,
     kind,
     href: (collection === "posts" ? "/blog/" : "/projects/") + data.slug,
