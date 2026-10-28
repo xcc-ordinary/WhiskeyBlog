@@ -2,7 +2,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { environment: "jsdom", exclude: ["tests/e2e/**", "tests/studio-preview/**", "node_modules/**", ".worktrees/**"] },
+  test: { environment: "jsdom", exclude: ["tests/e2e/**", "tests/legacy-e2e/**", "tests/studio-preview/**", "node_modules/**", ".worktrees/**"] },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./", import.meta.url)),
