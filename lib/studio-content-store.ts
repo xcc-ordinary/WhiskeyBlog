@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireOwner } from "@/lib/supabase/auth";
 import type { Database } from "@/lib/supabase/types";
+import matter from "gray-matter";
 
 export type ContentCollection = "posts" | "projects";
 export function cloudContentEnabled() { return process.env.STUDIO_CONTENT_BACKEND === "supabase"; }
@@ -21,18 +22,29 @@ export async function readCloudDocuments(collection: ContentCollection) {
     auth: { persistSession: false, autoRefreshToken: false },
     global: { fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }) },
   });
-  const { data, error } = await client.from("studio_documents").select("slug, document").eq("collection", collection);
+  const { data, error } = await client.from("public_studio_documents").select("slug, document").eq("collection", collection).abortSignal(AbortSignal.timeout(8000));
   if (error) {
     const code = /^[a-z0-9]+$/i.test(error.code ?? "") ? error.code : "network";
-    throw new Error(`无法读取线上内容，请检查 Supabase 连接及 0004 迁移。（${code}）`);
+    console.error("Public content read failed.", { code });
+    throw new Error("内容暂时无法载入，请稍后重试。");
   }
   return data;
+}
+
+/** Full recycled documents must only be read with the authenticated owner's RLS. */
+export async function readOwnerCloudDocuments(collection: ContentCollection) {
+  if (!cloudContentEnabled()) return [];
+  const client = await createSupabaseServerClient();
+  await requireOwner(client);
+  const { data, error } = await client.from("studio_documents").select("slug, document").eq("collection", collection);
+  if (error) throw new Error("无法读取工作台内容，请稍后重试。");
+  return data ?? [];
 }
 
 export async function saveCloudDocument(collection: ContentCollection, slug: string, document: string, existing: boolean) {
   const client = await createSupabaseServerClient();
   await requireOwner(client);
-  const row = { collection, slug, document, updated_at: new Date().toISOString() };
+  const row = { collection, slug, document, is_deleted: matter(document).data.studioDeleted === true, updated_at: new Date().toISOString() };
   const { error } = existing
     ? await client.from("studio_documents").upsert(row, { onConflict: "collection,slug" })
     : await client.from("studio_documents").insert(row);

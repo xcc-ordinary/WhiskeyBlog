@@ -3,7 +3,7 @@ import { beforeEach, afterEach, it, expect, vi } from "vitest";
 import matter from "gray-matter";
 const mocks = vi.hoisted(() => ({ owner: vi.fn(), read: vi.fn(), save: vi.fn(), localRead: vi.fn(), localWrite: vi.fn() }));
 vi.mock("@/lib/supabase/auth", () => ({ requireOwner: mocks.owner }));
-vi.mock("@/lib/studio-content-store", () => ({ cloudContentEnabled: () => true, readCloudDocuments: mocks.read, saveCloudDocument: mocks.save }));
+vi.mock("@/lib/studio-content-store", () => ({ cloudContentEnabled: () => true, readOwnerCloudDocuments: mocks.read, saveCloudDocument: mocks.save }));
 vi.mock("node:fs/promises", () => ({ readFile: mocks.localRead, writeFile: mocks.localWrite, readdir: vi.fn(async () => []) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 import { changeStudioContentState } from "@/app/studio/content-actions";

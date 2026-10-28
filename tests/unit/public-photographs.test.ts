@@ -33,7 +33,7 @@ const fakePublishedClient = {
 };
 
 describe("public photograph archive", () => {
-  it("batches only public derivatives and matches responses by path rather than order", async () => {
+  it("uses stable same-origin endpoints without embedding expiring storage signatures", async () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "local-test-value");
     const createSignedUrls = vi.fn().mockResolvedValue({ error: null, data: [
@@ -48,9 +48,9 @@ describe("public photograph archive", () => {
         { ...published, id: "draft", status: "draft" },
         { ...published, id: "original", galleryPath: "originals/private.jpg" },
       ] });
-      expect(createSignedUrls).toHaveBeenCalledWith(["published/gallery.jpg", "published/second.jpg"], 900);
+      expect(createSignedUrls).not.toHaveBeenCalled();
       expect(result.map(photo => [photo.id, photo.galleryUrl])).toEqual([
-        ["published-id", "https://images.example/first"], ["second", "https://images.example/second"],
+        ["published-id", "/photographs/published-id"], ["second", "/photographs/second"],
       ]);
     } finally { vi.unstubAllEnvs(); }
   });

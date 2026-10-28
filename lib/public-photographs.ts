@@ -33,11 +33,18 @@ function requiredServerEnvironment(name: "NEXT_PUBLIC_SUPABASE_URL" | "SUPABASE_
   return value;
 }
 
-function createPublicArchiveClient() {
+export function createPublicArchiveClient() {
   return createClient<Database>(
     requiredServerEnvironment("NEXT_PUBLIC_SUPABASE_URL"),
     requiredServerEnvironment("SUPABASE_SERVICE_ROLE_KEY"),
-    { auth: { autoRefreshToken: false, persistSession: false } },
+    {
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: { fetch: (input, init) => fetch(input, {
+        ...init,
+        cache: "no-store",
+        signal: init?.signal ? AbortSignal.any([init.signal, AbortSignal.timeout(8000)]) : AbortSignal.timeout(8000),
+      }) },
+    },
   );
 }
 
@@ -55,7 +62,7 @@ function toPublicRecord(photo: PublishedPhotograph, galleryUrl: string): PublicA
 }
 
 /**
- * Returns only published metadata plus fifteen-minute links to the gallery derivative.
+ * Returns only published metadata and stable same-origin image endpoints.
  * It deliberately has no API for originals, thumbnails, or draft records.
  */
 export async function getPublicArchivePhotographs(options: PublicPhotographOptions = {}): Promise<PublicArchivePhotograph[]> {
@@ -70,18 +77,10 @@ export async function getPublicArchivePhotographs(options: PublicPhotographOptio
       && Boolean(photo.galleryPath && normalizeDerivativePath(photo.galleryPath) && photo.title?.trim() && photo.alt?.trim()),
     );
 
-    // Sign the public projection in one request so a slow connection cannot
-    // leave individual cards missing while their neighbours have loaded.
+    // Resolve storage only when the browser requests the image. Cached HTML and
+    // long-lived tabs must not embed expiring credentials.
     if (!signDerivativeUrl) {
-      const objectPaths = safePublished.map(photo => normalizeDerivativePath(photo.galleryPath!)!.slice("derivatives/".length));
-      if (!objectPaths.length) return [];
-      const { data, error } = await archiveClient!.storage.from("derivatives").createSignedUrls(objectPaths, SIGNED_DERIVATIVE_URL_SECONDS);
-      if (error || !data) return [];
-      const urls = new Map(data.filter(item => !item.error && item.path && item.signedUrl).map(item => [item.path, item.signedUrl!]));
-      return safePublished.flatMap((photo, i) => {
-        const url = urls.get(objectPaths[i]);
-        return url ? [toPublicRecord(photo, url)] : [];
-      });
+      return safePublished.map(photo => toPublicRecord(photo, `/photographs/${encodeURIComponent(photo.id)}`));
     }
 
     const signed = await Promise.all(

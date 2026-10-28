@@ -4,7 +4,7 @@ import path from "node:path";
 import matter from "gray-matter";
 import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/supabase/auth";
-import { cloudContentEnabled, readCloudDocuments, saveCloudDocument, type ContentCollection } from "@/lib/studio-content-store";
+import { cloudContentEnabled, readOwnerCloudDocuments, saveCloudDocument, type ContentCollection } from "@/lib/studio-content-store";
 import { requireRepositoryContentWrites } from "@/lib/content-writes";
 import { parseContentDocument, type PostSummary, type ProjectSummary } from "@/lib/content";
 
@@ -21,7 +21,7 @@ export async function changeStudioContentState(collection: string, slug: string,
     await requireOwner(); valid(collection, slug);
     if (typeof deleted !== "boolean") throw new Error("操作无效。");
     if (!cloudContentEnabled()) requireRepositoryContentWrites();
-    const rows = cloudContentEnabled() ? await readCloudDocuments(collection) : [];
+    const rows = cloudContentEnabled() ? await readOwnerCloudDocuments(collection) : [];
     const document = rows.find(row => row.slug === slug)?.document ?? await localDocument(collection, slug);
     if (!document) throw new Error("未找到这篇内容。");
     const parsed = matter(document);
@@ -39,7 +39,7 @@ export async function getStudioTrash(): Promise<(PostSummary | ProjectSummary)[]
   await requireOwner();
   const archived: (PostSummary | ProjectSummary)[] = [];
   for (const collection of ["posts", "projects"] as const) {
-    const cloud = cloudContentEnabled() ? await readCloudDocuments(collection) : [];
+    const cloud = cloudContentEnabled() ? await readOwnerCloudDocuments(collection) : [];
     const overridden = new Set(cloud.map(row => row.slug));
     const folder = path.join(process.cwd(), "content", collection);
     const local = await Promise.all((await readdir(folder)).filter(file => file.endsWith(".mdx") && !overridden.has(file.slice(0, -4))).map(async file => ({ document: await readFile(path.join(folder, file), "utf8") })));

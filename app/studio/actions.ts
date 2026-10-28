@@ -7,6 +7,8 @@ import { createDraftPhotograph, deletePhotograph, publishPhotograph, unpublishPh
 import type { PhotographCrop } from "@/lib/supabase/types";
 import { extensionForUploadType, getUploadValidationError, isManagedOriginalPath, type UploadFileDetails } from "@/lib/supabase/upload";
 import { requireOwner } from "@/lib/supabase/auth";
+import { createPhotographDerivatives } from "@/lib/photograph-derivatives";
+import { revalidatePath } from "next/cache";
 
 type ActionResult = { ok: true; message?: string; photographId?: string } | { ok: false; message: string };
 
@@ -104,6 +106,8 @@ export async function savePhotographDraft(id: string, form: FormData): Promise<A
 export async function publishStudioPhotograph(id: string): Promise<ActionResult> {
   try {
     await publishPhotograph(id);
+    revalidatePath("/");
+    revalidatePath("/archive");
     return { ok: true, message: "照片已发布。" };
   } catch (error) {
     return actionError(error);
@@ -113,6 +117,8 @@ export async function publishStudioPhotograph(id: string): Promise<ActionResult>
 export async function unpublishStudioPhotograph(id: string): Promise<ActionResult> {
   try {
     await unpublishPhotograph(id);
+    revalidatePath("/");
+    revalidatePath("/archive");
     return { ok: true, message: "照片已撤回为草稿。" };
   } catch (error) {
     return actionError(error);
@@ -127,24 +133,29 @@ export async function quickPublishStudioPhotograph(id: string): Promise<ActionRe
     const { data, error } = await supabase.from("photographs").select("*").eq("id", id).single();
     if (error || !data) return { ok: false, message: "未找到这张照片。" };
 
-    const extension = data.original_path.match(/\.([a-z0-9]+)$/i)?.[1];
-    if (!extension) return { ok: false, message: "无法识别原图格式。" };
-    const displayPath = `owner/${id}/display.${extension}`;
-    if (!data.thumbnail_path || !data.gallery_path || !data.detail_path) {
-      const { data: original, error: downloadError } = await supabase.storage.from("originals").download(data.original_path);
-      if (downloadError || !original) return { ok: false, message: "无法读取私密原图，请稍后重试。" };
-      const { error: uploadError } = await supabase.storage.from("derivatives").upload(displayPath, original, { contentType: original.type || undefined, upsert: true });
+    const { data: original, error: downloadError } = await supabase.storage.from("originals").download(data.original_path);
+    if (downloadError || !original) return { ok: false, message: "无法读取私密原图，请稍后重试。" };
+    const derivatives = await createPhotographDerivatives(Buffer.from(await original.arrayBuffer()));
+    const paths = {} as Record<"thumbnail" | "gallery" | "detail", string>;
+    // Unique names avoid overwriting the currently published set on partial failure.
+    const generation = crypto.randomUUID();
+    for (const derivative of derivatives) {
+      const objectPath = `owner/${id}/${generation}-${derivative.kind}.webp`;
+      const { error: uploadError } = await supabase.storage.from("derivatives").upload(objectPath, derivative.bytes, { contentType: "image/webp", upsert: false });
       if (uploadError) return { ok: false, message: "无法准备展示图片，请稍后重试。" };
+      paths[derivative.kind] = objectPath;
     }
 
     await updatePhotograph(id, {
       title: data.title?.trim() || "未命名照片",
       alt: data.alt?.trim() || data.title?.trim() || "上传的摄影作品",
-      thumbnailPath: data.thumbnail_path || displayPath,
-      galleryPath: data.gallery_path || displayPath,
-      detailPath: data.detail_path || displayPath,
+      thumbnailPath: paths.thumbnail,
+      galleryPath: paths.gallery,
+      detailPath: paths.detail,
     }, supabase);
     await publishPhotograph(id, supabase);
+    revalidatePath("/");
+    revalidatePath("/archive");
     return { ok: true, message: "照片已发布到公开档案。" };
   } catch (error) {
     return actionError(error);

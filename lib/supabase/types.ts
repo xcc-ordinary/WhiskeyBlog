@@ -103,9 +103,9 @@ export type Database = {
   public: {
     Tables: {
       studio_documents: {
-        Row: { collection: string; slug: string; document: string; updated_at: string };
-        Insert: { collection: string; slug: string; document: string; updated_at?: string };
-        Update: { document?: string; updated_at?: string };
+        Row: { collection: string; slug: string; document: string; is_deleted: boolean; updated_at: string };
+        Insert: { collection: string; slug: string; document: string; is_deleted?: boolean; updated_at?: string };
+        Update: { document?: string; is_deleted?: boolean; updated_at?: string };
         Relationships: [];
       };
       photographs: {
@@ -116,6 +116,10 @@ export type Database = {
       };
     };
     Views: {
+      public_studio_documents: {
+        Row: { collection: string; slug: string; document: string };
+        Relationships: [];
+      };
       published_photographs: {
         Row: PublishedPhotographRow;
         Relationships: [];
